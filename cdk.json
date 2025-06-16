@@ -1,0 +1,53 @@
+cdk_json_content = {
+    "app": "python app.py",
+    "watch": {
+        "include": [
+            "**"
+        ],
+        "exclude": [
+            "README.md",
+            "cdk*.json",
+            "requirements*.txt",
+            "source.bat",
+            "**/__pycache__",
+            "**/.venv"
+        ]
+    },
+    "context": {
+        "@aws-cdk/aws-lambda:recognizeLayerVersion": True,
+        "@aws-cdk/core:checkSecretUsage": True,
+        "@aws-cdk/core:target-partitions": ["aws", "aws-cn"],
+        "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": True,
+        "@aws-cdk/aws-ec2:uniqueImdsv2TemplateName": True,
+        "@aws-cdk/aws-ecs:arnFormatIncludesClusterName": True,
+        "@aws-cdk/aws-iam:minimizePolicies": True,
+        "@aws-cdk/core:validateSnapshotRemovalPolicy": True,
+        "@aws-cdk/aws-codepipeline:crossAccountKeyAliasStackSafeResourceName": True,
+        "@aws-cdk/aws-s3:createDefaultLoggingPolicy": True,
+        "@aws-cdk/aws-sns-subscriptions:restrictSqsDescryption": True,
+        "@aws-cdk/aws-apigateway:disableCloudWatchRole": True,
+        "@aws-cdk/core:enablePartitionLiterals": True,
+        "@aws-cdk/aws-events:eventsTargetQueueSameAccount": True,
+        "@aws-cdk/aws-iam:standardizedServicePrincipals": True,
+        "@aws-cdk/aws-ecs:disableExplicitDeploymentControllerForCircuitBreaker": True,
+        "@aws-cdk/aws-iam:importedRoleStackSafeDefaultPolicyName": True,
+        "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": True,
+        "@aws-cdk/aws-route53-patterns:useCertificate": True,
+        "@aws-cdk/customresources:installLatestAwsSdkDefault": False,
+        "@aws-cdk/aws-rds:databaseProxyUniqueResourceName": True,
+        "@aws-cdk/aws-codedeploy:removeAlarmsFromDeploymentGroup": True,
+        "@aws-cdk/aws-apigateway:authorizerChangeDeploymentLogicalId": True,
+        "@aws-cdk/aws-ec2:launchTemplateDefaultUserData": True,
+        "@aws-cdk/aws-secretsmanager:useAttachedSecretResourcePolicyForSecretTargetAttachments": True,
+        "@aws-cdk/aws-redshift:columnId": True,
+        "@aws-cdk/aws-stepfunctions-tasks:enableLogging": True,
+        "@aws-cdk/aws-ec2:restrictDefaultSecurityGroup": True,
+        "@aws-cdk/aws-apigateway:requestValidatorUniqueId": True,
+        "@aws-cdk/aws-kms:aliasNameRef": True,
+        "@aws-cdk/aws-autoscaling:generateLaunchTemplateInsteadOfLaunchConfig": True,
+        "@aws-cdk/core:includePrefixInUniqueNameGeneration": True,
+        "@aws-cdk/aws-efs:denyAnonymousAccess": True,
+        "@aws-cdk/aws-opensearchservice:enableLogging": True,
+        "@aws-cdk/aws-lambda:useLatestRuntimeVersion": True
+    }
+}
