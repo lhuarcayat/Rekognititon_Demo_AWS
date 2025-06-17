@@ -43,7 +43,7 @@ class RekognitionStack(Stack):
         )
         self.user_photos_bucket=s3.Bucket(
             self,'UserPhotosBucket',
-            bucket_name=f'rekognition-poc-user-photos-{self.account}--{self.region}',
+            bucket_name=f'rekognition-poc-user-photos-{self.account}-{self.region}',
             encryption=s3.BucketEncryption.S3_MANAGED,
             lifecycle_rules=[
                 s3.LifecycleRule(
@@ -89,7 +89,7 @@ class RekognitionStack(Stack):
                 dynamodb.GlobalSecondaryIndex(
                     index_name='person-name-index',
                     partition_key=dynamodb.Attribute(
-                        name='person-name',
+                        name='person_name',
                         type=dynamodb.AttributeType.STRING
                     )
                 )
@@ -234,6 +234,7 @@ class RekognitionStack(Stack):
             role=self.indexer_role,
             timeout=Duration.minutes(5),
             memory_size=1024,
+            layers=[self.shared_layer],
             environment={
                 'COLLECTION_ID':'document-faces-collection',
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
@@ -249,11 +250,13 @@ class RekognitionStack(Stack):
             role=self.validator_role,
             timeout=Duration.seconds(30),
             memory_size=512,
+            layers=[self.shared_layer],
             environment={
                 'COLLECTION_ID':'document-faces-collection',
                 'COMPARISON_RESULTS_TABLE':self.comparison_results_table.table_name,
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
-                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name  
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
+                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name  
             }
         )
         self.user_photos_bucket.add_event_notification(
