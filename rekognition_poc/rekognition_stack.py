@@ -138,6 +138,13 @@ class RekognitionStack(Stack):
             removal_policy=RemovalPolicy.DESTROY
         )
     #========================IAM ROLE
+        self.shared_layer = lambda_.LayerVersion(
+            self, 'SharedLayer',
+            layer_version_name='rekognition-poc-shared-layer',
+            code=lambda_.Code.from_asset('lambda_code/shared'),
+            compatible_runtimes=[lambda_.Runtime.PYTHON_3_11],
+            description='Shared utilities for Rekognition PoC'
+        )
         self.indexer_role=iam.Role(
             self,'IndexerLambdaRole',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
