@@ -21,7 +21,7 @@ class RekognitionStack(Stack):
         self.documents_bucket = s3.Bucket(
             self, 'DocumentsBucket',
             bucket_name=f'rekognition-poc-documents-{self.account}-{self.region}',
-            versioning=True,
+            versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
             # lifecycle_rules=[
             #     s3.LifecycleRule(
@@ -66,6 +66,7 @@ class RekognitionStack(Stack):
                     max_age=3000
                 )
             ],
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,#####
             removal_policy=RemovalPolicy.DESTROY
         )
     #============================================================
