@@ -9,7 +9,7 @@ sys.path.append('/opt')
 
 # Imports locales (se empaquetan con la Lambda)
 from lambda_code.shared.python.shared.image_processor import MinimalImageProcessor
-from shared.rekognition_client import RekognitionClient
+from lambda_code.shared.python.shared.rekognition_client import RekognitionClient
 
 # Setup logging
 logger = logging.getLogger()
