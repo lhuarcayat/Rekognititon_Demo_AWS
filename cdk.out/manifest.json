@@ -1,0 +1,189 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "RekognitionPocStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "RekognitionPocStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "RekognitionPocStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/us-east-1",
+      "properties": {
+        "templateFile": "RekognitionPocStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/f9b73193072d8c13aa1d8bb0150c7a6272a56d98fc6fbc08d4b34edd5d86ec5a.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "RekognitionPocStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "RekognitionPocStack.assets"
+      ],
+      "metadata": {
+        "/RekognitionPocStack/DocumentsBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentsBucket9EC9DEB9"
+          }
+        ],
+        "/RekognitionPocStack/UserPhotosBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPhotosBucket4D5DE39B"
+          }
+        ],
+        "/RekognitionPocStack/UserPhotosBucket/Notifications/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPhotosBucketNotificationsFFC4FB93"
+          }
+        ],
+        "/RekognitionPocStack/UserPhotosBucket/AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPhotosBucketAllowBucketNotificationsToRekognitionPocStackUserValidator857841D06B1F3FD3"
+          }
+        ],
+        "/RekognitionPocStack/IndexedDocumentsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "IndexedDocumentsTable2C59B6EB"
+            }
+          }
+        ],
+        "/RekognitionPocStack/IndexedDocumentsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IndexedDocumentsTable2C59B6EB"
+          }
+        ],
+        "/RekognitionPocStack/ComparisonResultsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "ComparisonResultsTable188C61C4"
+            }
+          }
+        ],
+        "/RekognitionPocStack/ComparisonResultsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ComparisonResultsTable188C61C4"
+          }
+        ],
+        "/RekognitionPocStack/SharedLayer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SharedLayer27DFABF0"
+          }
+        ],
+        "/RekognitionPocStack/IndexerLambdaRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IndexerLambdaRole34F05CC2"
+          }
+        ],
+        "/RekognitionPocStack/ValidatorLambdaRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ValidatorLambdaRoleD4191E2F"
+          }
+        ],
+        "/RekognitionPocStack/DocumentIndexer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentIndexer7C68C1D7"
+          }
+        ],
+        "/RekognitionPocStack/UserValidator/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserValidatorF49AEC8F"
+          }
+        ],
+        "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC"
+          }
+        ],
+        "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36"
+          }
+        ],
+        "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691"
+          }
+        ],
+        "/RekognitionPocStack/DocumentsBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentsBucketName"
+          }
+        ],
+        "/RekognitionPocStack/UserPhotosBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPhotosBucketName"
+          }
+        ],
+        "/RekognitionPocStack/IndexedDocumentsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "IndexedDocumentsTableName"
+          }
+        ],
+        "/RekognitionPocStack/ComparisonResultsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ComparisonResultsTableName"
+          }
+        ],
+        "/RekognitionPocStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/RekognitionPocStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/RekognitionPocStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "RekognitionPocStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

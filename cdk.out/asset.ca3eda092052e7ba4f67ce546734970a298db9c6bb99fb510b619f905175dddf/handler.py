@@ -9,7 +9,7 @@ import sys
 sys.path.append('/opt')
 
 # Imports locales
-from lambda_code.shared.python.shared.image_processor import MinimalImageProcessor
+from shared.image_processor import MinimalImageProcessor
 from shared.rekognition_client import RekognitionClient
 
 # Setup logging

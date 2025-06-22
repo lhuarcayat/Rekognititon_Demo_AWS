@@ -1,6 +1,6 @@
 import boto3
 import io
-from PIL import Image,ExifTags
+from PIL import Image, ExifTags
 import logging
 
 logger=logging.getLogger()

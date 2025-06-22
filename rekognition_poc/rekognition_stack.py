@@ -79,25 +79,24 @@ class RekognitionStack(Stack):
                 type=dynamodb.AttributeType.STRING
             ),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            global_secondary_indexes=[
-                dynamodb.GlobalSecondaryIndex(
-                    index_name='face-id-index',
-                    partition_key=dynamodb.Attribute(
-                        name='face_id',
-                        type=dynamodb.AttributeType.STRING
-                    )
-                ),
-                dynamodb.GlobalSecondaryIndex(
-                    index_name='person-name-index',
-                    partition_key=dynamodb.Attribute(
-                        name='person_name',
-                        type=dynamodb.AttributeType.STRING
-                    )
-                )
-            ],
             removal_policy=RemovalPolicy.DESTROY
         )
 
+        self.indexed_documents_table.add_global_secondary_index(
+            index_name='face-id-index',
+            partition_key=dynamodb.Attribute(
+                name='face_id',
+                type=dynamodb.AttributeType.STRING
+            )
+        )
+        
+        self.indexed_documents_table.add_global_secondary_index(
+            index_name='person-name-index',
+            partition_key=dynamodb.Attribute(
+                name='person_name',
+                type=dynamodb.AttributeType.STRING
+            )
+        )
     #================================================
         self.comparison_results_table=dynamodb.Table(
             self,'ComparisonResultsTable',
@@ -111,32 +110,32 @@ class RekognitionStack(Stack):
                 type=dynamodb.AttributeType.STRING
             ),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            global_secondary_indexes=[
-                dynamodb.GlobalSecondaryIndex(
-                    index_name='user-image-index',
-                    partition_key=dynamodb.Attribute(
-                        name='user_image_key',
-                        type=dynamodb.AttributeType.STRING
-                    ),
-                    sort_key=dynamodb.Attribute(
-                        name='timestamp',
-                        type=dynamodb.AttributeType.STRING
-                    )
-                ),
-                dynamodb.GlobalSecondaryIndex(
-                    index_name='face-id-index',
-                    partition_key=dynamodb.Attribute(
-                        name='matched_face_id',
-                        type=dynamodb.AttributeType.STRING
-                    ),
-                    sort_key=dynamodb.Attribute(
-                        name='confidence_score',
-                        type=dynamodb.AttributeType.NUMBER
-                    )
-                )
-            ],
             time_to_live_attribute='ttl',
             removal_policy=RemovalPolicy.DESTROY
+        )
+
+        self.comparison_results_table.add_global_secondary_index(
+            index_name='user-image-index',
+            partition_key=dynamodb.Attribute(
+                name='user_image_key',
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name='timestamp',
+                type=dynamodb.AttributeType.STRING
+            )
+        )
+        
+        self.comparison_results_table.add_global_secondary_index(
+            index_name='face-id-index',
+            partition_key=dynamodb.Attribute(
+                name='matched_face_id',
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name='confidence_score',
+                type=dynamodb.AttributeType.NUMBER
+            )
         )
     #========================IAM ROLE
         self.shared_layer = lambda_.LayerVersion(
