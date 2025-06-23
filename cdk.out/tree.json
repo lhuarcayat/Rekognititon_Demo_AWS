@@ -416,9 +416,9 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "a40a80f2e70ae9b37b471f011863e4b9a45585865107d0cb1a14c39201367572.zip"
+                      "s3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
                     },
-                    "description": "Shared utilities for Rekognition PoC",
+                    "description": "Shared utilities with auto-compiled dependencies",
                     "layerName": "rekognition-poc-shared-layer"
                   }
                 },
@@ -491,6 +491,16 @@
                               ],
                               "Effect": "Allow",
                               "Resource": "*"
+                            },
+                            {
+                              "Action": "s3:ListBucket",
+                              "Effect": "Allow",
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "DocumentsBucket9EC9DEB9",
+                                  "Arn"
+                                ]
+                              }
                             },
                             {
                               "Action": "s3:GetObject",
@@ -742,7 +752,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "f8cfbfcdd8508cf6ae4bbf54817be57b07aceeeaa2ea2033bbc5f987c5c906c0.zip"
+                      "s3Key": "ec0764a63bf688d2d1f89f3ab761d3510c5f0f470ad243d1c2c2c4418ef6e849.zip"
                     },
                     "environment": {
                       "variables": {
@@ -824,7 +834,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "5f5f66002a05c00b8239512a7af056d14177a4660e4b170a5bc094ed45beb881.zip"
+                      "s3Key": "bc29604f2ef3d5a4bc582f0556bc27c9049a2c93cc2ac8f420f93a367d78c144.zip"
                     },
                     "environment": {
                       "variables": {

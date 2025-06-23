@@ -372,15 +372,15 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "a40a80f2e70ae9b37b471f011863e4b9a45585865107d0cb1a14c39201367572.zip"
+     "S3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
     },
-    "Description": "Shared utilities for Rekognition PoC",
+    "Description": "Shared utilities with auto-compiled dependencies",
     "LayerName": "rekognition-poc-shared-layer"
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/SharedLayer/Resource",
-    "aws:asset:path": "asset.a40a80f2e70ae9b37b471f011863e4b9a45585865107d0cb1a14c39201367572",
-    "aws:asset:is-bundled": false,
+    "aws:asset:path": "asset.8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec",
+    "aws:asset:is-bundled": true,
     "aws:asset:property": "Content"
    }
   },
@@ -426,6 +426,16 @@
          ],
          "Effect": "Allow",
          "Resource": "*"
+        },
+        {
+         "Action": "s3:ListBucket",
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::GetAtt": [
+           "DocumentsBucket9EC9DEB9",
+           "Arn"
+          ]
+         }
         },
         {
          "Action": "s3:GetObject",
@@ -614,7 +624,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "f8cfbfcdd8508cf6ae4bbf54817be57b07aceeeaa2ea2033bbc5f987c5c906c0.zip"
+     "S3Key": "ec0764a63bf688d2d1f89f3ab761d3510c5f0f470ad243d1c2c2c4418ef6e849.zip"
     },
     "Environment": {
      "Variables": {
@@ -649,7 +659,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/Resource",
-    "aws:asset:path": "asset.f8cfbfcdd8508cf6ae4bbf54817be57b07aceeeaa2ea2033bbc5f987c5c906c0",
+    "aws:asset:path": "asset.ec0764a63bf688d2d1f89f3ab761d3510c5f0f470ad243d1c2c2c4418ef6e849",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -661,7 +671,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "5f5f66002a05c00b8239512a7af056d14177a4660e4b170a5bc094ed45beb881.zip"
+     "S3Key": "bc29604f2ef3d5a4bc582f0556bc27c9049a2c93cc2ac8f420f93a367d78c144.zip"
     },
     "Environment": {
      "Variables": {
@@ -702,7 +712,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/UserValidator/Resource",
-    "aws:asset:path": "asset.5f5f66002a05c00b8239512a7af056d14177a4660e4b170a5bc094ed45beb881",
+    "aws:asset:path": "asset.bc29604f2ef3d5a4bc582f0556bc27c9049a2c93cc2ac8f420f93a367d78c144",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

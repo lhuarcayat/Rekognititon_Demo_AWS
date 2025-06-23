@@ -1,5 +1,5 @@
 import aws_cdk as cdk
-from rekognition_poc.rekognition_stack import RekognitionStack
+from infrastructure.rekognition_stack import RekognitionStack
 
 app = cdk.App()
 
