@@ -11,9 +11,13 @@ def clean_orphaned_faces():
     
     # Las 3 caras huérfanas identificadas en el diagnóstico
     orphaned_faces = [
-        #"50ddc5c2-f962-4c23-b1a5-ad123f534ab8",  # Luis Licencia (014519)
-        #"824e4eb0-b64a-42c7-9d7d-73c3af7c99a9",  # Luis DNI (014518)
-        #"7e420c0a-a207-4851-a6ff-0cb3590d0728"   # Laura Carne (014517)
+        '76a2dda6-82bb-4203-8cc5-464f3368b44a',
+        '6f4e753f-5a38-447c-874e-02dd53447802',
+        'fdb14337-6d8d-433f-a378-618b0025f93b',
+        '3355fd2a-bb82-423f-8852-c6415c22f4ff',
+        'e9d410b2-0ba2-4cb5-9ea8-4864753fd67a',
+        'dfa55ada-c73b-4ebc-a50f-f6c2ead26b38',
+        '33db5628-3ca9-43cc-a444-fde59f742d4b'
     ]
     
     print(f"🎯 Caras a eliminar: {len(orphaned_faces)}")

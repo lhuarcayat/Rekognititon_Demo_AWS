@@ -420,6 +420,7 @@
         {
          "Action": [
           "rekognition:CreateCollection",
+          "rekognition:DeleteFaces",
           "rekognition:DescribeCollection",
           "rekognition:DetectFaces",
           "rekognition:IndexFaces"
@@ -459,6 +460,7 @@
          "Action": [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
+          "dynamodb:Scan",
           "dynamodb:UpdateItem"
          ],
          "Effect": "Allow",
@@ -521,6 +523,24 @@
          ],
          "Effect": "Allow",
          "Resource": "*"
+        },
+        {
+         "Action": "s3:ListBucket",
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "DocumentsBucket9EC9DEB9",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::GetAtt": [
+            "UserPhotosBucket4D5DE39B",
+            "Arn"
+           ]
+          }
+         ]
         },
         {
          "Action": "s3:GetObject",
@@ -624,7 +644,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "ec0764a63bf688d2d1f89f3ab761d3510c5f0f470ad243d1c2c2c4418ef6e849.zip"
+     "S3Key": "4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05.zip"
     },
     "Environment": {
      "Variables": {
@@ -659,7 +679,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/Resource",
-    "aws:asset:path": "asset.ec0764a63bf688d2d1f89f3ab761d3510c5f0f470ad243d1c2c2c4418ef6e849",
+    "aws:asset:path": "asset.4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

@@ -171,7 +171,8 @@ class RekognitionStack(Stack):
                                 'rekognition:IndexFaces',
                                 'rekognition:CreateCollection',
                                 'rekognition:DescribeCollection',
-                                'rekognition:DetectFaces'
+                                'rekognition:DetectFaces',
+                                'rekognition:DeleteFaces'
                             ],
                             resources=['*']
                         ),
@@ -194,7 +195,8 @@ class RekognitionStack(Stack):
                             actions=[
                                 'dynamodb:PutItem',
                                 'dynamodb:GetItem',
-                                'dynamodb:UpdateItem'
+                                'dynamodb:UpdateItem',
+                                'dynamodb:Scan'
                             ],
                             resources=[self.indexed_documents_table.table_arn]
                         )
@@ -220,6 +222,16 @@ class RekognitionStack(Stack):
                                 'rekognition:DetectFaces'
                             ],
                             resources=['*']
+                        ),
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                's3:ListBucket'  
+                            ],
+                            resources=[
+                                self.user_photos_bucket.bucket_arn,     
+                                self.documents_bucket.bucket_arn         
+                            ]
                         ),
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
