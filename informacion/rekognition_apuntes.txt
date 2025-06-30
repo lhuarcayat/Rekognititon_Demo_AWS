@@ -1,0 +1,55 @@
+6 APIS DE REKOGNITION
+DESCRIBE COLLECTION-CREATE COLLECTION
+DETECT FACES-- Documentos (solo una cara)
+INDEX FACES
+------------------------------------
+DETECT FACES -- Usuario
+SEARCH FACES BY IMAGE (busca en los INDEX FACES) da los 5 rostros más parecidos umbral 75%
+COMPARE FACES (solo con los 5 rostros)
+**DetectModerationLabels**Liveness
+...................................
+MIN_DIMENSION 80X80 PIXELES
+ROSTRO 50X50 PIXELES
+ACE_MIN_PERCENTAGE = 4%       # Mínimo 4% del área total de imagen
+MAX_DIMENSION 4096X4096 PIXELES
+MAXFILESIZE=15X1024X1024
+.................................
+SOLO UNA CARA
+JPG,PNG -- JPEG
+75% THRESHOLD---MAXFACES=5---CARAS=20000000
+
+metadata = {
+    'document_id': 'juan_perez_dni_20250618_143022',
+    'face_id': '12345678-abcd-1234-5678-abcdef123456',
+    's3_key': 'juan_perez_dni.jpg',
+    'person_name': 'Juan Perez',  # Extraído del filename
+    'document_type': 'DNI',  # DNI, CEDULA, PASSPORT, LICENSE, DOCUMENT
+    'index_timestamp': '2025-06-18T14:30:22.123Z',
+    'confidence_score': 99.85,  # Confidence de IndexFaces
+    'face_bounding_box': '{"Width":0.23,"Height":0.34,"Left":0.35,"Top":0.21}',
+    'processing_status': 'INDEXED_SUCCESSFULLY'
+}
+
+item = {
+    'comparison_id': 'comp_20250618_143045_a1b2c3d4',
+    'timestamp': '2025-06-18T14:30:45.678Z',
+    'user_image_key': 'user_photo_123.jpg',
+    'processing_time_ms': 1847,  # Tiempo real de procesamiento
+    'ttl': 1740787845,  # Se elimina automáticamente en 1 año
+    'status': '',  # Ver estados posibles abajo
+    'matched_face_id': 'abc123...',  # Si hay match
+    'confidence_score': 94.8,  # % de similaridad final
+    'search_confidence': 92.5,  # % de búsqueda inicial
+    'person_name': 'Juan Perez',  # Si hay match
+    'document_image_key': 'juan_perez_dni.jpg',  # Si hay match
+    'candidates_evaluated': 3  # Cuántos candidatos se evaluaron
+}
+
+
+
+
+
+
+
+
+
