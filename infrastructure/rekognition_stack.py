@@ -6,6 +6,7 @@ from aws_cdk import(
     aws_lambda as lambda_,
     aws_iam as iam,
     aws_s3_notifications as s3n,
+    aws_apigateway as apigateway,
     RemovalPolicy,
     Duration
 )
@@ -335,6 +336,63 @@ class RekognitionStack(Stack):
             value=self.comparison_results_table.table_name,
             description='DynamoDB table for comparison results'
         )
+        self._add_web_interface()
+
+    def _add_web_interface(self):
+        #S3 para hosting web
+        self.web_bucket = s3.Bucket(
+            self, 'WebInterfaceBucket',
+            bucket_name=f'rekognition-poc-web-{self.account}-{self.region}',
+            website_index_document='index.html',
+            public_read_access=True, #prueba
+            removal_policy=RemovalPolicy.DESTROY
+        )
+        #API GATEWAY
+        self.api = apigateway.RestApi(
+            self, 'RekognitionWebAPI',
+            rest_api_name='rekognition-poc-web-api',
+            description='Web interface for Rekognition POC',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods = apigateway.Cors.ALL_METHODS,
+                allow_headers =['Content-Type','Authorization']
+            )
+        )
+        self._create_api_endpoints()
+        cdk.CfnOutput(self,'WebBucketName',value=self.web_bucket.bucket_name)
+        cdk.CfnOutput(self, 'APIGatewayURL',value=self.api.url)
+
+    def _create_api_endpoints(self):
+        #user endpoints
+        users=self.api.root.add_resource('users')
+        users.add_resource('lookup').add_method(
+            'POST', apigateway.LambdaIntegration(self.user_validator)
+        )
+        users.add_resource('validate').add_method(
+            'POST',apigateway.LambdaIntegration(self.user_validatior)
+        )
+        #documents endpoints
+        documents = self.api.root.add_resource('documents')
+        documents.add_resource('index').add_method(
+            'POST',apigateway.LambdaIntegration(self.document_indexer)
+        )
+        self.user_validator.add_permission(
+            'AllowAPIGateway',
+            principal=iam.ServicePrincipal('apigateway.amazonaws.com'),
+            action='lambda:InvokeFunction'
+        )
+        self.document_indexer.add_permission(
+            'AllowAPIGatewayIndexer',
+            principal=iam.ServicePrincipal('apigateway.amazonaws.com'),
+            action='lambda:InvokeFunction'
+        )
+
+
+
+
+
+
+
 
 
 

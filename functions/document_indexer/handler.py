@@ -6,6 +6,8 @@ import uuid
 from datetime import datetime
 import sys
 from decimal import Decimal
+import base64
+import io
 sys.path.append('/opt')
 
 # Imports locales (se empaquetan con la Lambda)
@@ -63,7 +65,8 @@ def lambda_handler(event, context):
         elif 'documents' in event:
             # Indexar documentos específicos (mantener funcionalidad)
             return index_specific_documents(event['documents'])
-            
+        elif 'httpMethod' in event:
+            return handle_web_document_request(event, context)
         else:
             return {
                 'statusCode': 400,
@@ -432,3 +435,106 @@ def index_specific_documents(document_list: list):
         new_indexed=success_count,
         results=results
     )
+def handle_web_document_request(event, context):
+    try:
+        body=json.loads(event.get('body','{}'))
+        return index_document_from_web(body)
+    except Exception as e:
+        return {
+            'statusCode':500,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({'error':str(e)})
+        }
+def index_document_from_web(request_data):
+    try:
+        if not rekognition_client.create_collection_if_not_exists():
+            return {
+                'statusCode':500,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'error':'Failed to create collection'})
+            }
+        user_data = request_data.get('user_data',{})
+        document_image = request_data.get('document_image','')
+        #Decodificar imagen
+        if document_image.starswith('data:image'):
+            image_data = document_image.split(',')[1]
+        else:
+            image_data = document_image
+        image_bytes = base64.b64decode(image_data)
+
+        processed_bytes, error = image_processor.process_image(image_bytes, 'web_document.jpg')
+        if error:
+            return{
+                'statusCode':400,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'success':False, 'error':error})
+            }
+        face_detection = rekognition_client.detect_faces(processed_bytes)
+        if not face_detection['success'] or face_detection['face_count']==0:
+            return{
+                'statusCode':400,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'success':False,'error':'No faces detected'})
+            }
+        document_id = generate_document_id(f'web_{user_data.get('document_number','unknown')}.jpg')
+        index_result = rekognition_client.index_face(processed_bytes, document_id)
+        if not index_result['success']:
+            return{
+                'statusCode':500,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'success':False,'error':index_result['error']})
+            }
+        person_name = user_data.get('document_number','Usuario Web')
+        metadata = {
+            'document_id': document_id,
+            'face_id': index_result['face_id'],
+            's3_key': f'web_captures/{document_id}.jpg',
+            'person_name':person_name,
+            'document_type':user_data.get('document_type','DNI'),
+            'document_number':user_data.get('document_number',''),
+            'index_timestamp':datetime.utcnow().isoformat(),
+            'confidence_score':Decimal(str(index_result['confidence'])),
+            'processing_status':'INDEXED_SUCCESSFULLY',
+            'source':'WEB_INTERFACE'
+        }
+        table.put_item(Item=metadata)
+        return{
+            'statusCode':200,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({
+                'success':True,
+                'document_id':document_id,
+                'face_id':index_result['face_id'],
+                'confidence':index_result['confidence']
+            })
+        }
+    except Exception as e:
+        return {
+            'statusCode':500,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({'success':False, 'error':str(e)})
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de la transacción</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px; max-width: 450px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .verification-info { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .user-info { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .user-name { font-weight: bold; color: #333; margin-bottom: 5px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef; }
+        .detail-label { color: #666; }
+        .detail-value { color: #333; font-weight: 500; text-align: right; }
+        .amount { font-size: 18px; font-weight: bold; color: #28a745; }
+        .status-badge { background: #28a745; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; margin-bottom: 10px; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-secondary { background: transparent; color: #6c757d; border: 1px solid #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Resumen de la transacción</h2>
+        
+        <div class="verification-info">
+            ✅ <strong>Identidad verificada exitosamente</strong><br>
+            Tu identidad ha sido confirmada mediante reconocimiento facial.
+        </div>
+        
+        <div class="user-info">
+            <div class="user-name" id="userName">ADELIS GONZALEZ ARPUSHANA</div>
+            <div>Cuenta con los siguientes subsidios asignados en la Multival</div>
+        </div>
+        
+        <div class="transaction-details">
+            <div class="detail-row">
+                <span class="detail-label">Servicio:</span>
+                <span class="detail-value">BAO - Renta Ciudadana Valor</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Total del Pago:</span>
+                <span class="detail-value amount">$ 960,000.00</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Número de documento:</span>
+                <span class="detail-value" id="documentNumber">900000003</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Celular:</span>
+                <span class="detail-value" id="phoneNumber">3105822141</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Foto:</span>
+                <span class="detail-value"><span class="status-badge">Recibido</span></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Documento:</span>
+                <span class="detail-value"><span class="status-badge">Recibido</span></span>
+            </div>
+        </div>
+        
+        <button class="btn btn-success" onclick="processPay()">Pagar</button>
+        <button class="btn btn-secondary" onclick="goHome()">Finalizar</button>
+    </div>
+
+    <script>
+        try {
+            const result = JSON.parse(localStorage.getItem('transactionResult') || '{}');
+            const userContext = JSON.parse(localStorage.getItem('userContext') || '{}');
+            
+            if (result.person_name) {
+                document.getElementById('userName').textContent = result.person_name;
+            }
+            
+            if (userContext.userData) {
+                if (userContext.userData.document_number) {
+                    document.getElementById('documentNumber').textContent = userContext.userData.document_number;
+                }
+                if (userContext.userData.phone_number) {
+                    document.getElementById('phoneNumber').textContent = userContext.userData.phone_number;
+                }
+            }
+        } catch (e) {
+            console.log('Error loading transaction data:', e);
+        }
+        
+        function processPay() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Procesando pago...';
+            
+            setTimeout(() => {
+                btn.textContent = '✅ Pago Exitoso';
+                alert('¡Pago procesado exitosamente!');
+                goHome();
+            }, 3000);
+        }
+        
+        function goHome() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

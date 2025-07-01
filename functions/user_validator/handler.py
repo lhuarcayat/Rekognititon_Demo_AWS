@@ -7,6 +7,7 @@ from datetime import datetime
 import time
 import sys
 from decimal import Decimal
+import base64
 sys.path.append('/opt')
 
 # Imports locales
@@ -44,25 +45,33 @@ def lambda_handler(event, context):
     start_time = time.time()
     
     try:
+        if 'Records' in event:
+
         # Procesar eventos S3
-        for record in event['Records']:
-            if record['eventSource'] == 'aws:s3':
-                bucket_name = record['s3']['bucket']['name']
-                s3_key = record['s3']['object']['key']
-                
-                logger.info(f"Processing user photo: {s3_key}")
-                
-                result = validate_user_photo(s3_key, start_time)
-                
-                # Log resultado final
-                processing_time = (time.time() - start_time) * 1000
-                logger.info(f"Validation completed for {s3_key}: {result['status']} in {processing_time:.0f}ms")
-        
-        return {
-            'statusCode': 200,
-            'body': json.dumps({'message': 'Processing completed successfully'})
-        }
-        
+            for record in event['Records']:
+                if record['eventSource'] == 'aws:s3':
+                    bucket_name = record['s3']['bucket']['name']
+                    s3_key = record['s3']['object']['key']
+                    
+                    logger.info(f"Processing user photo: {s3_key}")
+                    
+                    result = validate_user_photo(s3_key, start_time)
+                    
+                    # Log resultado final
+                    processing_time = (time.time() - start_time) * 1000
+                    logger.info(f"Validation completed for {s3_key}: {result['status']} in {processing_time:.0f}ms")
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'message': 'Processing completed successfully'})
+            }
+        elif 'httpMethod' in event:
+            return handle_web_api_request(event,context)
+        else:
+            return{
+                'statusCode':400,
+                'body':json.dumps({'error':'Unsupported event type'})
+            }
     except Exception as e:
         logger.error(f"Unhandled error: {str(e)}")
         return {
@@ -281,3 +290,102 @@ def generate_comparison_id() -> str:
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
     unique_id = str(uuid.uuid4())[:8]
     return f"comp_{timestamp}_{unique_id}"
+
+def handle_web_api_request(event,context):
+    try:
+        path =event['path']
+        body=json.loads(event.get('body','{}'))
+        if path.endswith('/users/lookup'):
+            return lookup_user_from_web(body)
+        elif path.endswith('users/validate'):
+            return validate_liveness_from_web(body)
+        else:
+            return{
+                'statusCode': 404,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'error':'Endpoint not found'})
+            }
+    except Exception as e:
+        return{
+            'statusCode':500,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({'error':str(e)})
+        }
+def lookup_user_from_web(request_data):
+    try:
+        user_data=request_data.get('user_data',{})
+        document_type=user_data.get('document_type')
+        document_number=user_data.get('document_number')
+        response = documents_table.scan(
+            FilterExpression='document_type=:dt AND contains(s3_key,:dn)',
+            ExpressionAttributeValues={':dt':document_type,':dn':document_number}
+        )
+        user_exists = len(response['Items'])>0
+        return{
+            'statusCode':200,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({
+                'user_exists': user_exists,
+                'user_data':response['Items'][0] if user_exists else None,
+                'message': 'Usuario encontrado' if user_exists else 'Usuario nuevo'
+            })
+        }
+    except Exception as e:
+        return {
+            'statusCode':500,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({'error':str(e)})
+        }
+
+def validate_liveness_from_web(request_data):
+    try:
+        liveness_image=request_data.get('liveness_image','')
+        if liveness_image.startswith('data:image'):
+            image_data=liveness_image.split(',')[1]
+        else:
+            image_data = liveness_image
+        image_bytes = base64.b64decode(image_data)
+
+        processed_bytes, error = image_processor.process_image(image_bytes, 'liveness.jpg')
+        if error:
+            return{
+                'statusCode':400,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'success':False,'error':error})
+            }
+        search_result=rekognition_client.search_faces_by_image(processed_bytes,threshold=75,max_faces=5)
+        if not search_result['success'] or not search_result['face_matches']:
+            return {
+                'statusCode':200,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({
+                    'success':True,
+                    'status': 'NO_MATCH_FOUND',
+                    'confidence':0
+                })
+            }
+        best_match= search_result['face_matches'][0]
+        similarity=best_match['Similarity']
+        face_id=best_match['Face']['FaceId']
+        document_metadata = get_document_by_face_id(face_id)
+        status ='MATCH_CONFIRMED' if similarity >= 85 else 'POSSIBLE_MATCH'
+        return {
+            'statusCode':200,
+            'headers':{'Access-Control-Allow-Origin':'*'},
+            'body':json.dumps({
+                'success':True,
+                'status':status,
+                'confidence':similarity,
+                'person_name':document_metadata.get('person_name') if document_metadata else 'Usuario'
+            })
+        }
+    except Exception as e:
+            return {
+                'statusCode':500,
+                'headers':{'Access-Control-Allow-Origin':'*'},
+                'body':json.dumps({'success':False,'error':str(e)})
+            }
+
+
+
+

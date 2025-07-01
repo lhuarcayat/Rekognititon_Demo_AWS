@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRUEBASHOT PRUEBAS</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 400px; margin: 50px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #28a745; }
+        .icon { width: 30px; height: 30px; background: #28a745; border-radius: 50%; margin-right: 15px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .icon::before { content: "✓"; }
+        h2 { color: #333; font-size: 16px; margin: 0; }
+        .subtitle { color: #666; font-size: 14px; margin-top: 5px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; font-size: 14px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; margin-bottom: 10px; }
+        .btn-primary { background: #6c757d; color: white; }
+        .btn-secondary { background: transparent; color: #28a745; border: 1px solid #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon"></div>
+            <div>
+                <h2>PRUEBASHOT PRUEBAS</h2>
+                <div class="subtitle">DNI • Cédula 7</div>
+            </div>
+        </div>
+        
+        <form id="consultaForm">
+            <div class="form-group">
+                <label>Tipo de documento</label>
+                <select id="tipoDoc" required>
+                    <option value="">Seleccionar</option>
+                    <option value="DNI">DNI</option>
+                    <option value="CEDULA">Cédula</option>
+                    <option value="PASSPORT">Pasaporte</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Número de documento</label>
+                <input type="text" id="numDoc" placeholder="Ingrese número de documento" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Número celular</label>
+                <input type="tel" id="numCel" placeholder="Ingrese número celular" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Consultar</button>
+            <button type="button" class="btn btn-secondary">Atrás</button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = 'PLACEHOLDER_API_URL';
+        
+        document.getElementById('consultaForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                document_type: document.getElementById('tipoDoc').value,
+                document_number: document.getElementById('numDoc').value,
+                phone_number: document.getElementById('numCel').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/lookup`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_data: userData})
+                });
+                
+                const result = await response.json();
+                localStorage.setItem('userContext', JSON.stringify({userData, result}));
+                window.location.href = 'capture.html';
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html>
