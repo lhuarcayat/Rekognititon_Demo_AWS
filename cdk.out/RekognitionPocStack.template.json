@@ -644,7 +644,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05.zip"
+     "S3Key": "bd1e4c8a7419dab477392bebec5ef9392c5c2db43d06e511bf1cc7d82f0bc83a.zip"
     },
     "Environment": {
      "Variables": {
@@ -679,9 +679,25 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/Resource",
-    "aws:asset:path": "asset.4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05",
+    "aws:asset:path": "asset.bd1e4c8a7419dab477392bebec5ef9392c5c2db43d06e511bf1cc7d82f0bc83a",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
+   }
+  },
+  "DocumentIndexerAllowAPIGatewayIndexerEEED4E50": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DocumentIndexer7C68C1D7",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/AllowAPIGatewayIndexer"
    }
   },
   "UserValidatorF49AEC8F": {
@@ -691,7 +707,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "1dbc6e1ccaee469f93c215a29a1d12985bfd48154123368a7015d9fee35897fe.zip"
+     "S3Key": "2a4e2faee23ff366331b3242ddad1cf5f42cbf7bc17360cd89d943531b36c803.zip"
     },
     "Environment": {
      "Variables": {
@@ -732,9 +748,25 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/UserValidator/Resource",
-    "aws:asset:path": "asset.1dbc6e1ccaee469f93c215a29a1d12985bfd48154123368a7015d9fee35897fe",
+    "aws:asset:path": "asset.2a4e2faee23ff366331b3242ddad1cf5f42cbf7bc17360cd89d943531b36c803",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
+   }
+  },
+  "UserValidatorAllowAPIGateway26C2187C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "UserValidatorF49AEC8F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/UserValidator/AllowAPIGateway"
    }
   },
   "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC": {
@@ -820,10 +852,879 @@
     "aws:cdk:path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource"
    }
   },
+  "WebInterfaceBucket3A7ACE14": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": {
+     "Fn::Join": [
+      "",
+      [
+       "rekognition-poc-web-",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       "-us-east-1"
+      ]
+     ]
+    },
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "HEAD"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3000
+      }
+     ]
+    },
+    "WebsiteConfiguration": {
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/WebInterfaceBucket/Resource"
+   }
+  },
+  "WebInterfaceBucketPolicyC9E7B197": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "WebInterfaceBucket3A7ACE14"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "WebOAI6A7C4516",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "WebInterfaceBucket3A7ACE14",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "WebInterfaceBucket3A7ACE14",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/WebInterfaceBucket/Policy/Resource"
+   }
+  },
+  "WebOAI6A7C4516": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "OAI for Rekognition Web Interface"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/WebOAI/Resource"
+   }
+  },
+  "WebDistribution59C46482": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "CustomErrorResponses": [
+      {
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "RekognitionPocStackWebDistributionOrigin116376100",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "CustomOriginConfig": {
+        "OriginProtocolPolicy": "http-only",
+        "OriginSSLProtocols": [
+         "TLSv1.2"
+        ]
+       },
+       "DomainName": {
+        "Fn::Select": [
+         2,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::GetAtt": [
+             "WebInterfaceBucket3A7ACE14",
+             "WebsiteURL"
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "Id": "RekognitionPocStackWebDistributionOrigin116376100"
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/WebDistribution/Resource"
+   }
+  },
+  "RekognitionWebAPI5D87F7AA": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "Web interface for Rekognition POC",
+    "Name": "rekognition-poc-web-api"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Resource"
+   }
+  },
+  "RekognitionWebAPIDeployment1998A47329bed7154d0b7f5e5344d4910397eebc": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "Web interface for Rekognition POC",
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "DependsOn": [
+    "RekognitionWebAPIdocumentsindexOPTIONS816B0493",
+    "RekognitionWebAPIdocumentsindexPOSTF09F5D09",
+    "RekognitionWebAPIdocumentsindex2E8B1CE4",
+    "RekognitionWebAPIdocumentsOPTIONS13EBA808",
+    "RekognitionWebAPIdocumentsAC146502",
+    "RekognitionWebAPIOPTIONSDADEFD27",
+    "RekognitionWebAPIuserslookupOPTIONSCDA766DC",
+    "RekognitionWebAPIuserslookupPOST15E4159A",
+    "RekognitionWebAPIuserslookup3D7FD623",
+    "RekognitionWebAPIusersOPTIONSC5BC8BB3",
+    "RekognitionWebAPIusers69F2C1E2",
+    "RekognitionWebAPIusersvalidateOPTIONSDCE66F81",
+    "RekognitionWebAPIusersvalidatePOST6968FEE1",
+    "RekognitionWebAPIusersvalidateF905F283"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Deployment/Resource"
+   }
+  },
+  "RekognitionWebAPIDeploymentStageprod2613A38B": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "RekognitionWebAPIDeployment1998A47329bed7154d0b7f5e5344d4910397eebc"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    },
+    "StageName": "prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/DeploymentStage.prod/Resource"
+   }
+  },
+  "RekognitionWebAPIOPTIONSDADEFD27": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "RekognitionWebAPI5D87F7AA",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/OPTIONS/Resource"
+   }
+  },
+  "RekognitionWebAPIusers69F2C1E2": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "RekognitionWebAPI5D87F7AA",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "users",
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/Resource"
+   }
+  },
+  "RekognitionWebAPIusersOPTIONSC5BC8BB3": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIusers69F2C1E2"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/OPTIONS/Resource"
+   }
+  },
+  "RekognitionWebAPIuserslookup3D7FD623": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RekognitionWebAPIusers69F2C1E2"
+    },
+    "PathPart": "lookup",
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/lookup/Resource"
+   }
+  },
+  "RekognitionWebAPIuserslookupOPTIONSCDA766DC": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIuserslookup3D7FD623"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/lookup/OPTIONS/Resource"
+   }
+  },
+  "RekognitionWebAPIuserslookupPOSTApiPermissionRekognitionPocStackRekognitionWebAPI333A1347POSTuserslookupB51FC41B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "UserValidatorF49AEC8F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionWebAPI5D87F7AA"
+       },
+       "/",
+       {
+        "Ref": "RekognitionWebAPIDeploymentStageprod2613A38B"
+       },
+       "/POST/users/lookup"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/lookup/POST/ApiPermission.RekognitionPocStackRekognitionWebAPI333A1347.POST..users.lookup"
+   }
+  },
+  "RekognitionWebAPIuserslookupPOSTApiPermissionTestRekognitionPocStackRekognitionWebAPI333A1347POSTuserslookup8E705B9F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "UserValidatorF49AEC8F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionWebAPI5D87F7AA"
+       },
+       "/test-invoke-stage/POST/users/lookup"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/lookup/POST/ApiPermission.Test.RekognitionPocStackRekognitionWebAPI333A1347.POST..users.lookup"
+   }
+  },
+  "RekognitionWebAPIuserslookupPOST15E4159A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "UserValidatorF49AEC8F",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIuserslookup3D7FD623"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/lookup/POST/Resource"
+   }
+  },
+  "RekognitionWebAPIusersvalidateF905F283": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RekognitionWebAPIusers69F2C1E2"
+    },
+    "PathPart": "validate",
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/validate/Resource"
+   }
+  },
+  "RekognitionWebAPIusersvalidateOPTIONSDCE66F81": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIusersvalidateF905F283"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/validate/OPTIONS/Resource"
+   }
+  },
+  "RekognitionWebAPIusersvalidatePOSTApiPermissionRekognitionPocStackRekognitionWebAPI333A1347POSTusersvalidate45087E3D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "UserValidatorF49AEC8F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionWebAPI5D87F7AA"
+       },
+       "/",
+       {
+        "Ref": "RekognitionWebAPIDeploymentStageprod2613A38B"
+       },
+       "/POST/users/validate"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/validate/POST/ApiPermission.RekognitionPocStackRekognitionWebAPI333A1347.POST..users.validate"
+   }
+  },
+  "RekognitionWebAPIusersvalidatePOSTApiPermissionTestRekognitionPocStackRekognitionWebAPI333A1347POSTusersvalidate0D045F12": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "UserValidatorF49AEC8F",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionWebAPI5D87F7AA"
+       },
+       "/test-invoke-stage/POST/users/validate"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/validate/POST/ApiPermission.Test.RekognitionPocStackRekognitionWebAPI333A1347.POST..users.validate"
+   }
+  },
+  "RekognitionWebAPIusersvalidatePOST6968FEE1": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "UserValidatorF49AEC8F",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIusersvalidateF905F283"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/users/validate/POST/Resource"
+   }
+  },
+  "RekognitionWebAPIdocumentsAC146502": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "RekognitionWebAPI5D87F7AA",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "documents",
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/Resource"
+   }
+  },
+  "RekognitionWebAPIdocumentsOPTIONS13EBA808": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIdocumentsAC146502"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/OPTIONS/Resource"
+   }
+  },
+  "RekognitionWebAPIdocumentsindex2E8B1CE4": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RekognitionWebAPIdocumentsAC146502"
+    },
+    "PathPart": "index",
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/index/Resource"
+   }
+  },
+  "RekognitionWebAPIdocumentsindexOPTIONS816B0493": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIdocumentsindex2E8B1CE4"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/index/OPTIONS/Resource"
+   }
+  },
+  "RekognitionWebAPIdocumentsindexPOSTApiPermissionRekognitionPocStackRekognitionWebAPI333A1347POSTdocumentsindexB4F91F02": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DocumentIndexer7C68C1D7",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionWebAPI5D87F7AA"
+       },
+       "/",
+       {
+        "Ref": "RekognitionWebAPIDeploymentStageprod2613A38B"
+       },
+       "/POST/documents/index"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/index/POST/ApiPermission.RekognitionPocStackRekognitionWebAPI333A1347.POST..documents.index"
+   }
+  },
+  "RekognitionWebAPIdocumentsindexPOSTApiPermissionTestRekognitionPocStackRekognitionWebAPI333A1347POSTdocumentsindexA257C812": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DocumentIndexer7C68C1D7",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionWebAPI5D87F7AA"
+       },
+       "/test-invoke-stage/POST/documents/index"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/index/POST/ApiPermission.Test.RekognitionPocStackRekognitionWebAPI333A1347.POST..documents.index"
+   }
+  },
+  "RekognitionWebAPIdocumentsindexPOSTF09F5D09": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DocumentIndexer7C68C1D7",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "RekognitionWebAPIdocumentsindex2E8B1CE4"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionWebAPI5D87F7AA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Default/documents/index/POST/Resource"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WLwWrDMBBEvyV3eRvH/YHG0FOhJim9hrW8Tje2pKKVCEbo34vltNDTe8PMHKB+3sN+h3ep9DBVM/eQzgH1pPAulyQNpGPUEwXVjvZhG44olNWMph8QUjvajrxhEXZWveFC/pN8Ce1o/+XXaHV4FL+e1bBYNG7oIX1gP9NaFslKmguKUBB4WaEYDaST2zaFnZtZL2vcLOdSkbjoNak/Kf9zwCvb67p4j+E7hqy6JXw5+9RAfYC63t2EufLRBjYEp40/Hc0XzykBAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22QUWvCQBCEf4vv59Vo/4BGBKFFiaWvcrls4tbkLtzuIeHIfy+5JGihT/MNMyzDrmXyvpKrhXrQUhf3ZY25DBdW+i7Ug66BNjLsvL4Di7Q0E42yUwQTnm2Nuns2Rt+LWjV5oWRIS3MG1yARWiM+VAfuG1w0aWn++IM3mqdg5l4UnVGNLXIZvlRewxBG6AVtrooImOR2EIGqkSGzYyfqc9w8S9fWF6WzhmU4OazQbLUGomMBhpFjNx06h6Hzb2OPxA5zP0999b1QLVaK4aE6GTIg3rYY50y4h7a2XQMmPvXFXVhVcfgIGZD1TkP89CfwzRZDONGcTpcj9/2re1bib4ajaKqhcfLceu7FueObNW8bmaxlkix+CHHpvGFsQGaj/gLYkL2dIgIAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/CDKMetadata/Default"
@@ -853,6 +1754,72 @@
    "Description": "DynamoDB table for comparison results",
    "Value": {
     "Ref": "ComparisonResultsTable188C61C4"
+   }
+  },
+  "RekognitionWebAPIEndpointE5C6CD76": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "RekognitionWebAPI5D87F7AA"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "RekognitionWebAPIDeploymentStageprod2613A38B"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "WebBucketName": {
+   "Value": {
+    "Ref": "WebInterfaceBucket3A7ACE14"
+   }
+  },
+  "APIGatewayURL": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "RekognitionWebAPI5D87F7AA"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "RekognitionWebAPIDeploymentStageprod2613A38B"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "WebInterfaceURL": {
+   "Description": "Web interface URL (CloudFront)",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "WebDistribution59C46482",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
    }
   }
  },

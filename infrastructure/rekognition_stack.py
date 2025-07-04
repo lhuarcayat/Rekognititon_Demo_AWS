@@ -7,6 +7,8 @@ from aws_cdk import(
     aws_iam as iam,
     aws_s3_notifications as s3n,
     aws_apigateway as apigateway,
+    aws_cloudfront as cloudfront,
+    aws_cloudfront_origins as origins,
     RemovalPolicy,
     Duration
 )
@@ -344,9 +346,41 @@ class RekognitionStack(Stack):
             self, 'WebInterfaceBucket',
             bucket_name=f'rekognition-poc-web-{self.account}-{self.region}',
             website_index_document='index.html',
-            public_read_access=True, #prueba
-            removal_policy=RemovalPolicy.DESTROY
+            removal_policy=RemovalPolicy.DESTROY,
+            cors=[
+                s3.CorsRule(
+                    allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD],
+                    allowed_origins=['*'],
+                    allowed_headers=['*'],
+                    max_age=3000
+                )
+            ]
         )
+        oai = cloudfront.OriginAccessIdentity(
+            self, 'WebOAI',
+            comment='OAI for Rekognition Web Interface'
+        )
+        self.distribution = cloudfront.Distribution(
+            self, 'WebDistribution',
+            default_behavior=cloudfront.BehaviorOptions(
+                origin=origins.S3Origin(self.web_bucket, origin_access_identity=oai),
+                viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+                cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED
+            ),
+            default_root_object='index.html',
+            error_responses=[
+                cloudfront.ErrorResponse(
+                    http_status=404,
+                    response_http_status=200,
+                    response_page_path='/index.html'
+                )
+            ]
+        )
+
+        
+        # Dar permisos específicos a CloudFront
+        self.web_bucket.grant_read(oai)
         #API GATEWAY
         self.api = apigateway.RestApi(
             self, 'RekognitionWebAPI',
@@ -361,7 +395,11 @@ class RekognitionStack(Stack):
         self._create_api_endpoints()
         cdk.CfnOutput(self,'WebBucketName',value=self.web_bucket.bucket_name)
         cdk.CfnOutput(self, 'APIGatewayURL',value=self.api.url)
-
+        cdk.CfnOutput(
+            self, 'WebInterfaceURL',
+            value=f'https://{self.distribution.distribution_domain_name}',
+            description='Web interface URL (CloudFront)'
+        )
     def _create_api_endpoints(self):
         #user endpoints
         users=self.api.root.add_resource('users')
@@ -369,7 +407,7 @@ class RekognitionStack(Stack):
             'POST', apigateway.LambdaIntegration(self.user_validator)
         )
         users.add_resource('validate').add_method(
-            'POST',apigateway.LambdaIntegration(self.user_validatior)
+            'POST',apigateway.LambdaIntegration(self.user_validator)
         )
         #documents endpoints
         documents = self.api.root.add_resource('documents')
