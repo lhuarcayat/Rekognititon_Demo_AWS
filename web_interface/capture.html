@@ -5,36 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captura de documento</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px; max-width: 500px; text-align: center; }
         .camera-icon { width: 80px; height: 60px; background: #e9ecef; border: 2px solid #dee2e6; border-radius: 8px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         h3 { color: #333; margin-bottom: 15px; }
-        .video-container { margin: 20px 0; display: none; }
-        #video { width: 100%; max-width: 400px; height: 300px; border-radius: 8px; }
+        .instructions { color: #666; margin-bottom: 20px; line-height: 1.5; }
+        .video-container { margin: 20px 0; display: none; position: relative; }
+        #video { width: 100%; max-width: 400px; height: 300px; border-radius: 8px; background: #000; }
         #canvas { display: none; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; margin-bottom: 10px; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-primary { background: #343a40; color: white; }
+        .btn-success { background: #28a745; color: white; }
         .btn-secondary { background: transparent; color: #28a745; border: 1px solid #28a745; }
         .status { padding: 15px; border-radius: 4px; margin: 15px 0; display: none; }
-        .status.success { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .progress { width: 100%; height: 4px; background: #e9ecef; border-radius: 2px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: #28a745; width: 0%; transition: width 0.3s ease; }
+        .capture-controls { display: none; gap: 10px; margin-top: 15px; }
+        .capture-controls.show { display: flex; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="camera-icon">📷</div>
+        <div class="camera-icon" id="cameraIcon">📷</div>
         <h3>Captura de documento</h3>
-        <p>Sin acceso a la cámara</p>
-        <p>Para continuar. Por favor, activa los permisos para usar la cámara web</p>
+        
+        <!-- Estado inicial -->
+        <div id="initialState">
+            <p class="instructions">Para continuar, por favor activa los permisos para usar la cámara web y coloca tu documento de identidad frente a la cámara.</p>
+            <button id="activarCamara" class="btn btn-primary">Permitir acceso a la Cámara</button>
+        </div>
+        
+        <!-- Estado de cámara activa -->
+        <div id="cameraActiveState" style="display: none;">
+            <p class="instructions">📄 Coloca tu documento de identidad en el centro de la cámara y presiona "Tomar Foto"</p>
+            <div class="video-container" id="videoContainer">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            
+            <div class="capture-controls" id="captureControls">
+                <button id="takePhoto" class="btn btn-success">📸 Tomar Foto</button>
+                <button id="retakePhoto" class="btn btn-secondary" style="display: none;">🔄 Tomar Otra</button>
+            </div>
+        </div>
+        
+        <!-- Estado de procesamiento -->
+        <div id="processingState" style="display: none;">
+            <p class="instructions">🔄 Procesando documento...</p>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
         
         <div class="status" id="statusMessage"></div>
         
-        <div class="video-container" id="videoContainer">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
-        </div>
-        
-        <button id="activarCamara" class="btn btn-primary">Permitir acceso a la Cámara</button>
         <button class="btn btn-secondary" onclick="history.back()">Atrás</button>
     </div>
 
@@ -42,80 +70,242 @@
         const API_BASE = 'https://78iguvux61.execute-api.us-east-1.amazonaws.com/prod';
         let userContext = JSON.parse(localStorage.getItem('userContext') || '{}');
         let stream;
+        let photoTaken = false;
         
+        // Referencias a elementos
+        const initialState = document.getElementById('initialState');
+        const cameraActiveState = document.getElementById('cameraActiveState');
+        const processingState = document.getElementById('processingState');
+        const videoContainer = document.getElementById('videoContainer');
+        const captureControls = document.getElementById('captureControls');
+        const statusMessage = document.getElementById('statusMessage');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Configuración de estados
+        function showState(state) {
+            // Ocultar todos los estados
+            initialState.style.display = 'none';
+            cameraActiveState.style.display = 'none';
+            processingState.style.display = 'none';
+            statusMessage.style.display = 'none';
+            
+            // Mostrar estado específico
+            if (state === 'initial') {
+                initialState.style.display = 'block';
+            } else if (state === 'camera') {
+                cameraActiveState.style.display = 'block';
+                videoContainer.style.display = 'block';
+                captureControls.classList.add('show');
+            } else if (state === 'processing') {
+                processingState.style.display = 'block';
+                animateProgress();
+            }
+        }
+        
+        function showStatus(type, message) {
+            statusMessage.className = `status ${type}`;
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+        }
+        
+        function animateProgress() {
+            let width = 0;
+            const interval = setInterval(() => {
+                width += 10;
+                progressBar.style.width = width + '%';
+                if (width >= 100) {
+                    clearInterval(interval);
+                }
+            }, 200);
+        }
+        
+        // Activar cámara
         document.getElementById('activarCamara').onclick = async () => {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({video: true});
+                showStatus('info', '📷 Activando cámara...');
+                
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'environment' // Cámara trasera en móviles
+                    }
+                });
+                
                 document.getElementById('video').srcObject = stream;
-                document.getElementById('videoContainer').style.display = 'block';
-                document.getElementById('activarCamara').style.display = 'none';
-                
-                showStatus('success', '✅ Cámara activada. Procesando...');
-                
-                setTimeout(async () => {
-                    const image = captureImage();
-                    await processUser(image);
-                }, 3000);
+                showState('camera');
+                showStatus('success', '✅ Cámara activada. Posiciona tu documento y presiona "Tomar Foto"');
                 
             } catch (error) {
-                showStatus('error', 'Error accediendo a la cámara: ' + error.message);
+                showStatus('error', '❌ Error accediendo a la cámara: ' + error.message);
+                console.error('Error accessing camera:', error);
             }
         };
         
+        // Tomar foto
+        document.getElementById('takePhoto').onclick = () => {
+            const image = captureImage();
+            if (image) {
+                showStatus('info', '📸 Foto capturada. Procesando...');
+                document.getElementById('takePhoto').style.display = 'none';
+                document.getElementById('retakePhoto').style.display = 'inline-block';
+                photoTaken = true;
+                
+                // Procesar después de un momento
+                setTimeout(() => {
+                    processDocument(image);
+                }, 1000);
+            }
+        };
+        
+        // Tomar otra foto
+        document.getElementById('retakePhoto').onclick = () => {
+            document.getElementById('takePhoto').style.display = 'inline-block';
+            document.getElementById('retakePhoto').style.display = 'none';
+            photoTaken = false;
+            showStatus('info', '📄 Coloca tu documento y presiona "Tomar Foto" nuevamente');
+        };
+        
         function captureImage() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-            
-            return canvas.toDataURL('image/jpeg', 0.8);
+            try {
+                const video = document.getElementById('video');
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Configurar canvas con resolución del video
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                
+                // Dibujar frame actual del video
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convertir a base64
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                if (imageData === 'data:,') {
+                    throw new Error('No se pudo capturar la imagen');
+                }
+                
+                console.log('Image captured, size:', imageData.length);
+                return imageData;
+                
+            } catch (error) {
+                showStatus('error', '❌ Error capturando imagen: ' + error.message);
+                console.error('Error capturing image:', error);
+                return null;
+            }
         }
         
-        async function processUser(image) {
+        async function processDocument(image) {
+            showState('processing');
+            
             try {
+                console.log('Processing document...');
+                console.log('User context:', userContext);
+                console.log('API Base:', API_BASE);
+                
+                // Si es usuario nuevo, indexar documento primero
                 if (!userContext.result?.user_exists) {
-                    await fetch(`${API_BASE}/documents/index`, {
+                    console.log('New user - indexing document...');
+                    
+                    const indexResponse = await fetch(`${API_BASE}/documents/index`, {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Origin': window.location.origin
+                        },
                         body: JSON.stringify({
                             user_data: userContext.userData,
                             document_image: image
                         })
                     });
+                    
+                    console.log('Index response status:', indexResponse.status);
+                    
+                    if (!indexResponse.ok) {
+                        const errorText = await indexResponse.text();
+                        throw new Error(`Error indexando documento: ${indexResponse.status} - ${errorText}`);
+                    }
+                    
+                    const indexResult = await indexResponse.json();
+                    console.log('Index result:', indexResult);
                 }
                 
-                const response = await fetch(`${API_BASE}/users/validate`, {
+                // Validar usuario
+                console.log('Validating user...');
+                
+                const validateResponse = await fetch(`${API_BASE}/users/validate`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    },
                     body: JSON.stringify({
                         liveness_image: image,
                         user_context: userContext
                     })
                 });
                 
-                const result = await response.json();
+                console.log('Validate response status:', validateResponse.status);
+                
+                if (!validateResponse.ok) {
+                    const errorText = await validateResponse.text();
+                    throw new Error(`Error validando usuario: ${validateResponse.status} - ${errorText}`);
+                }
+                
+                const result = await validateResponse.json();
+                console.log('Validation result:', result);
                 
                 if (result.success && result.status === 'MATCH_CONFIRMED') {
+                    // Detener stream de cámara
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    // Guardar resultado y redirigir
                     localStorage.setItem('transactionResult', JSON.stringify(result));
-                    window.location.href = 'transaction.html';
+                    showStatus('success', '✅ Identidad verificada exitosamente. Redirigiendo...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'transaction.html';
+                    }, 2000);
+                    
                 } else {
-                    showStatus('error', 'Validación fallida: ' + (result.error || 'No se pudo confirmar identidad'));
+                    showState('camera');
+                    showStatus('error', `❌ Validación fallida: ${result.error || 'No se pudo confirmar identidad'}`);
+                    
+                    // Resetear botones
+                    document.getElementById('takePhoto').style.display = 'inline-block';
+                    document.getElementById('retakePhoto').style.display = 'none';
+                    photoTaken = false;
                 }
                 
             } catch (error) {
-                showStatus('error', 'Error procesando: ' + error.message);
+                console.error('Processing error:', error);
+                showState('camera');
+                showStatus('error', `❌ Error procesando: ${error.message}`);
+                
+                // Resetear botones
+                document.getElementById('takePhoto').style.display = 'inline-block';
+                document.getElementById('retakePhoto').style.display = 'none';
+                photoTaken = false;
             }
         }
         
-        function showStatus(type, message) {
-            const status = document.getElementById('statusMessage');
-            status.className = `status ${type}`;
-            status.textContent = message;
-            status.style.display = 'block';
-        }
+        // Cleanup al salir
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+        
+        // Inicializar
+        showState('initial');
+        
+        // Debug: mostrar información en consola
+        console.log('Capture page loaded');
+        console.log('API_BASE:', API_BASE);
+        console.log('User context:', userContext);
     </script>
 </body>
 </html>

@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/dc87a276b6d035c8e7993d3aee1a73801fb45567ee0944a49f40ee401e81861b.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/a38109e5ba84ec90552689f4d8b86497fb0b2900084e37e7d3cd8717e890bf45.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -110,10 +110,10 @@
             "data": "DocumentIndexer7C68C1D7"
           }
         ],
-        "/RekognitionPocStack/DocumentIndexer/AllowAPIGatewayIndexer": [
+        "/RekognitionPocStack/DocumentIndexer/AllowAPIGatewayInvokeIndexer": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DocumentIndexerAllowAPIGatewayIndexerEEED4E50"
+            "data": "DocumentIndexerAllowAPIGatewayInvokeIndexerA46F0E5C"
           }
         ],
         "/RekognitionPocStack/UserValidator/Resource": [
@@ -122,10 +122,10 @@
             "data": "UserValidatorF49AEC8F"
           }
         ],
-        "/RekognitionPocStack/UserValidator/AllowAPIGateway": [
+        "/RekognitionPocStack/UserValidator/AllowAPIGatewayInvoke": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "UserValidatorAllowAPIGateway26C2187C"
+            "data": "UserValidatorAllowAPIGatewayInvoke22420683"
           }
         ],
         "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource": [
@@ -203,7 +203,7 @@
         "/RekognitionPocStack/RekognitionWebAPI/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "RekognitionWebAPIDeployment1998A47329bed7154d0b7f5e5344d4910397eebc"
+            "data": "RekognitionWebAPIDeployment1998A473c3a5823449ad01c85c929b52eff72a28"
           }
         ],
         "/RekognitionPocStack/RekognitionWebAPI/DeploymentStage.prod/Resource": [
@@ -354,6 +354,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "WebInterfaceURL"
+          }
+        ],
+        "/RekognitionPocStack/CloudFrontDistributionId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CloudFrontDistributionId"
           }
         ],
         "/RekognitionPocStack/CDKMetadata/Default": [

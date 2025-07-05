@@ -1,232 +1,262 @@
 #!/usr/bin/env python3
 """
-🌐 CONFIGURADOR AUTOMÁTICO DE WEB INTERFACE
-Reemplaza URLs placeholder con valores reales del stack desplegado
+🔧 CORRECTOR ESPECÍFICO DE WEB CONFIG
+Completa la corrección que tuvo problemas en el script anterior
 """
 
-import os
-import sys
 import boto3
 import json
 import re
 from pathlib import Path
 
-class WebInterfaceConfigurator:
-    def __init__(self, stack_name="RekognitionPocStack"):
-        self.stack_name = stack_name
-        self.cloudformation = boto3.client('cloudformation')
+def get_api_url():
+    """Obtener URL del API desde CloudFormation"""
+    print("📋 Obteniendo URL del API...")
+    
+    try:
+        cf = boto3.client('cloudformation')
+        response = cf.describe_stacks(StackName='RekognitionPocStack')
         
-    def get_stack_outputs(self):
-        """Obtener outputs del stack CloudFormation"""
+        outputs = {}
+        for output in response['Stacks'][0]['Outputs']:
+            outputs[output['OutputKey']] = output['OutputValue']
+        
+        api_url = outputs.get('APIGatewayURL', '').rstrip('/')
+        web_url = outputs.get('WebInterfaceURL')
+        bucket_name = outputs.get('WebBucketName')
+        
+        print(f"   ✅ API URL: {api_url}")
+        print(f"   ✅ Web URL: {web_url}")
+        print(f"   ✅ Bucket: {bucket_name}")
+        
+        return api_url, web_url, bucket_name
+        
+    except Exception as e:
+        print(f"   ❌ Error: {e}")
+        return None, None, None
+
+def fix_html_files(api_url):
+    """Corregir archivos HTML con la URL correcta del API"""
+    print(f"\n🔧 Corrigiendo archivos HTML...")
+    
+    web_dir = Path("web_interface")
+    if not web_dir.exists():
+        print(f"   ❌ Directorio web_interface no encontrado")
+        return False
+    
+    html_files = list(web_dir.glob("*.html"))
+    if not html_files:
+        print(f"   ❌ No se encontraron archivos HTML")
+        return False
+    
+    fixed_files = []
+    
+    for html_file in html_files:
         try:
-            response = self.cloudformation.describe_stacks(StackName=self.stack_name)
-            outputs = response['Stacks'][0]['Outputs']
+            print(f"   🔧 Procesando {html_file.name}...")
             
-            # Convertir a diccionario para fácil acceso
-            output_dict = {}
-            for output in outputs:
-                output_dict[output['OutputKey']] = output['OutputValue']
-                
-            return output_dict
-            
-        except Exception as e:
-            print(f"❌ Error obteniendo outputs del stack: {e}")
-            return None
-    
-    def update_html_files(self, api_url):
-        """Actualizar archivos HTML con la URL real del API"""
-        web_interface_dir = Path("web_interface")
-        
-        if not web_interface_dir.exists():
-            print(f"❌ Directorio {web_interface_dir} no encontrado")
-            return False
-        
-        html_files = list(web_interface_dir.glob("*.html"))
-        
-        if not html_files:
-            print(f"❌ No se encontraron archivos HTML en {web_interface_dir}")
-            return False
-        
-        # Asegurar que no hay trailing slash
-        clean_api_url = api_url.rstrip('/')
-        
-        updated_files = []
-        
-        for html_file in html_files:
-            try:
-                # Leer archivo
-                with open(html_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Verificar si contiene placeholder
-                if 'PLACEHOLDER_API_URL' not in content:
-                    print(f"⏭️  {html_file.name}: Ya configurado")
-                    continue
-                
-                # Reemplazar placeholder
-                updated_content = content.replace('PLACEHOLDER_API_URL', clean_api_url)
-                
-                # Verificar que el reemplazo funcionó
-                if 'PLACEHOLDER_API_URL' in updated_content:
-                    print(f"⚠️  {html_file.name}: Reemplazo incompleto")
-                    continue
-                
-                # Escribir archivo actualizado
-                with open(html_file, 'w', encoding='utf-8') as f:
-                    f.write(updated_content)
-                
-                updated_files.append(html_file.name)
-                print(f"✅ {html_file.name}: Actualizado")
-                
-            except Exception as e:
-                print(f"❌ Error procesando {html_file.name}: {e}")
-        
-        return len(updated_files) > 0
-    
-    def verify_configuration(self):
-        """Verificar que la configuración es correcta"""
-        web_interface_dir = Path("web_interface")
-        issues = []
-        
-        for html_file in web_interface_dir.glob("*.html"):
             with open(html_file, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # Buscar placeholders restantes
+            original_content = content
+            
+            # 1. Reemplazar PLACEHOLDER_API_URL
             if 'PLACEHOLDER_API_URL' in content:
-                issues.append(f"{html_file.name}: Contiene PLACEHOLDER_API_URL")
+                content = content.replace('PLACEHOLDER_API_URL', api_url)
+                print(f"      ✅ Reemplazado PLACEHOLDER_API_URL")
             
-            # Buscar definiciones de API_BASE
-            api_base_matches = re.findall(r"const API_BASE = '([^']+)'", content)
+            # 2. Actualizar const API_BASE existente
+            api_base_pattern = r"const API_BASE = '[^']*'"
+            if re.search(api_base_pattern, content):
+                content = re.sub(api_base_pattern, f"const API_BASE = '{api_url}'", content)
+                print(f"      ✅ Actualizado const API_BASE")
             
-            if api_base_matches:
-                api_url = api_base_matches[0]
-                if api_url.startswith('https://'):
-                    print(f"✅ {html_file.name}: API_BASE = {api_url}")
-                else:
-                    issues.append(f"{html_file.name}: API_BASE inválido: {api_url}")
+            # 3. Verificar que se aplicaron cambios
+            if content != original_content:
+                with open(html_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                fixed_files.append(html_file.name)
+                print(f"      ✅ {html_file.name} actualizado")
+            else:
+                print(f"      ℹ️  {html_file.name} ya estaba correcto")
         
-        if issues:
-            print(f"\n⚠️  PROBLEMAS ENCONTRADOS:")
-            for issue in issues:
-                print(f"   - {issue}")
+        except Exception as e:
+            print(f"      ❌ Error con {html_file.name}: {e}")
+    
+    if fixed_files:
+        print(f"   ✅ Archivos corregidos: {fixed_files}")
+        return True
+    else:
+        print(f"   ℹ️  Todos los archivos ya estaban correctos")
+        return True
+
+def upload_fixed_files(bucket_name):
+    """Subir archivos corregidos a S3"""
+    print(f"\n📤 Subiendo archivos corregidos a S3...")
+    
+    try:
+        s3 = boto3.client('s3')
+        web_dir = Path("web_interface")
+        
+        uploaded_count = 0
+        
+        for file_path in web_dir.rglob("*"):
+            if file_path.is_file():
+                s3_key = str(file_path.relative_to(web_dir))
+                
+                # Determinar content type
+                if file_path.suffix == '.html':
+                    content_type = 'text/html'
+                elif file_path.suffix == '.css':
+                    content_type = 'text/css'
+                elif file_path.suffix == '.js':
+                    content_type = 'application/javascript'
+                else:
+                    content_type = 'binary/octet-stream'
+                
+                # Subir archivo
+                s3.upload_file(
+                    str(file_path),
+                    bucket_name,
+                    s3_key,
+                    ExtraArgs={
+                        'ContentType': content_type,
+                        'CacheControl': 'max-age=3600'
+                    }
+                )
+                
+                uploaded_count += 1
+                print(f"      📄 {s3_key}")
+        
+        print(f"   ✅ {uploaded_count} archivos subidos")
+        return True
+        
+    except Exception as e:
+        print(f"   ❌ Error subiendo archivos: {e}")
+        return False
+
+def verify_web_files(bucket_name):
+    """Verificar archivos en S3"""
+    print(f"\n🔍 Verificando archivos en S3...")
+    
+    try:
+        s3 = boto3.client('s3')
+        response = s3.list_objects_v2(Bucket=bucket_name)
+        
+        if 'Contents' not in response:
+            print(f"   ❌ Bucket está vacío")
             return False
         
-        print(f"\n🎉 Configuración web verificada correctamente")
-        return True
-    
-    def upload_to_s3(self, web_bucket_name):
-        """Subir archivos actualizados a S3"""
-        try:
-            s3 = boto3.client('s3')
-            web_interface_dir = Path("web_interface")
-            
-            uploaded_files = []
-            
-            for file_path in web_interface_dir.rglob("*"):
-                if file_path.is_file():
-                    # Clave S3 (path relativo)
-                    s3_key = str(file_path.relative_to(web_interface_dir))
-                    
-                    # Determinar content type
-                    if file_path.suffix == '.html':
-                        content_type = 'text/html'
-                    elif file_path.suffix == '.css':
-                        content_type = 'text/css'
-                    elif file_path.suffix == '.js':
-                        content_type = 'application/javascript'
-                    else:
-                        content_type = 'binary/octet-stream'
-                    
-                    # Subir archivo
-                    s3.upload_file(
-                        str(file_path),
-                        web_bucket_name,
-                        s3_key,
-                        ExtraArgs={'ContentType': content_type}
-                    )
-                    
-                    uploaded_files.append(s3_key)
-                    print(f"📤 Subido: {s3_key}")
-            
-            print(f"✅ {len(uploaded_files)} archivos subidos a s3://{web_bucket_name}/")
+        files = [obj['Key'] for obj in response['Contents']]
+        
+        print(f"   📁 Archivos en S3: {len(files)}")
+        for file in files:
+            print(f"      📄 {file}")
+        
+        # Verificar archivos críticos
+        critical_files = ['index.html', 'capture.html', 'transaction.html']
+        missing_files = [f for f in critical_files if f not in files]
+        
+        if missing_files:
+            print(f"   ❌ Archivos críticos faltantes: {missing_files}")
+            return False
+        else:
+            print(f"   ✅ Todos los archivos críticos presentes")
             return True
             
-        except Exception as e:
-            print(f"❌ Error subiendo a S3: {e}")
-            return False
+    except Exception as e:
+        print(f"   ❌ Error verificando archivos: {e}")
+        return False
+
+def test_web_access(web_url):
+    """Probar acceso a la web"""
+    print(f"\n🧪 Probando acceso a la web...")
     
-    def run_complete_configuration(self):
-        """Ejecutar configuración completa"""
-        print("🚀 INICIANDO CONFIGURACIÓN WEB INTERFACE")
-        print("=" * 50)
+    try:
+        import urllib.request
         
-        # 1. Obtener outputs del stack
-        print("📋 1. Obteniendo información del stack...")
-        outputs = self.get_stack_outputs()
+        test_url = f"{web_url}/index.html"
+        print(f"   🎯 Probando: {test_url}")
         
-        if not outputs:
-            return False
+        request = urllib.request.Request(test_url)
+        request.add_header('User-Agent', 'WebConfigFix/1.0')
         
-        api_url = outputs.get('APIGatewayURL')
-        web_bucket = outputs.get('WebBucketName')
-        web_url = outputs.get('WebInterfaceURL')
-        
-        if not api_url:
-            print("❌ No se encontró APIGatewayURL en los outputs")
-            return False
-        
-        print(f"   ✅ API Gateway URL: {api_url}")
-        print(f"   ✅ Web Bucket: {web_bucket}")
-        print(f"   ✅ Web URL: {web_url}")
-        
-        # 2. Actualizar archivos HTML
-        print("\n🔧 2. Actualizando archivos HTML...")
-        if not self.update_html_files(api_url):
-            print("❌ Falló la actualización de archivos HTML")
-            return False
-        
-        # 3. Verificar configuración
-        print("\n🔍 3. Verificando configuración...")
-        if not self.verify_configuration():
-            print("❌ Configuración inválida")
-            return False
-        
-        # 4. Subir a S3 (si bucket disponible)
-        if web_bucket:
-            print(f"\n📤 4. Subiendo archivos a S3...")
-            if not self.upload_to_s3(web_bucket):
-                print("⚠️  Error subiendo a S3, pero archivos locales están configurados")
-        
-        # 5. Resumen final
-        print(f"\n🎉 CONFIGURACIÓN COMPLETADA")
-        print("=" * 30)
-        print(f"✅ Archivos HTML actualizados con API URL")
-        print(f"✅ Archivos subidos a S3")
-        if web_url:
-            print(f"🌐 Interfaz web disponible en: {web_url}")
-        
-        return True
+        with urllib.request.urlopen(request, timeout=10) as response:
+            content = response.read().decode('utf-8')
+            
+            # Verificar que no tenga PLACEHOLDER
+            if 'PLACEHOLDER_API_URL' in content:
+                print(f"      ❌ Aún contiene PLACEHOLDER_API_URL")
+                return False
+            
+            # Verificar que tenga API_BASE correcto
+            import re
+            api_base_match = re.search(r"const API_BASE = '([^']+)'", content)
+            if api_base_match:
+                api_base = api_base_match.group(1)
+                print(f"      ✅ API_BASE configurado: {api_base}")
+                if api_base.startswith('https://') and 'amazonaws.com' in api_base:
+                    print(f"      ✅ URL del API válida")
+                    return True
+                else:
+                    print(f"      ❌ URL del API inválida")
+                    return False
+            else:
+                print(f"      ❌ API_BASE no encontrado")
+                return False
+                
+    except Exception as e:
+        print(f"   ❌ Error: {e}")
+        return False
 
 def main():
-    """Función principal"""
-    import argparse
+    """Corrección específica del web config"""
+    print("🔧 CORRECTOR ESPECÍFICO DE WEB CONFIG")
+    print("=" * 50)
+    print("Completa la corrección que tuvo problemas")
     
-    parser = argparse.ArgumentParser(description='Configurar Web Interface')
-    parser.add_argument('--stack-name', default='RekognitionPocStack', 
-                       help='Nombre del stack CloudFormation')
-    parser.add_argument('--verify-only', action='store_true',
-                       help='Solo verificar configuración actual')
+    # 1. Obtener URLs
+    api_url, web_url, bucket_name = get_api_url()
     
-    args = parser.parse_args()
+    if not all([api_url, web_url, bucket_name]):
+        print("\n❌ No se pudo obtener información del stack")
+        return False
     
-    configurator = WebInterfaceConfigurator(args.stack_name)
+    # 2. Corregir archivos HTML localmente
+    if not fix_html_files(api_url):
+        print("\n❌ Error corrigiendo archivos HTML")
+        return False
     
-    if args.verify_only:
-        configurator.verify_configuration()
+    # 3. Subir archivos corregidos
+    if not upload_fixed_files(bucket_name):
+        print("\n❌ Error subiendo archivos")
+        return False
+    
+    # 4. Verificar archivos en S3
+    if not verify_web_files(bucket_name):
+        print("\n❌ Error verificando archivos")
+        return False
+    
+    # 5. Probar acceso web
+    if test_web_access(web_url):
+        print(f"\n🎉 ¡WEB CONFIG CORREGIDO COMPLETAMENTE!")
+        print(f"   ✅ Archivos HTML actualizados")
+        print(f"   ✅ API URL configurada correctamente")
+        print(f"   ✅ Archivos subidos a S3")
+        print(f"   ✅ Web accesible y funcional")
+        
+        print(f"\n🌐 LISTO PARA USAR:")
+        print(f"   URL: {web_url}")
+        print(f"   📱 Refrescar con Ctrl+F5 y probar")
+        
+        return True
     else:
-        success = configurator.run_complete_configuration()
-        sys.exit(0 if success else 1)
+        print(f"\n⚠️  WEB CONFIG PARCIALMENTE CORREGIDO")
+        print(f"   🔄 Los archivos están subidos pero pueden tardar unos minutos")
+        print(f"   💡 Espera 5-10 minutos y prueba: {web_url}")
+        
+        return False
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    exit(0 if success else 1)

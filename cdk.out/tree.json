@@ -806,9 +806,9 @@
                   "version": "2.140.0"
                 }
               },
-              "AllowAPIGatewayIndexer": {
-                "id": "AllowAPIGatewayIndexer",
-                "path": "RekognitionPocStack/DocumentIndexer/AllowAPIGatewayIndexer",
+              "AllowAPIGatewayInvokeIndexer": {
+                "id": "AllowAPIGatewayInvokeIndexer",
+                "path": "RekognitionPocStack/DocumentIndexer/AllowAPIGatewayInvokeIndexer",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                   "aws:cdk:cloudformation:props": {
@@ -819,7 +819,23 @@
                         "Arn"
                       ]
                     },
-                    "principal": "apigateway.amazonaws.com"
+                    "principal": "apigateway.amazonaws.com",
+                    "sourceArn": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:execute-api:us-east-1:",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":",
+                          {
+                            "Ref": "RekognitionWebAPI5D87F7AA"
+                          },
+                          "/*/*/*/*/*"
+                        ]
+                      ]
+                    }
                   }
                 },
                 "constructInfo": {
@@ -915,9 +931,9 @@
                   "version": "2.140.0"
                 }
               },
-              "AllowAPIGateway": {
-                "id": "AllowAPIGateway",
-                "path": "RekognitionPocStack/UserValidator/AllowAPIGateway",
+              "AllowAPIGatewayInvoke": {
+                "id": "AllowAPIGatewayInvoke",
+                "path": "RekognitionPocStack/UserValidator/AllowAPIGatewayInvoke",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                   "aws:cdk:cloudformation:props": {
@@ -928,7 +944,23 @@
                         "Arn"
                       ]
                     },
-                    "principal": "apigateway.amazonaws.com"
+                    "principal": "apigateway.amazonaws.com",
+                    "sourceArn": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:execute-api:us-east-1:",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":",
+                          {
+                            "Ref": "RekognitionWebAPI5D87F7AA"
+                          },
+                          "/*/*/*/*/*"
+                        ]
+                      ]
+                    }
                   }
                 },
                 "constructInfo": {
@@ -1098,6 +1130,15 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
+                    "bucketEncryption": {
+                      "serverSideEncryptionConfiguration": [
+                        {
+                          "serverSideEncryptionByDefault": {
+                            "sseAlgorithm": "AES256"
+                          }
+                        }
+                      ]
+                    },
                     "bucketName": {
                       "Fn::Join": [
                         "",
@@ -1126,8 +1167,14 @@
                         }
                       ]
                     },
-                    "websiteConfiguration": {
-                      "indexDocument": "index.html"
+                    "publicAccessBlockConfiguration": {
+                      "blockPublicAcls": true,
+                      "blockPublicPolicy": true,
+                      "ignorePublicAcls": true,
+                      "restrictPublicBuckets": true
+                    },
+                    "versioningConfiguration": {
+                      "status": "Enabled"
                     }
                   }
                 },
@@ -1152,11 +1199,7 @@
                         "policyDocument": {
                           "Statement": [
                             {
-                              "Action": [
-                                "s3:GetBucket*",
-                                "s3:GetObject*",
-                                "s3:List*"
-                              ],
+                              "Action": "s3:GetObject",
                               "Effect": "Allow",
                               "Principal": {
                                 "CanonicalUser": {
@@ -1166,28 +1209,38 @@
                                   ]
                                 }
                               },
-                              "Resource": [
-                                {
-                                  "Fn::GetAtt": [
-                                    "WebInterfaceBucket3A7ACE14",
-                                    "Arn"
+                              "Resource": {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "WebInterfaceBucket3A7ACE14",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "/*"
                                   ]
-                                },
-                                {
-                                  "Fn::Join": [
-                                    "",
-                                    [
-                                      {
-                                        "Fn::GetAtt": [
-                                          "WebInterfaceBucket3A7ACE14",
-                                          "Arn"
-                                        ]
-                                      },
-                                      "/*"
-                                    ]
+                                ]
+                              }
+                            },
+                            {
+                              "Action": "s3:ListBucket",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "CanonicalUser": {
+                                  "Fn::GetAtt": [
+                                    "WebOAI6A7C4516",
+                                    "S3CanonicalUserId"
                                   ]
                                 }
-                              ]
+                              },
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "WebInterfaceBucket3A7ACE14",
+                                  "Arn"
+                                ]
+                              }
                             }
                           ],
                           "Version": "2012-10-17"
@@ -1260,27 +1313,24 @@
                       "origins": [
                         {
                           "domainName": {
-                            "Fn::Select": [
-                              2,
-                              {
-                                "Fn::Split": [
-                                  "/",
-                                  {
-                                    "Fn::GetAtt": [
-                                      "WebInterfaceBucket3A7ACE14",
-                                      "WebsiteURL"
-                                    ]
-                                  }
-                                ]
-                              }
+                            "Fn::GetAtt": [
+                              "WebInterfaceBucket3A7ACE14",
+                              "RegionalDomainName"
                             ]
                           },
                           "id": "RekognitionPocStackWebDistributionOrigin116376100",
-                          "customOriginConfig": {
-                            "originSslProtocols": [
-                              "TLSv1.2"
-                            ],
-                            "originProtocolPolicy": "http-only"
+                          "s3OriginConfig": {
+                            "originAccessIdentity": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "origin-access-identity/cloudfront/",
+                                  {
+                                    "Ref": "WebOAI6A7C4516"
+                                  }
+                                ]
+                              ]
+                            }
                           }
                         }
                       ],
@@ -1295,8 +1345,16 @@
                         "compress": true,
                         "viewerProtocolPolicy": "redirect-to-https"
                       },
+                      "comment": "Rekognition POC Web Interface",
                       "customErrorResponses": [
                         {
+                          "errorCachingMinTtl": 300,
+                          "errorCode": 403,
+                          "responseCode": 200,
+                          "responsePagePath": "/index.html"
+                        },
+                        {
+                          "errorCachingMinTtl": 300,
                           "errorCode": 404,
                           "responseCode": 200,
                           "responsePagePath": "/index.html"
@@ -1329,6 +1387,10 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::RestApi",
                   "aws:cdk:cloudformation:props": {
+                    "binaryMediaTypes": [
+                      "image/*",
+                      "application/octet-stream"
+                    ],
                     "description": "Web interface for Rekognition POC",
                     "name": "rekognition-poc-web-api"
                   }
@@ -1376,7 +1438,7 @@
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "RekognitionWebAPIDeployment1998A47329bed7154d0b7f5e5344d4910397eebc"
+                          "Ref": "RekognitionWebAPIDeployment1998A473c3a5823449ad01c85c929b52eff72a28"
                         },
                         "restApiId": {
                           "Ref": "RekognitionWebAPI5D87F7AA"
@@ -1429,9 +1491,10 @@
                                 {
                                   "statusCode": "204",
                                   "responseParameters": {
-                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
                                     "method.response.header.Access-Control-Allow-Origin": "'*'",
-                                    "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                    "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                                    "method.response.header.Access-Control-Max-Age": "'3600'"
                                   }
                                 }
                               ]
@@ -1442,7 +1505,8 @@
                                 "responseParameters": {
                                   "method.response.header.Access-Control-Allow-Headers": true,
                                   "method.response.header.Access-Control-Allow-Origin": true,
-                                  "method.response.header.Access-Control-Allow-Methods": true
+                                  "method.response.header.Access-Control-Allow-Methods": true,
+                                  "method.response.header.Access-Control-Max-Age": true
                                 }
                               }
                             ],
@@ -1517,9 +1581,10 @@
                                     {
                                       "statusCode": "204",
                                       "responseParameters": {
-                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
                                         "method.response.header.Access-Control-Allow-Origin": "'*'",
-                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                                        "method.response.header.Access-Control-Max-Age": "'3600'"
                                       }
                                     }
                                   ]
@@ -1530,7 +1595,8 @@
                                     "responseParameters": {
                                       "method.response.header.Access-Control-Allow-Headers": true,
                                       "method.response.header.Access-Control-Allow-Origin": true,
-                                      "method.response.header.Access-Control-Allow-Methods": true
+                                      "method.response.header.Access-Control-Allow-Methods": true,
+                                      "method.response.header.Access-Control-Max-Age": true
                                     }
                                   }
                                 ],
@@ -1599,9 +1665,10 @@
                                         {
                                           "statusCode": "204",
                                           "responseParameters": {
-                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
                                             "method.response.header.Access-Control-Allow-Origin": "'*'",
-                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                                            "method.response.header.Access-Control-Max-Age": "'3600'"
                                           }
                                         }
                                       ]
@@ -1612,7 +1679,8 @@
                                         "responseParameters": {
                                           "method.response.header.Access-Control-Allow-Headers": true,
                                           "method.response.header.Access-Control-Allow-Origin": true,
-                                          "method.response.header.Access-Control-Allow-Methods": true
+                                          "method.response.header.Access-Control-Allow-Methods": true,
+                                          "method.response.header.Access-Control-Max-Age": true
                                         }
                                       }
                                     ],
@@ -1742,8 +1810,24 @@
                                           ]
                                         ]
                                       },
-                                      "integrationHttpMethod": "POST"
+                                      "integrationHttpMethod": "POST",
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "200",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                          }
+                                        }
+                                      ]
                                     },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "200",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Origin": true
+                                        }
+                                      }
+                                    ],
                                     "resourceId": {
                                       "Ref": "RekognitionWebAPIuserslookup3D7FD623"
                                     },
@@ -1815,9 +1899,10 @@
                                         {
                                           "statusCode": "204",
                                           "responseParameters": {
-                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
                                             "method.response.header.Access-Control-Allow-Origin": "'*'",
-                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                                            "method.response.header.Access-Control-Max-Age": "'3600'"
                                           }
                                         }
                                       ]
@@ -1828,7 +1913,8 @@
                                         "responseParameters": {
                                           "method.response.header.Access-Control-Allow-Headers": true,
                                           "method.response.header.Access-Control-Allow-Origin": true,
-                                          "method.response.header.Access-Control-Allow-Methods": true
+                                          "method.response.header.Access-Control-Allow-Methods": true,
+                                          "method.response.header.Access-Control-Max-Age": true
                                         }
                                       }
                                     ],
@@ -1958,8 +2044,24 @@
                                           ]
                                         ]
                                       },
-                                      "integrationHttpMethod": "POST"
+                                      "integrationHttpMethod": "POST",
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "200",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                          }
+                                        }
+                                      ]
                                     },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "200",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Origin": true
+                                        }
+                                      }
+                                    ],
                                     "resourceId": {
                                       "Ref": "RekognitionWebAPIusersvalidateF905F283"
                                     },
@@ -2040,9 +2142,10 @@
                                     {
                                       "statusCode": "204",
                                       "responseParameters": {
-                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
                                         "method.response.header.Access-Control-Allow-Origin": "'*'",
-                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                                        "method.response.header.Access-Control-Max-Age": "'3600'"
                                       }
                                     }
                                   ]
@@ -2053,7 +2156,8 @@
                                     "responseParameters": {
                                       "method.response.header.Access-Control-Allow-Headers": true,
                                       "method.response.header.Access-Control-Allow-Origin": true,
-                                      "method.response.header.Access-Control-Allow-Methods": true
+                                      "method.response.header.Access-Control-Allow-Methods": true,
+                                      "method.response.header.Access-Control-Max-Age": true
                                     }
                                   }
                                 ],
@@ -2122,9 +2226,10 @@
                                         {
                                           "statusCode": "204",
                                           "responseParameters": {
-                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
                                             "method.response.header.Access-Control-Allow-Origin": "'*'",
-                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+                                            "method.response.header.Access-Control-Max-Age": "'3600'"
                                           }
                                         }
                                       ]
@@ -2135,7 +2240,8 @@
                                         "responseParameters": {
                                           "method.response.header.Access-Control-Allow-Headers": true,
                                           "method.response.header.Access-Control-Allow-Origin": true,
-                                          "method.response.header.Access-Control-Allow-Methods": true
+                                          "method.response.header.Access-Control-Allow-Methods": true,
+                                          "method.response.header.Access-Control-Max-Age": true
                                         }
                                       }
                                     ],
@@ -2329,6 +2435,14 @@
           "WebInterfaceURL": {
             "id": "WebInterfaceURL",
             "path": "RekognitionPocStack/WebInterfaceURL",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.140.0"
+            }
+          },
+          "CloudFrontDistributionId": {
+            "id": "CloudFrontDistributionId",
+            "path": "RekognitionPocStack/CloudFrontDistributionId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"

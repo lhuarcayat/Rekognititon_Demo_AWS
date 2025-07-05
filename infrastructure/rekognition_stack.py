@@ -345,8 +345,16 @@ class RekognitionStack(Stack):
         self.web_bucket = s3.Bucket(
             self, 'WebInterfaceBucket',
             bucket_name=f'rekog-poc-web-{self.account}',
-            website_index_document='index.html',
+            encryption=s3.BucketEncryption.S3_MANAGED,
+            versioned=True,  # Mejor para cache invalidation
             removal_policy=RemovalPolicy.DESTROY,
+            public_read_access=False,  # Explícitamente bloquear acceso público directo
+            block_public_access=s3.BlockPublicAccess(
+                block_public_acls=True,
+                block_public_policy=True,
+                ignore_public_acls=True,
+                restrict_public_buckets=True  
+            ),           
             cors=[
                 s3.CorsRule(
                     allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.HEAD],
@@ -360,6 +368,22 @@ class RekognitionStack(Stack):
             self, 'WebOAI',
             comment='OAI for Rekognition Web Interface'
         )
+        self.web_bucket.add_to_resource_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                principals=[iam.CanonicalUserPrincipal(oai.cloud_front_origin_access_identity_s3_canonical_user_id)],
+                actions=['s3:GetObject'],
+                resources=[f'{self.web_bucket.bucket_arn}/*']
+            )
+        )
+        self.web_bucket.add_to_resource_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                principals=[iam.CanonicalUserPrincipal(oai.cloud_front_origin_access_identity_s3_canonical_user_id)],
+                actions=['s3:ListBucket'],
+                resources=[self.web_bucket.bucket_arn]
+            )
+        )        
         self.distribution = cloudfront.Distribution(
             self, 'WebDistribution',
             default_behavior=cloudfront.BehaviorOptions(
@@ -371,28 +395,41 @@ class RekognitionStack(Stack):
             default_root_object='index.html',
             error_responses=[
                 cloudfront.ErrorResponse(
+                    http_status=403,  # Manejar 403 específicamente
+                    response_http_status=200,
+                    response_page_path='/index.html',
+                    ttl=Duration.minutes(5)
+                ),
+                cloudfront.ErrorResponse(
                     http_status=404,
                     response_http_status=200,
-                    response_page_path='/index.html'
+                    response_page_path='/index.html',
+                    ttl=Duration.minutes(5)
                 )
-            ]
+            ],
+            comment='Rekognition POC Web Interface'
         )
-
-        
-        # Dar permisos específicos a CloudFront
-        self.web_bucket.grant_read(oai)
         #API GATEWAY
         self.api = apigateway.RestApi(
             self, 'RekognitionWebAPI',
             rest_api_name='rekognition-poc-web-api',
             description='Web interface for Rekognition POC',
+            binary_media_types=['image/*', 'application/octet-stream'],
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
-                allow_methods = apigateway.Cors.ALL_METHODS,
-                allow_headers =['Content-Type','Authorization']
+                allow_methods=apigateway.Cors.ALL_METHODS,
+                allow_headers=[
+                    'Content-Type',
+                    'Authorization', 
+                    'X-Amz-Date',
+                    'X-Api-Key',
+                    'X-Amz-Security-Token'
+                ],
+                max_age=Duration.seconds(3600)
             )
         )
         self._create_api_endpoints()
+        self._deploy_web_files()
         cdk.CfnOutput(self,'WebBucketName',value=self.web_bucket.bucket_name)
         cdk.CfnOutput(self, 'APIGatewayURL',value=self.api.url)
         cdk.CfnOutput(
@@ -400,30 +437,91 @@ class RekognitionStack(Stack):
             value=f'https://{self.distribution.distribution_domain_name}',
             description='Web interface URL (CloudFront)'
         )
+        cdk.CfnOutput(
+            self, 'CloudFrontDistributionId',
+            value=self.distribution.distribution_id,
+            description='CloudFront Distribution ID for cache invalidation'
+        )
     def _create_api_endpoints(self):
         #user endpoints
-        users=self.api.root.add_resource('users')
+        users = self.api.root.add_resource('users')
         users.add_resource('lookup').add_method(
-            'POST', apigateway.LambdaIntegration(self.user_validator)
+            'POST', 
+            apigateway.LambdaIntegration(
+                self.user_validator,
+                proxy=True,
+                integration_responses=[
+                    apigateway.IntegrationResponse(
+                        status_code='200',
+                        response_parameters={
+                            'method.response.header.Access-Control-Allow-Origin': "'*'"
+                        }
+                    )
+                ]
+            ),
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code='200',
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                )
+            ]
         )
+        
         users.add_resource('validate').add_method(
-            'POST',apigateway.LambdaIntegration(self.user_validator)
+            'POST',
+            apigateway.LambdaIntegration(
+                self.user_validator,
+                proxy=True,
+                integration_responses=[
+                    apigateway.IntegrationResponse(
+                        status_code='200',
+                        response_parameters={
+                            'method.response.header.Access-Control-Allow-Origin': "'*'"
+                        }
+                    )
+                ]
+            ),
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code='200',
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                )
+            ]
         )
-        #documents endpoints
+
+        # Documents endpoints
         documents = self.api.root.add_resource('documents')
         documents.add_resource('index').add_method(
-            'POST',apigateway.LambdaIntegration(self.document_indexer)
+            'POST',
+            apigateway.LambdaIntegration(
+                self.document_indexer,
+                proxy=True
+            )
         )
+
+        # Permisos explícitos para Lambda
         self.user_validator.add_permission(
-            'AllowAPIGateway',
+            'AllowAPIGatewayInvoke',
             principal=iam.ServicePrincipal('apigateway.amazonaws.com'),
-            action='lambda:InvokeFunction'
+            action='lambda:InvokeFunction',
+            source_arn=f"{self.api.arn_for_execute_api()}/*/*"
         )
+        
         self.document_indexer.add_permission(
-            'AllowAPIGatewayIndexer',
+            'AllowAPIGatewayInvokeIndexer',
             principal=iam.ServicePrincipal('apigateway.amazonaws.com'),
-            action='lambda:InvokeFunction'
+            action='lambda:InvokeFunction',
+            source_arn=f"{self.api.arn_for_execute_api()}/*/*"
         )
+    def _deploy_web_files(self):
+        """Deploy automático de archivos web (placeholder por ahora)"""
+        # Esta funcionalidad se manejará manualmente con scripts/web_config.py
+        # para evitar complejidad adicional en CDK
+        pass
 
 
 
