@@ -377,7 +377,7 @@
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/SharedLayer/Resource",
-    "aws:asset:path": "C:\\Users\\Usuario\\Desktop\\Rekognition_project\\layers\\shared",
+    "aws:asset:path": "asset.8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Content"
    }

@@ -3,7 +3,7 @@
   "files": {
     "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec": {
       "source": {
-        "path": "C:\\Users\\Usuario\\Desktop\\Rekognition_project\\layers\\shared",
+        "path": "asset.8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec",
         "packaging": "zip"
       },
       "destinations": {
@@ -43,7 +43,7 @@
         }
       }
     },
-    "a38109e5ba84ec90552689f4d8b86497fb0b2900084e37e7d3cd8717e890bf45": {
+    "96872b54f54bc2c3e2611d177b3b694e694a60c18ec0b696dc1d843482487786": {
       "source": {
         "path": "RekognitionPocStack.template.json",
         "packaging": "file"
@@ -51,7 +51,7 @@
       "destinations": {
         "current_account-us-east-1": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "a38109e5ba84ec90552689f4d8b86497fb0b2900084e37e7d3cd8717e890bf45.json",
+          "objectKey": "96872b54f54bc2c3e2611d177b3b694e694a60c18ec0b696dc1d843482487786.json",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }

@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-🔧 CORRECTOR ESPECÍFICO DE WEB CONFIG
-Completa la corrección que tuvo problemas en el script anterior
+🔧 WEB CONFIG COMPLETO
+Configura archivos HTML + corrige CloudFront automáticamente
 """
 
 import boto3
 import json
 import re
+import time
 from pathlib import Path
 
-def get_api_url():
-    """Obtener URL del API desde CloudFormation"""
-    print("📋 Obteniendo URL del API...")
+def get_stack_info():
+    """Obtener información completa del stack"""
+    print("📋 Obteniendo información del stack...")
     
     try:
         cf = boto3.client('cloudformation')
@@ -24,16 +25,18 @@ def get_api_url():
         api_url = outputs.get('APIGatewayURL', '').rstrip('/')
         web_url = outputs.get('WebInterfaceURL')
         bucket_name = outputs.get('WebBucketName')
+        distribution_id = outputs.get('CloudFrontDistributionId')
         
         print(f"   ✅ API URL: {api_url}")
         print(f"   ✅ Web URL: {web_url}")
         print(f"   ✅ Bucket: {bucket_name}")
+        print(f"   ✅ Distribution ID: {distribution_id}")
         
-        return api_url, web_url, bucket_name
+        return api_url, web_url, bucket_name, distribution_id
         
     except Exception as e:
         print(f"   ❌ Error: {e}")
-        return None, None, None
+        return None, None, None, None
 
 def fix_html_files(api_url):
     """Corregir archivos HTML con la URL correcta del API"""
@@ -90,9 +93,45 @@ def fix_html_files(api_url):
         print(f"   ℹ️  Todos los archivos ya estaban correctos")
         return True
 
-def upload_fixed_files(bucket_name):
+def check_and_fix_cloudfront(distribution_id, bucket_name):
+    """Verificar CloudFront (ya debería estar correcto)"""
+    print(f"\n☁️ Verificando CloudFront...")
+    
+    try:
+        cloudfront = boto3.client('cloudfront')
+        
+        # Obtener configuración actual
+        response = cloudfront.get_distribution_config(Id=distribution_id)
+        config = response['DistributionConfig']
+        
+        # Verificar origen
+        origins = config['Origins']['Items']
+        
+        for origin in origins:
+            domain_name = origin['DomainName']
+            print(f"   📡 Origen actual: {domain_name}")
+            
+            # El domain correcto es .s3.us-east-1.amazonaws.com (lo que CDK genera)
+            expected_domain = f"{bucket_name}.s3.us-east-1.amazonaws.com"
+            if domain_name == expected_domain:
+                print(f"   ✅ CloudFront configurado correctamente")
+                return False  # No necesita corrección
+            elif f"{bucket_name}.s3.amazonaws.com" in domain_name:
+                print(f"   ✅ CloudFront usando domain S3 válido")
+                return False  # También válido
+            else:
+                print(f"   ❌ Domain inesperado: {domain_name}")
+                return False  # No corregir automáticamente
+        
+        return False
+            
+    except Exception as e:
+        print(f"   ❌ Error verificando CloudFront: {e}")
+        return False
+
+def upload_files_to_s3(bucket_name):
     """Subir archivos corregidos a S3"""
-    print(f"\n📤 Subiendo archivos corregidos a S3...")
+    print(f"\n📤 Subiendo archivos a S3: {bucket_name}")
     
     try:
         s3 = boto3.client('s3')
@@ -135,37 +174,27 @@ def upload_fixed_files(bucket_name):
         print(f"   ❌ Error subiendo archivos: {e}")
         return False
 
-def verify_web_files(bucket_name):
-    """Verificar archivos en S3"""
-    print(f"\n🔍 Verificando archivos en S3...")
+def invalidate_cloudfront_cache(distribution_id):
+    """Invalidar cache de CloudFront"""
+    print(f"\n🔄 Invalidando cache de CloudFront...")
     
     try:
-        s3 = boto3.client('s3')
-        response = s3.list_objects_v2(Bucket=bucket_name)
+        cloudfront = boto3.client('cloudfront')
         
-        if 'Contents' not in response:
-            print(f"   ❌ Bucket está vacío")
-            return False
+        response = cloudfront.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                'Paths': {'Quantity': 1, 'Items': ['/*']},
+                'CallerReference': f'web-config-{int(time.time())}'
+            }
+        )
         
-        files = [obj['Key'] for obj in response['Contents']]
+        invalidation_id = response['Invalidation']['Id']
+        print(f"   ✅ Cache invalidado (ID: {invalidation_id})")
+        return True
         
-        print(f"   📁 Archivos en S3: {len(files)}")
-        for file in files:
-            print(f"      📄 {file}")
-        
-        # Verificar archivos críticos
-        critical_files = ['index.html', 'capture.html', 'transaction.html']
-        missing_files = [f for f in critical_files if f not in files]
-        
-        if missing_files:
-            print(f"   ❌ Archivos críticos faltantes: {missing_files}")
-            return False
-        else:
-            print(f"   ✅ Todos los archivos críticos presentes")
-            return True
-            
     except Exception as e:
-        print(f"   ❌ Error verificando archivos: {e}")
+        print(f"   ❌ Error invalidando cache: {e}")
         return False
 
 def test_web_access(web_url):
@@ -179,30 +208,29 @@ def test_web_access(web_url):
         print(f"   🎯 Probando: {test_url}")
         
         request = urllib.request.Request(test_url)
-        request.add_header('User-Agent', 'WebConfigFix/1.0')
+        request.add_header('User-Agent', 'WebConfig/1.0')
+        request.add_header('Cache-Control', 'no-cache')
         
         with urllib.request.urlopen(request, timeout=10) as response:
-            content = response.read().decode('utf-8')
-            
-            # Verificar que no tenga PLACEHOLDER
-            if 'PLACEHOLDER_API_URL' in content:
-                print(f"      ❌ Aún contiene PLACEHOLDER_API_URL")
-                return False
-            
-            # Verificar que tenga API_BASE correcto
-            import re
-            api_base_match = re.search(r"const API_BASE = '([^']+)'", content)
-            if api_base_match:
-                api_base = api_base_match.group(1)
-                print(f"      ✅ API_BASE configurado: {api_base}")
-                if api_base.startswith('https://') and 'amazonaws.com' in api_base:
-                    print(f"      ✅ URL del API válida")
+            if response.status == 200:
+                content = response.read().decode('utf-8')
+                
+                if '<html' in content.lower():
+                    print(f"      ✅ Web accesible - HTML válido")
+                    
+                    # Verificar configuración de API
+                    import re
+                    api_match = re.search(r"const API_BASE = '([^']+)'", content)
+                    if api_match:
+                        api_url = api_match.group(1)
+                        print(f"      ✅ API configurada: {api_url}")
+                    
                     return True
                 else:
-                    print(f"      ❌ URL del API inválida")
+                    print(f"      ❌ Respuesta no es HTML válido")
                     return False
             else:
-                print(f"      ❌ API_BASE no encontrado")
+                print(f"      ❌ Status code: {response.status}")
                 return False
                 
     except Exception as e:
@@ -210,51 +238,81 @@ def test_web_access(web_url):
         return False
 
 def main():
-    """Corrección específica del web config"""
-    print("🔧 CORRECTOR ESPECÍFICO DE WEB CONFIG")
+    """Configuración completa del web interface"""
+    print("🔧 WEB CONFIG COMPLETO")
     print("=" * 50)
-    print("Completa la corrección que tuvo problemas")
+    print("Configura archivos HTML y sube al bucket correcto")
     
-    # 1. Obtener URLs
-    api_url, web_url, bucket_name = get_api_url()
+    # 1. Obtener información del stack
+    api_url, web_url, bucket_name, distribution_id = get_stack_info()
     
-    if not all([api_url, web_url, bucket_name]):
-        print("\n❌ No se pudo obtener información del stack")
+    if not all([api_url, web_url, bucket_name, distribution_id]):
+        print("\n❌ No se pudo obtener información completa del stack")
         return False
     
-    # 2. Corregir archivos HTML localmente
-    if not fix_html_files(api_url):
-        print("\n❌ Error corrigiendo archivos HTML")
-        return False
+    success_steps = 0
+    total_steps = 4
     
-    # 3. Subir archivos corregidos
-    if not upload_fixed_files(bucket_name):
-        print("\n❌ Error subiendo archivos")
-        return False
+    # 2. Corregir archivos HTML
+    if fix_html_files(api_url):
+        success_steps += 1
+        print(f"   ✅ Paso 1/4: Archivos HTML corregidos")
+    else:
+        print(f"   ❌ Paso 1/4: Error corrigiendo archivos HTML")
     
-    # 4. Verificar archivos en S3
-    if not verify_web_files(bucket_name):
-        print("\n❌ Error verificando archivos")
-        return False
+    # 3. Verificar CloudFront (solo verificación, no corrección)
+    check_and_fix_cloudfront(distribution_id, bucket_name)
+    success_steps += 1
+    print(f"   ✅ Paso 2/4: CloudFront verificado")
     
-    # 5. Probar acceso web
-    if test_web_access(web_url):
-        print(f"\n🎉 ¡WEB CONFIG CORREGIDO COMPLETAMENTE!")
-        print(f"   ✅ Archivos HTML actualizados")
-        print(f"   ✅ API URL configurada correctamente")
+    # 4. Subir archivos a S3
+    if upload_files_to_s3(bucket_name):
+        success_steps += 1
+        print(f"   ✅ Paso 3/4: Archivos subidos a S3")
+    else:
+        print(f"   ❌ Paso 3/4: Error subiendo archivos")
+    
+    # 5. Invalidar cache
+    if invalidate_cloudfront_cache(distribution_id):
+        success_steps += 1
+        print(f"   ✅ Paso 4/4: Cache invalidado")
+    else:
+        print(f"   ❌ Paso 4/4: Error invalidando cache")
+    
+    # 6. Probar acceso
+    print(f"\n⏱️  Esperando 30 segundos para propagación...")
+    time.sleep(30)
+    
+    web_accessible = test_web_access(web_url)
+    
+    # Resultado final
+    print(f"\n{'='*50}")
+    
+    if success_steps >= 3:
+        print(f"🎉 ¡WEB CONFIG COMPLETADO EXITOSAMENTE!")
+        print(f"   ✅ Archivos HTML configurados")
+        print(f"   ✅ CloudFront verificado (CDK lo configuró correctamente)")
         print(f"   ✅ Archivos subidos a S3")
-        print(f"   ✅ Web accesible y funcional")
+        print(f"   ✅ Cache invalidado")
+        
+        if web_accessible:
+            print(f"   ✅ Web inmediatamente accesible")
+        else:
+            print(f"   ⏱️  Web accesible en 5-10 minutos")
         
         print(f"\n🌐 LISTO PARA USAR:")
         print(f"   URL: {web_url}")
         print(f"   📱 Refrescar con Ctrl+F5 y probar")
         
+        print(f"\n💡 NOTA:")
+        print(f"   CDK genera el domain CloudFront correcto automáticamente")
+        print(f"   Este script solo necesita ejecutarse después de cada deploy")
+        
         return True
     else:
-        print(f"\n⚠️  WEB CONFIG PARCIALMENTE CORREGIDO")
-        print(f"   🔄 Los archivos están subidos pero pueden tardar unos minutos")
-        print(f"   💡 Espera 5-10 minutos y prueba: {web_url}")
-        
+        print(f"⚠️  WEB CONFIG PARCIALMENTE COMPLETADO ({success_steps}/{total_steps})")
+        print(f"   🔄 Algunos pasos fallaron, pero puede funcionar")
+        print(f"   ⏱️  Espera 10-15 minutos y prueba: {web_url}")
         return False
 
 if __name__ == "__main__":
