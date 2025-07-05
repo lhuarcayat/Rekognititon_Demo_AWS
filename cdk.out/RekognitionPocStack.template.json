@@ -16,11 +16,10 @@
      "Fn::Join": [
       "",
       [
-       "rekognition-poc-documents-",
+       "rekog-poc-documents-",
        {
         "Ref": "AWS::AccountId"
-       },
-       "-us-east-1"
+       }
       ]
      ]
     },
@@ -56,11 +55,10 @@
      "Fn::Join": [
       "",
       [
-       "rekognition-poc-user-photos-",
+       "rekog-poc-user-photos-",
        {
         "Ref": "AWS::AccountId"
-       },
-       "-us-east-1"
+       }
       ]
      ]
     },
@@ -644,7 +642,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "bd1e4c8a7419dab477392bebec5ef9392c5c2db43d06e511bf1cc7d82f0bc83a.zip"
+     "S3Key": "ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d.zip"
     },
     "Environment": {
      "Variables": {
@@ -679,7 +677,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/Resource",
-    "aws:asset:path": "asset.bd1e4c8a7419dab477392bebec5ef9392c5c2db43d06e511bf1cc7d82f0bc83a",
+    "aws:asset:path": "asset.ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -859,11 +857,10 @@
      "Fn::Join": [
       "",
       [
-       "rekognition-poc-web-",
+       "rekog-poc-web-",
        {
         "Ref": "AWS::AccountId"
-       },
-       "-us-east-1"
+       }
       ]
      ]
     },

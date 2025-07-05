@@ -23,7 +23,7 @@ class RekognitionStack(Stack):
 # ======================================================================
         self.documents_bucket = s3.Bucket(
             self, 'DocumentsBucket',
-            bucket_name=f'rekognition-poc-documents-{self.account}-{self.region}',
+            bucket_name=f'rekog-poc-documents-{self.account}',
             versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
             # lifecycle_rules=[
@@ -46,7 +46,7 @@ class RekognitionStack(Stack):
         )
         self.user_photos_bucket=s3.Bucket(
             self,'UserPhotosBucket',
-            bucket_name=f'rekognition-poc-user-photos-{self.account}-{self.region}',
+            bucket_name=f'rekog-poc-user-photos-{self.account}',
             encryption=s3.BucketEncryption.S3_MANAGED,
             lifecycle_rules=[
                 s3.LifecycleRule(
@@ -344,7 +344,7 @@ class RekognitionStack(Stack):
         #S3 para hosting web
         self.web_bucket = s3.Bucket(
             self, 'WebInterfaceBucket',
-            bucket_name=f'rekognition-poc-web-{self.account}-{self.region}',
+            bucket_name=f'rekog-poc-web-{self.account}',
             website_index_document='index.html',
             removal_policy=RemovalPolicy.DESTROY,
             cors=[
