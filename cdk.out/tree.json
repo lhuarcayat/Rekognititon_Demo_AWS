@@ -226,6 +226,15 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
+                    "bucketEncryption": {
+                      "serverSideEncryptionConfiguration": [
+                        {
+                          "serverSideEncryptionByDefault": {
+                            "sseAlgorithm": "AES256"
+                          }
+                        }
+                      ]
+                    },
                     "bucketName": {
                       "Fn::Join": [
                         "",
@@ -242,21 +251,17 @@
                       ]
                     },
                     "publicAccessBlockConfiguration": {
-                      "blockPublicAcls": false,
-                      "blockPublicPolicy": false,
-                      "ignorePublicAcls": false,
-                      "restrictPublicBuckets": false
+                      "blockPublicAcls": true,
+                      "blockPublicPolicy": true,
+                      "ignorePublicAcls": true,
+                      "restrictPublicBuckets": true
                     },
                     "tags": [
                       {
                         "key": "aws-cdk:cr-owned:29cf9ae3",
                         "value": "true"
                       }
-                    ],
-                    "websiteConfiguration": {
-                      "indexDocument": "index.html",
-                      "errorDocument": "error.html"
-                    }
+                    ]
                   }
                 },
                 "constructInfo": {
@@ -280,10 +285,53 @@
                         "policyDocument": {
                           "Statement": [
                             {
+                              "Action": [
+                                "s3:GetBucket*",
+                                "s3:GetObject*",
+                                "s3:List*"
+                              ],
+                              "Effect": "Allow",
+                              "Principal": {
+                                "CanonicalUser": {
+                                  "Fn::GetAtt": [
+                                    "FrontendOAIF4D25B13",
+                                    "S3CanonicalUserId"
+                                  ]
+                                }
+                              },
+                              "Resource": [
+                                {
+                                  "Fn::GetAtt": [
+                                    "FrontendBucketEFE2E19C",
+                                    "Arn"
+                                  ]
+                                },
+                                {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      {
+                                        "Fn::GetAtt": [
+                                          "FrontendBucketEFE2E19C",
+                                          "Arn"
+                                        ]
+                                      },
+                                      "/*"
+                                    ]
+                                  ]
+                                }
+                              ]
+                            },
+                            {
                               "Action": "s3:GetObject",
                               "Effect": "Allow",
                               "Principal": {
-                                "AWS": "*"
+                                "CanonicalUser": {
+                                  "Fn::GetAtt": [
+                                    "FrontendOAIF4D25B13",
+                                    "S3CanonicalUserId"
+                                  ]
+                                }
                               },
                               "Resource": {
                                 "Fn::Join": [
@@ -921,27 +969,36 @@
                                 "s3:PutObject"
                               ],
                               "Effect": "Allow",
-                              "Resource": {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    {
-                                      "Fn::GetAtt": [
-                                        "DocumentsBucket9EC9DEB9",
-                                        "Arn"
-                                      ]
-                                    },
-                                    "/*",
-                                    {
-                                      "Fn::GetAtt": [
-                                        "UserPhotosBucket4D5DE39B",
-                                        "Arn"
-                                      ]
-                                    },
-                                    "/*"
+                              "Resource": [
+                                {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      {
+                                        "Fn::GetAtt": [
+                                          "DocumentsBucket9EC9DEB9",
+                                          "Arn"
+                                        ]
+                                      },
+                                      "/*"
+                                    ]
                                   ]
-                                ]
-                              }
+                                },
+                                {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      {
+                                        "Fn::GetAtt": [
+                                          "UserPhotosBucket4D5DE39B",
+                                          "Arn"
+                                        ]
+                                      },
+                                      "/*"
+                                    ]
+                                  ]
+                                }
+                              ]
                             },
                             {
                               "Action": [
@@ -1402,6 +1459,124 @@
             },
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.140.0"
+            }
+          },
+          "FrontendOAI": {
+            "id": "FrontendOAI",
+            "path": "RekognitionPocStack/FrontendOAI",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/FrontendOAI/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+                  "aws:cdk:cloudformation:props": {
+                    "cloudFrontOriginAccessIdentityConfig": {
+                      "comment": "OAI for Rekognition POC Frontend"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnCloudFrontOriginAccessIdentity",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cloudfront.OriginAccessIdentity",
+              "version": "2.140.0"
+            }
+          },
+          "FrontendDistribution": {
+            "id": "FrontendDistribution",
+            "path": "RekognitionPocStack/FrontendDistribution",
+            "children": {
+              "Origin1": {
+                "id": "Origin1",
+                "path": "RekognitionPocStack/FrontendDistribution/Origin1",
+                "constructInfo": {
+                  "fqn": "constructs.Construct",
+                  "version": "10.4.2"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/FrontendDistribution/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::CloudFront::Distribution",
+                  "aws:cdk:cloudformation:props": {
+                    "distributionConfig": {
+                      "enabled": true,
+                      "origins": [
+                        {
+                          "domainName": {
+                            "Fn::GetAtt": [
+                              "FrontendBucketEFE2E19C",
+                              "RegionalDomainName"
+                            ]
+                          },
+                          "id": "RekognitionPocStackFrontendDistributionOrigin129DD51F9",
+                          "s3OriginConfig": {
+                            "originAccessIdentity": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "origin-access-identity/cloudfront/",
+                                  {
+                                    "Ref": "FrontendOAIF4D25B13"
+                                  }
+                                ]
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "defaultCacheBehavior": {
+                        "pathPattern": "*",
+                        "targetOriginId": "RekognitionPocStackFrontendDistributionOrigin129DD51F9",
+                        "allowedMethods": [
+                          "GET",
+                          "HEAD"
+                        ],
+                        "cachedMethods": [
+                          "GET",
+                          "HEAD"
+                        ],
+                        "cachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+                        "compress": true,
+                        "viewerProtocolPolicy": "redirect-to-https"
+                      },
+                      "comment": "Rekognition POC Frontend Distribution",
+                      "customErrorResponses": [
+                        {
+                          "errorCachingMinTtl": 300,
+                          "errorCode": 404,
+                          "responseCode": 200,
+                          "responsePagePath": "/index.html"
+                        },
+                        {
+                          "errorCachingMinTtl": 300,
+                          "errorCode": 403,
+                          "responseCode": 200,
+                          "responsePagePath": "/index.html"
+                        }
+                      ],
+                      "defaultRootObject": "index.html",
+                      "httpVersion": "http2",
+                      "ipv6Enabled": true,
+                      "priceClass": "PriceClass_100"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnDistribution",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cloudfront.Distribution",
               "version": "2.140.0"
             }
           },
@@ -2759,6 +2934,14 @@
                                       ]
                                     }
                                   ]
+                                },
+                                {
+                                  "Action": [
+                                    "cloudfront:CreateInvalidation",
+                                    "cloudfront:GetInvalidation"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "*"
                                 }
                               ],
                               "Version": "2012-10-17"
@@ -2885,6 +3068,14 @@
           "FrontendUrl": {
             "id": "FrontendUrl",
             "path": "RekognitionPocStack/FrontendUrl",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.140.0"
+            }
+          },
+          "CloudFrontDistributionId": {
+            "id": "CloudFrontDistributionId",
+            "path": "RekognitionPocStack/CloudFrontDistributionId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"

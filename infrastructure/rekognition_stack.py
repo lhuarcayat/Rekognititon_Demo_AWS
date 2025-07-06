@@ -8,6 +8,8 @@ from aws_cdk import(
     aws_iam as iam,
     aws_s3_notifications as s3n,
     aws_apigateway as apigateway,
+    aws_cloudfront as cloudfront,
+    aws_cloudfront_origins as origins,
     RemovalPolicy,
     Duration
 )
@@ -61,21 +63,17 @@ class RekognitionStack(Stack):
                     max_age=3000
                 )
             ],
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,#####
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY
         )
+        
+        # 🆕 FRONTEND BUCKET - Configurado para CloudFront (NO website hosting)
         self.frontend_bucket = s3.Bucket(
             self, 'FrontendBucket',
             bucket_name = f'rekognition-poc-frontend-{self.account}-{self.region}',
-            website_index_document = 'index.html',
-            website_error_document= 'error.html',
-            public_read_access = True,
-            block_public_access =s3.BlockPublicAccess(
-                block_public_acls=False,
-                block_public_policy=False,
-                ignore_public_acls=False,
-                restrict_public_buckets=False
-            ),
+            encryption=s3.BucketEncryption.S3_MANAGED,
+            # NO website hosting - CloudFront lo manejará
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # Más seguro
             removal_policy=RemovalPolicy.DESTROY
         )
 
@@ -273,6 +271,7 @@ class RekognitionStack(Stack):
             }
         )
 
+        # 🔧 FIXED: Agregada coma faltante entre recursos
         self.api_role = iam.Role(
             self, 'ApiLambdaRole',
             assumed_by = iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -289,7 +288,7 @@ class RekognitionStack(Stack):
                                 's3:GetObject'
                             ],
                             resources=[
-                                f'{self.documents_bucket.bucket_arn}/*'
+                                f'{self.documents_bucket.bucket_arn}/*',  # 🔧 FIXED: Agregada coma
                                 f'{self.user_photos_bucket.bucket_arn}/*'
                             ]
                         ),
@@ -403,6 +402,54 @@ class RekognitionStack(Stack):
             }
         )
 
+# ======================================================================
+# 🆕 CLOUDFRONT DISTRIBUTION - HTTPS Frontend
+# ======================================================================
+        # Crear Origin Access Identity para acceso seguro a S3
+        self.origin_access_identity = cloudfront.OriginAccessIdentity(
+            self, 'FrontendOAI',
+            comment='OAI for Rekognition POC Frontend'
+        )
+        
+        # Permitir que CloudFront acceda al bucket
+        self.frontend_bucket.grant_read(self.origin_access_identity)
+
+        # Crear distribución CloudFront
+        self.distribution = cloudfront.Distribution(
+            self, 'FrontendDistribution',
+            default_behavior=cloudfront.BehaviorOptions(
+                origin=origins.S3Origin(
+                    self.frontend_bucket,
+                    origin_access_identity=self.origin_access_identity
+                ),
+                viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+                cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD,
+                cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED,
+                compress=True
+            ),
+            default_root_object='index.html',
+            error_responses=[
+                cloudfront.ErrorResponse(
+                    http_status=404,
+                    response_http_status=200,
+                    response_page_path='/index.html',
+                    ttl=Duration.minutes(5)
+                ),
+                cloudfront.ErrorResponse(
+                    http_status=403,
+                    response_http_status=200,
+                    response_page_path='/index.html',
+                    ttl=Duration.minutes(5)
+                )
+            ],
+            price_class=cloudfront.PriceClass.PRICE_CLASS_100,  # Solo US/EU para reducir costos
+            comment='Rekognition POC Frontend Distribution'
+        )
+
+# ======================================================================
+# API GATEWAY
+# ======================================================================
         self.api = apigateway.RestApi(
             self, 'RekognitionApi',
             rest_api_name='rekognition-poc-api',
@@ -437,9 +484,9 @@ class RekognitionStack(Stack):
             apigateway.LambdaIntegration(self.check_validation_lambda)
         )
 
-
-
-
+# ======================================================================
+# S3 TRIGGERS
+# ======================================================================
         self.user_photos_bucket.add_event_notification(
             s3.EventType.OBJECT_CREATED,
             s3n.LambdaDestination(self.user_validator),
@@ -456,13 +503,21 @@ class RekognitionStack(Stack):
                     s3.NotificationKeyFilter(suffix=".png")
                 )
         
+# ======================================================================
+# 🆕 FRONTEND DEPLOYMENT
+# ======================================================================
         self.frontend_deployment = s3deploy.BucketDeployment(
             self, 'FrontendDeployment',
             sources=[s3deploy.Source.asset('frontend/dist')],
             destination_bucket=self.frontend_bucket,
+            distribution=self.distribution,  # 🆕 Invalidar cache automáticamente
+            distribution_paths=['/*'],  # 🆕 Invalidar todos los archivos
             retain_on_delete=False
         )       
 
+# ======================================================================
+# OUTPUTS - UPDATED
+# ======================================================================
         cdk.CfnOutput(
             self,'DocumentsBucketName',
             value=self.documents_bucket.bucket_name,
@@ -479,11 +534,21 @@ class RekognitionStack(Stack):
             value=self.frontend_bucket.bucket_name,
             description='Bucket for frontend hosting'
         )
+        
+        # 🆕 NUEVA URL con HTTPS via CloudFront
         cdk.CfnOutput(
             self, 'FrontendUrl',
-            value=self.frontend_bucket.bucket_website_url,
-            description='Frontend website URL'
+            value=f'https://{self.distribution.distribution_domain_name}',
+            description='Frontend website URL (HTTPS via CloudFront)'
         )
+        
+        # 🆕 OUTPUT adicional para CloudFront
+        cdk.CfnOutput(
+            self, 'CloudFrontDistributionId',
+            value=self.distribution.distribution_id,
+            description='CloudFront distribution ID'
+        )
+        
         cdk.CfnOutput(
             self, 'ApiGatewayUrl',
             value=self.api.url,
@@ -499,7 +564,6 @@ class RekognitionStack(Stack):
             value=self.comparison_results_table.table_name,
             description='DynamoDB table for comparison results'
         )
-
 
 
 

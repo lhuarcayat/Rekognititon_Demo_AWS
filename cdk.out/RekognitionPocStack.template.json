@@ -250,6 +250,15 @@
   "FrontendBucketEFE2E19C": {
    "Type": "AWS::S3::Bucket",
    "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
     "BucketName": {
      "Fn::Join": [
       "",
@@ -266,21 +275,17 @@
      ]
     },
     "PublicAccessBlockConfiguration": {
-     "BlockPublicAcls": false,
-     "BlockPublicPolicy": false,
-     "IgnorePublicAcls": false,
-     "RestrictPublicBuckets": false
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
     },
     "Tags": [
      {
       "Key": "aws-cdk:cr-owned:29cf9ae3",
       "Value": "true"
      }
-    ],
-    "WebsiteConfiguration": {
-     "ErrorDocument": "error.html",
-     "IndexDocument": "index.html"
-    }
+    ]
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
@@ -297,10 +302,53 @@
     "PolicyDocument": {
      "Statement": [
       {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "FrontendOAIF4D25B13",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "FrontendBucketEFE2E19C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "FrontendBucketEFE2E19C",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
        "Action": "s3:GetObject",
        "Effect": "Allow",
        "Principal": {
-        "AWS": "*"
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "FrontendOAIF4D25B13",
+          "S3CanonicalUserId"
+         ]
+        }
        },
        "Resource": {
         "Fn::Join": [
@@ -782,27 +830,36 @@
           "s3:PutObject"
          ],
          "Effect": "Allow",
-         "Resource": {
-          "Fn::Join": [
-           "",
-           [
-            {
-             "Fn::GetAtt": [
-              "DocumentsBucket9EC9DEB9",
-              "Arn"
-             ]
-            },
-            "/*",
-            {
-             "Fn::GetAtt": [
-              "UserPhotosBucket4D5DE39B",
-              "Arn"
-             ]
-            },
-            "/*"
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "DocumentsBucket9EC9DEB9",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
            ]
-          ]
-         }
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "UserPhotosBucket4D5DE39B",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
+           ]
+          }
+         ]
         },
         {
          "Action": [
@@ -1082,6 +1139,85 @@
     "aws:asset:path": "asset.2b0d5269a4439d22d0e84f18ea86bf5af98f59691a5c0a403bd7c4dfd9a3d0b8",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
+   }
+  },
+  "FrontendOAIF4D25B13": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "OAI for Rekognition POC Frontend"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/FrontendOAI/Resource"
+   }
+  },
+  "FrontendDistributionE6EAF405": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Comment": "Rekognition POC Frontend Distribution",
+     "CustomErrorResponses": [
+      {
+       "ErrorCachingMinTTL": 300,
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCachingMinTTL": 300,
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "CachedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "Compress": true,
+      "TargetOriginId": "RekognitionPocStackFrontendDistributionOrigin129DD51F9",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "FrontendBucketEFE2E19C",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "RekognitionPocStackFrontendDistributionOrigin129DD51F9",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "FrontendOAIF4D25B13"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ],
+     "PriceClass": "PriceClass_100"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/FrontendDistribution/Resource"
    }
   },
   "RekognitionApiFBDE99C9": {
@@ -1919,13 +2055,19 @@
      }
     ],
     "SourceObjectKeys": [
-     "eef1a67f2f90e57b2706a7122a7ad3e3153551ef6dad5d8ad1ffd1b1cdb20b4d.zip"
+     "a479c224551be3593fa84de681053bc2ec3ffd1a5333a53df5f87c8d91b6220a.zip"
     ],
     "DestinationBucketName": {
      "Ref": "FrontendBucketEFE2E19C"
     },
     "RetainOnDelete": false,
-    "Prune": true
+    "Prune": true,
+    "DistributionId": {
+     "Ref": "FrontendDistributionE6EAF405"
+    },
+    "DistributionPaths": [
+     "/*"
+    ]
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
@@ -2049,6 +2191,14 @@
          ]
         }
        ]
+      },
+      {
+       "Action": [
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
       }
      ],
      "Version": "2012-10-17"
@@ -2107,7 +2257,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1VQy26DMBD8lt4dNyT9gYSqp1aNSNUrWmBD3BgbsYsQsvj3yo+G9DSPXY29s5PZy1Zun2CiTd3cNlpV0p0Z6puAiUpHe+mOY31DFvnFJBbhZLWq59VOOoojEC5CQ1c1IF1+MSccOkWkrBHvMOPwjUMQ+cX802+jqTkN7vysTKuR7d1ZRDMb6GxTSfcFlUa/HsgiaF86IEImefAgGuy1nTs0LOPnXu/GIhR00hU2JgRc74psEdCrFhgnmKUrkPjQq7Cd6Brn3Qd1ZmhDbiQFkh2HGn034gP5ahs/TOxvmpIDX5ZHta6Eu3yoMq3f+By5HznVXWrfZwkT1VrJw0S5VqFikY/Etnt8KLemUbHQ08xXa573MtvJLHv6IaU2w2hYdSiLiL/Gold+LQIAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21R0W7CMAz8lr2HDMZ+AIqQJm0CwbRXlCam80gTVDuqqqj/PiUtlEl78p19cc72i1y8zuX8SbU00+Yys1jKeGSlL0K1dIq0lHEd9AVYFGc3oiHsvUXdTemRD2StCHphVV0aJWNxdntoaiRC78S76qD5giaT4uz+8G1wmsfCHR/RVRbY3zO9MJ1TtTeljJ+qtJDkGfSClqeoiIBJrlIQBq7WdzU4loO5zT3RC1S1jAc/dMhxmmtAvdDWB3NuvGMZdw1W6FZaA9GbAcfIWVskzTZp/lVskLjBMtxGe+S9UFesFEOrOhkPQLy6YrYzwslvfjqxI6sqGx/AAciHRkNavvgA/vYmFUd0q46dM+77RzZJ8uJSU3RVUuwCXwOP9zzZdLCTaklblKuWCov5hqIIxL5+/KjwzuAw5L7jb++el3LxIheLpx9CnDXBMdYgD0P8BfvTm5+OAgAA"
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/CDKMetadata/Default"
@@ -2161,12 +2311,26 @@
    }
   },
   "FrontendUrl": {
-   "Description": "Frontend website URL",
+   "Description": "Frontend website URL (HTTPS via CloudFront)",
    "Value": {
-    "Fn::GetAtt": [
-     "FrontendBucketEFE2E19C",
-     "WebsiteURL"
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "FrontendDistributionE6EAF405",
+        "DomainName"
+       ]
+      }
+     ]
     ]
+   }
+  },
+  "CloudFrontDistributionId": {
+   "Description": "CloudFront distribution ID",
+   "Value": {
+    "Ref": "FrontendDistributionE6EAF405"
    }
   },
   "ApiGatewayUrl": {
