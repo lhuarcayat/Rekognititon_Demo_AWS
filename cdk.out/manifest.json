@@ -11,21 +11,21 @@
     },
     "RekognitionPocStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://unknown-account/us-east-1",
+      "environment": "aws://unknown-account/unknown-region",
       "properties": {
         "templateFile": "RekognitionPocStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/b1b597a6ebdf77d7761ebef667aedb18fabd02aba54377518b89ea81b2f1c0cf.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/3ce618091d8deb6cd7ec206bfdfc559ac9669f10a10a88811321c922ba79bac4.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "RekognitionPocStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1",
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
@@ -56,6 +56,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "UserPhotosBucketAllowBucketNotificationsToRekognitionPocStackUserValidator857841D06B1F3FD3"
+          }
+        ],
+        "/RekognitionPocStack/FrontendBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBucketEFE2E19C"
+          }
+        ],
+        "/RekognitionPocStack/FrontendBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBucketPolicy1DFF75D9"
           }
         ],
         "/RekognitionPocStack/IndexedDocumentsTable": [
@@ -104,6 +116,12 @@
             "data": "ValidatorLambdaRoleD4191E2F"
           }
         ],
+        "/RekognitionPocStack/ApiLambdaRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiLambdaRole66D0B4CD"
+          }
+        ],
         "/RekognitionPocStack/DocumentIndexer/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -114,6 +132,156 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "UserValidatorF49AEC8F"
+          }
+        ],
+        "/RekognitionPocStack/PresignedUrlsLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PresignedUrlsLambda4D3A70EC"
+          }
+        ],
+        "/RekognitionPocStack/DocumentIndexerApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentIndexerApiD0843226"
+          }
+        ],
+        "/RekognitionPocStack/CheckValidationLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckValidationLambda112BA848"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiFBDE99C9"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Deployment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiDeployment12E716F5769cf81bdee2a61fa465fddddd67a8ac"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/DeploymentStage.prod/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiDeploymentStageprodFC9D95C2"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Endpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiEndpoint0AC9B664"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiOPTIONSE9227AF8"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/presigned-urls/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApipresignedurls98C038BA"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/presigned-urls/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApipresignedurlsOPTIONS5770D3B7"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApipresignedurlsPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTpresignedurls9C7E857F"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApipresignedurlsPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTpresignedurls653EA5B7"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApipresignedurlsPOST4926CAF4"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/index-document/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiindexdocumentC155D060"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/index-document/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiindexdocumentOPTIONSD3990640"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/index-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..index-document": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiindexdocumentPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTindexdocumentF2510F94"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/index-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..index-document": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiindexdocumentPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTindexdocument4AF22EB6"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/index-document/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApiindexdocumentPOST20E08C68"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationBF29CB94"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationOPTIONS99507CC4"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationnumerodocumento77E2D4EE"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationnumerodocumentoOPTIONS01891819"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationnumerodocumentoGETApiPermissionRekognitionPocStackRekognitionApiF810B10BGETcheckvalidationnumerodocumentoC00A0539"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationnumerodocumentoGETApiPermissionTestRekognitionPocStackRekognitionApiF810B10BGETcheckvalidationnumerodocumento6A309786"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckvalidationnumerodocumentoGET0C8BBD20"
           }
         ],
         "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource": [
@@ -134,6 +302,36 @@
             "data": "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691"
           }
         ],
+        "/RekognitionPocStack/FrontendDeployment/AwsCliLayer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDeploymentAwsCliLayer77737BA0"
+          }
+        ],
+        "/RekognitionPocStack/FrontendDeployment/CustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDeploymentCustomResource068A52DB"
+          }
+        ],
+        "/RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+          }
+        ],
+        "/RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF"
+          }
+        ],
+        "/RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
+          }
+        ],
         "/RekognitionPocStack/DocumentsBucketName": [
           {
             "type": "aws:cdk:logicalId",
@@ -144,6 +342,24 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "UserPhotosBucketName"
+          }
+        ],
+        "/RekognitionPocStack/FrontendBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBucketName"
+          }
+        ],
+        "/RekognitionPocStack/FrontendUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendUrl"
+          }
+        ],
+        "/RekognitionPocStack/ApiGatewayUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiGatewayUrl"
           }
         ],
         "/RekognitionPocStack/IndexedDocumentsTableName": [
@@ -162,6 +378,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
+          }
+        ],
+        "/RekognitionPocStack/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
           }
         ],
         "/RekognitionPocStack/BootstrapVersion": [

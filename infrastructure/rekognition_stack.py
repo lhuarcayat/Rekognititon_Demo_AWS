@@ -2,10 +2,12 @@ import aws_cdk as cdk
 from aws_cdk import(
     Stack,
     aws_s3 as s3,
+    aws_s3_deployment as s3deploy,
     aws_dynamodb as dynamodb,
     aws_lambda as lambda_,
     aws_iam as iam,
     aws_s3_notifications as s3n,
+    aws_apigateway as apigateway,
     RemovalPolicy,
     Duration
 )
@@ -23,21 +25,14 @@ class RekognitionStack(Stack):
             bucket_name=f'rekognition-poc-documents-{self.account}-{self.region}',
             versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
-            # lifecycle_rules=[
-            #     s3.LifecycleRule(
-            #         id='documents_archive',
-            #         transitions=[
-            #             s3.Transition(
-            #                 storage_class=s3.StorageClass.GLACIER,
-            #                 transition_after=Duration.days(30)
-            #             ),
-            #             s3.Transition(
-            #                 storage_class=s3.StorageClass.DEEP_ARCHIVE,
-            #                 transition_after=Duration.days(90)
-            #             )
-            #         ]
-            #     )
-            # ],
+            cors=[
+                s3.CorsRule(
+                    allowed_methods=[s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.GET],
+                    allowed_origins=['*'],
+                    allowed_headers=['*'],
+                    max_age=3000
+                )
+            ],
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.RETAIN
         )
@@ -60,7 +55,7 @@ class RekognitionStack(Stack):
             ],
             cors=[
                 s3.CorsRule(
-                    allowed_methods=[s3.HttpMethods.POST,s3.HttpMethods.PUT],
+                    allowed_methods=[s3.HttpMethods.POST,s3.HttpMethods.PUT, s3.HttpMethods.GET],
                     allowed_origins=['*'],
                     allowed_headers=['*'],
                     max_age=3000
@@ -69,6 +64,21 @@ class RekognitionStack(Stack):
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,#####
             removal_policy=RemovalPolicy.DESTROY
         )
+        self.frontend_bucket = s3.Bucket(
+            self, 'FrontendBucket',
+            bucket_name = f'rekognition-poc-frontend-{self.account}-{self.region}',
+            website_index_document = 'index.html',
+            website_error_document= 'error.html',
+            public_read_access = True,
+            block_public_access =s3.BlockPublicAccess(
+                block_public_acls=False,
+                block_public_policy=False,
+                ignore_public_acls=False,
+                restrict_public_buckets=False
+            ),
+            removal_policy=RemovalPolicy.DESTROY
+        )
+
     #============================================================
         #Tabla para metadatos de documentos indexados
         self.indexed_documents_table=dynamodb.Table(
@@ -186,7 +196,8 @@ class RekognitionStack(Stack):
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
                             actions=[
-                                's3:GetObject'
+                                's3:GetObject',
+                                's3:DeleteObject'
                             ],
                             resources=[f'{self.documents_bucket.bucket_arn}/*']
                         ),
@@ -261,6 +272,49 @@ class RekognitionStack(Stack):
                 )
             }
         )
+
+        self.api_role = iam.Role(
+            self, 'ApiLambdaRole',
+            assumed_by = iam.ServicePrincipal('lambda.amazonaws.com'),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')                
+            ],
+            inline_policies={
+                'ApiLambdaPolicy': iam.PolicyDocument(
+                    statements=[
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                's3:PutObject',
+                                's3:GetObject'
+                            ],
+                            resources=[
+                                f'{self.documents_bucket.bucket_arn}/*'
+                                f'{self.user_photos_bucket.bucket_arn}/*'
+                            ]
+                        ),
+                        iam.PolicyStatement(
+                            effect =iam.Effect.ALLOW,
+                            actions=[
+                                'dynamodb:Query',
+                                'dynamodb:Scan'
+                            ],
+                            resources=[
+                                self.comparison_results_table.table_arn,
+                                f'{self.comparison_results_table.table_arn}/index/*'
+                            ]
+                        ),
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'lambda:InvokeFunction'
+                            ],
+                            resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:rekognition-poc-document-indexer']
+                        )
+                    ]
+                )
+            }
+        )
     #====================================================
         self.document_indexer = lambda_.Function(
             self, 'DocumentIndexer',
@@ -300,6 +354,92 @@ class RekognitionStack(Stack):
                 'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name  
             }
         )
+#=======================================================================
+#Nuevas lambdas para API
+#======================================================================
+        self.presigned_urls_lambda = lambda_.Function(
+            self, 'PresignedUrlsLambda',
+            function_name= 'rekognition-poc-presigned-urls',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler ='handler.lambda_handler',
+            code = lambda_.Code.from_asset('functions/presigned_urls'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name,
+                'USER_PHOTOS_BUCKET':self.user_photos_bucket.bucket_name
+            }
+        )
+
+        # Lambda para endpoint de document indexer
+        self.document_indexer_api = lambda_.Function(
+            self, 'DocumentIndexerApi',
+            function_name='rekognition-poc-document-indexer-api',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/document_indexer_api'),
+            role=self.api_role,
+            timeout=Duration.seconds(30),
+            memory_size=256,
+            environment={
+                'DOCUMENT_INDEXER_FUNCTION': self.document_indexer.function_name,
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
+            }
+        )
+
+        # Lambda para check validation
+        self.check_validation_lambda = lambda_.Function(
+            self, 'CheckValidationLambda',
+            function_name='rekognition-poc-check-validation',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/check_validation'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'COMPARISON_RESULTS_TABLE': self.comparison_results_table.table_name
+            }
+        )
+
+        self.api = apigateway.RestApi(
+            self, 'RekognitionApi',
+            rest_api_name='rekognition-poc-api',
+            description='API for Rekognition POC Frontend',
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=apigateway.Cors.ALL_METHODS,
+                allow_headers=apigateway.Cors.DEFAULT_HEADERS
+            )
+        )
+
+        # Endpoints
+        # POST /presigned-urls
+        presigned_resource = self.api.root.add_resource('presigned-urls')
+        presigned_resource.add_method(
+            'POST',
+            apigateway.LambdaIntegration(self.presigned_urls_lambda)
+        )
+
+        # POST /index-document  
+        index_resource = self.api.root.add_resource('index-document')
+        index_resource.add_method(
+            'POST',
+            apigateway.LambdaIntegration(self.document_indexer_api)
+        )
+
+        # GET /check-validation/{numero_documento}
+        check_resource = self.api.root.add_resource('check-validation')
+        check_document_resource = check_resource.add_resource('{numero_documento}')
+        check_document_resource.add_method(
+            'GET',
+            apigateway.LambdaIntegration(self.check_validation_lambda)
+        )
+
+
+
+
         self.user_photos_bucket.add_event_notification(
             s3.EventType.OBJECT_CREATED,
             s3n.LambdaDestination(self.user_validator),
@@ -315,6 +455,14 @@ class RekognitionStack(Stack):
                     s3n.LambdaDestination(self.user_validator), 
                     s3.NotificationKeyFilter(suffix=".png")
                 )
+        
+        self.frontend_deployment = s3deploy.BucketDeployment(
+            self, 'FrontendDeployment',
+            sources=[s3deploy.Source.asset('frontend/dist')],
+            destination_bucket=self.frontend_bucket,
+            retain_on_delete=False
+        )       
+
         cdk.CfnOutput(
             self,'DocumentsBucketName',
             value=self.documents_bucket.bucket_name,
@@ -324,6 +472,22 @@ class RekognitionStack(Stack):
             self, 'UserPhotosBucketName',
             value=self.user_photos_bucket.bucket_name,
             description='Bucket for user photos'
+        )
+
+        cdk.CfnOutput(
+            self, 'FrontendBucketName',
+            value=self.frontend_bucket.bucket_name,
+            description='Bucket for frontend hosting'
+        )
+        cdk.CfnOutput(
+            self, 'FrontendUrl',
+            value=self.frontend_bucket.bucket_website_url,
+            description='Frontend website URL'
+        )
+        cdk.CfnOutput(
+            self, 'ApiGatewayUrl',
+            value=self.api.url,
+            description='API Gateway endpoint URL'
         )
         cdk.CfnOutput(
             self,'IndexedDocumentsTableName',

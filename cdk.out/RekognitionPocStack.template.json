@@ -20,8 +20,29 @@
        {
         "Ref": "AWS::AccountId"
        },
-       "-us-east-1"
+       "-",
+       {
+        "Ref": "AWS::Region"
+       }
       ]
+     ]
+    },
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "PUT",
+        "POST",
+        "GET"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3000
+      }
      ]
     },
     "PublicAccessBlockConfiguration": {
@@ -60,7 +81,10 @@
        {
         "Ref": "AWS::AccountId"
        },
-       "-us-east-1"
+       "-",
+       {
+        "Ref": "AWS::Region"
+       }
       ]
      ]
     },
@@ -72,7 +96,8 @@
        ],
        "AllowedMethods": [
         "POST",
-        "PUT"
+        "PUT",
+        "GET"
        ],
        "AllowedOrigins": [
         "*"
@@ -220,6 +245,84 @@
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/UserPhotosBucket/AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0"
+   }
+  },
+  "FrontendBucketEFE2E19C": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": {
+     "Fn::Join": [
+      "",
+      [
+       "rekognition-poc-frontend-",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       "-",
+       {
+        "Ref": "AWS::Region"
+       }
+      ]
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": false,
+     "BlockPublicPolicy": false,
+     "IgnorePublicAcls": false,
+     "RestrictPublicBuckets": false
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:cr-owned:29cf9ae3",
+      "Value": "true"
+     }
+    ],
+    "WebsiteConfiguration": {
+     "ErrorDocument": "error.html",
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/FrontendBucket/Resource"
+   }
+  },
+  "FrontendBucketPolicy1DFF75D9": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "FrontendBucketEFE2E19C"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "FrontendBucketEFE2E19C",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/FrontendBucket/Policy/Resource"
    }
   },
   "IndexedDocumentsTable2C59B6EB": {
@@ -370,7 +473,7 @@
     ],
     "Content": {
      "S3Bucket": {
-      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
      "S3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
     },
@@ -439,7 +542,10 @@
          }
         },
         {
-         "Action": "s3:GetObject",
+         "Action": [
+          "s3:DeleteObject",
+          "s3:GetObject"
+         ],
          "Effect": "Allow",
          "Resource": {
           "Fn::Join": [
@@ -637,12 +743,133 @@
     "aws:cdk:path": "RekognitionPocStack/ValidatorLambdaRole/Resource"
    }
   },
+  "ApiLambdaRole66D0B4CD": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "s3:GetObject",
+          "s3:PutObject"
+         ],
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::Join": [
+           "",
+           [
+            {
+             "Fn::GetAtt": [
+              "DocumentsBucket9EC9DEB9",
+              "Arn"
+             ]
+            },
+            "/*",
+            {
+             "Fn::GetAtt": [
+              "UserPhotosBucket4D5DE39B",
+              "Arn"
+             ]
+            },
+            "/*"
+           ]
+          ]
+         }
+        },
+        {
+         "Action": [
+          "dynamodb:Query",
+          "dynamodb:Scan"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "ComparisonResultsTable188C61C4",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "ComparisonResultsTable188C61C4",
+               "Arn"
+              ]
+             },
+             "/index/*"
+            ]
+           ]
+          }
+         ]
+        },
+        {
+         "Action": "lambda:InvokeFunction",
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:aws:lambda:",
+            {
+             "Ref": "AWS::Region"
+            },
+            ":",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":function:rekognition-poc-document-indexer"
+           ]
+          ]
+         }
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "ApiLambdaPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/ApiLambdaRole/Resource"
+   }
+  },
   "DocumentIndexer7C68C1D7": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
     "Code": {
      "S3Bucket": {
-      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
      "S3Key": "4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05.zip"
     },
@@ -689,7 +916,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": {
-      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
      "S3Key": "1dbc6e1ccaee469f93c215a29a1d12985bfd48154123368a7015d9fee35897fe.zip"
     },
@@ -735,6 +962,845 @@
     "aws:asset:path": "asset.1dbc6e1ccaee469f93c215a29a1d12985bfd48154123368a7015d9fee35897fe",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
+   }
+  },
+  "PresignedUrlsLambda4D3A70EC": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "8bc3a639dfa35557e0996b0029448deb662b8ff09e2dd08dbada4b5c0f34d21c.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DOCUMENTS_BUCKET": {
+       "Ref": "DocumentsBucket9EC9DEB9"
+      },
+      "USER_PHOTOS_BUCKET": {
+       "Ref": "UserPhotosBucket4D5DE39B"
+      }
+     }
+    },
+    "FunctionName": "rekognition-poc-presigned-urls",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::GetAtt": [
+      "ApiLambdaRole66D0B4CD",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "ApiLambdaRole66D0B4CD"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/PresignedUrlsLambda/Resource",
+    "aws:asset:path": "asset.8bc3a639dfa35557e0996b0029448deb662b8ff09e2dd08dbada4b5c0f34d21c",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "DocumentIndexerApiD0843226": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "e8211f2c75a17c67099738e300763da70916054a2a82f0f698f7bbf0f3d9259b.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DOCUMENT_INDEXER_FUNCTION": {
+       "Ref": "DocumentIndexer7C68C1D7"
+      },
+      "DOCUMENTS_BUCKET": {
+       "Ref": "DocumentsBucket9EC9DEB9"
+      }
+     }
+    },
+    "FunctionName": "rekognition-poc-document-indexer-api",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "ApiLambdaRole66D0B4CD",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "ApiLambdaRole66D0B4CD"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/DocumentIndexerApi/Resource",
+    "aws:asset:path": "asset.e8211f2c75a17c67099738e300763da70916054a2a82f0f698f7bbf0f3d9259b",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CheckValidationLambda112BA848": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "2b0d5269a4439d22d0e84f18ea86bf5af98f59691a5c0a403bd7c4dfd9a3d0b8.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "COMPARISON_RESULTS_TABLE": {
+       "Ref": "ComparisonResultsTable188C61C4"
+      }
+     }
+    },
+    "FunctionName": "rekognition-poc-check-validation",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::GetAtt": [
+      "ApiLambdaRole66D0B4CD",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "ApiLambdaRole66D0B4CD"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/CheckValidationLambda/Resource",
+    "aws:asset:path": "asset.2b0d5269a4439d22d0e84f18ea86bf5af98f59691a5c0a403bd7c4dfd9a3d0b8",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "RekognitionApiFBDE99C9": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "API for Rekognition POC Frontend",
+    "Name": "rekognition-poc-api"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Resource"
+   }
+  },
+  "RekognitionApiDeployment12E716F5769cf81bdee2a61fa465fddddd67a8ac": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "API for Rekognition POC Frontend",
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "DependsOn": [
+    "RekognitionApicheckvalidationnumerodocumentoGET0C8BBD20",
+    "RekognitionApicheckvalidationnumerodocumentoOPTIONS01891819",
+    "RekognitionApicheckvalidationnumerodocumento77E2D4EE",
+    "RekognitionApicheckvalidationOPTIONS99507CC4",
+    "RekognitionApicheckvalidationBF29CB94",
+    "RekognitionApiindexdocumentOPTIONSD3990640",
+    "RekognitionApiindexdocumentPOST20E08C68",
+    "RekognitionApiindexdocumentC155D060",
+    "RekognitionApiOPTIONSE9227AF8",
+    "RekognitionApipresignedurlsOPTIONS5770D3B7",
+    "RekognitionApipresignedurlsPOST4926CAF4",
+    "RekognitionApipresignedurls98C038BA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Deployment/Resource"
+   }
+  },
+  "RekognitionApiDeploymentStageprodFC9D95C2": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "RekognitionApiDeployment12E716F5769cf81bdee2a61fa465fddddd67a8ac"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    },
+    "StageName": "prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "RekognitionApiOPTIONSE9227AF8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "RekognitionApiFBDE99C9",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/OPTIONS/Resource"
+   }
+  },
+  "RekognitionApipresignedurls98C038BA": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "RekognitionApiFBDE99C9",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "presigned-urls",
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/Resource"
+   }
+  },
+  "RekognitionApipresignedurlsOPTIONS5770D3B7": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionApipresignedurls98C038BA"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/OPTIONS/Resource"
+   }
+  },
+  "RekognitionApipresignedurlsPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTpresignedurls9C7E857F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PresignedUrlsLambda4D3A70EC",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionApiFBDE99C9"
+       },
+       "/",
+       {
+        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+       },
+       "/POST/presigned-urls"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls"
+   }
+  },
+  "RekognitionApipresignedurlsPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTpresignedurls653EA5B7": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PresignedUrlsLambda4D3A70EC",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionApiFBDE99C9"
+       },
+       "/test-invoke-stage/POST/presigned-urls"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls"
+   }
+  },
+  "RekognitionApipresignedurlsPOST4926CAF4": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "PresignedUrlsLambda4D3A70EC",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "RekognitionApipresignedurls98C038BA"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/Resource"
+   }
+  },
+  "RekognitionApiindexdocumentC155D060": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "RekognitionApiFBDE99C9",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "index-document",
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/index-document/Resource"
+   }
+  },
+  "RekognitionApiindexdocumentOPTIONSD3990640": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionApiindexdocumentC155D060"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/index-document/OPTIONS/Resource"
+   }
+  },
+  "RekognitionApiindexdocumentPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTindexdocumentF2510F94": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DocumentIndexerApiD0843226",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionApiFBDE99C9"
+       },
+       "/",
+       {
+        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+       },
+       "/POST/index-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..index-document"
+   }
+  },
+  "RekognitionApiindexdocumentPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTindexdocument4AF22EB6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DocumentIndexerApiD0843226",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionApiFBDE99C9"
+       },
+       "/test-invoke-stage/POST/index-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..index-document"
+   }
+  },
+  "RekognitionApiindexdocumentPOST20E08C68": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DocumentIndexerApiD0843226",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "RekognitionApiindexdocumentC155D060"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST/Resource"
+   }
+  },
+  "RekognitionApicheckvalidationBF29CB94": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "RekognitionApiFBDE99C9",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "check-validation",
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/Resource"
+   }
+  },
+  "RekognitionApicheckvalidationOPTIONS99507CC4": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionApicheckvalidationBF29CB94"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/OPTIONS/Resource"
+   }
+  },
+  "RekognitionApicheckvalidationnumerodocumento77E2D4EE": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RekognitionApicheckvalidationBF29CB94"
+    },
+    "PathPart": "{numero_documento}",
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/Resource"
+   }
+  },
+  "RekognitionApicheckvalidationnumerodocumentoOPTIONS01891819": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RekognitionApicheckvalidationnumerodocumento77E2D4EE"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/OPTIONS/Resource"
+   }
+  },
+  "RekognitionApicheckvalidationnumerodocumentoGETApiPermissionRekognitionPocStackRekognitionApiF810B10BGETcheckvalidationnumerodocumentoC00A0539": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CheckValidationLambda112BA848",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionApiFBDE99C9"
+       },
+       "/",
+       {
+        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+       },
+       "/GET/check-validation/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}"
+   }
+  },
+  "RekognitionApicheckvalidationnumerodocumentoGETApiPermissionTestRekognitionPocStackRekognitionApiF810B10BGETcheckvalidationnumerodocumento6A309786": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CheckValidationLambda112BA848",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "RekognitionApiFBDE99C9"
+       },
+       "/test-invoke-stage/GET/check-validation/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}"
+   }
+  },
+  "RekognitionApicheckvalidationnumerodocumentoGET0C8BBD20": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CheckValidationLambda112BA848",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "RekognitionApicheckvalidationnumerodocumento77E2D4EE"
+    },
+    "RestApiId": {
+     "Ref": "RekognitionApiFBDE99C9"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/Resource"
    }
   },
   "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC": {
@@ -820,17 +1886,262 @@
     "aws:cdk:path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource"
    }
   },
+  "FrontendDeploymentAwsCliLayer77737BA0": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "Content": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "1b2c92f2cd21c170884393633bd4c732676df6290562199b6e3ca5e2a1be7d18.zip"
+    },
+    "Description": "/opt/awscli/aws"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/FrontendDeployment/AwsCliLayer/Resource",
+    "aws:asset:path": "asset.1b2c92f2cd21c170884393633bd4c732676df6290562199b6e3ca5e2a1be7d18.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "FrontendDeploymentCustomResource068A52DB": {
+   "Type": "Custom::CDKBucketDeployment",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+      "Arn"
+     ]
+    },
+    "SourceBucketNames": [
+     {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     }
+    ],
+    "SourceObjectKeys": [
+     "eef1a67f2f90e57b2706a7122a7ad3e3153551ef6dad5d8ad1ffd1b1cdb20b4d.zip"
+    ],
+    "DestinationBucketName": {
+     "Ref": "FrontendBucketEFE2E19C"
+    },
+    "RetainOnDelete": false,
+    "Prune": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/FrontendDeployment/CustomResource/Default"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::",
+           {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+           },
+           "/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::",
+           {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+           }
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "FrontendBucketEFE2E19C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "FrontendBucketEFE2E19C",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "Roles": [
+     {
+      "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "2d56e153cac88d3e0c2f842e8e6f6783b8725bf91f95e0673b4725448a56e96d.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_CA_BUNDLE": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+     }
+    },
+    "Handler": "index.handler",
+    "Layers": [
+     {
+      "Ref": "FrontendDeploymentAwsCliLayer77737BA0"
+     }
+    ],
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.9",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
+    "aws:asset:path": "asset.2d56e153cac88d3e0c2f842e8e6f6783b8725bf91f95e0673b4725448a56e96d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WLwWrDMBBEvyV3eRvH/YHG0FOhJim9hrW8Tje2pKKVCEbo34vltNDTe8PMHKB+3sN+h3ep9DBVM/eQzgH1pPAulyQNpGPUEwXVjvZhG44olNWMph8QUjvajrxhEXZWveFC/pN8Ce1o/+XXaHV4FL+e1bBYNG7oIX1gP9NaFslKmguKUBB4WaEYDaST2zaFnZtZL2vcLOdSkbjoNak/Kf9zwCvb67p4j+E7hqy6JXw5+9RAfYC63t2EufLRBjYEp40/Hc0XzykBAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1VQy26DMBD8lt4dNyT9gYSqp1aNSNUrWmBD3BgbsYsQsvj3yo+G9DSPXY29s5PZy1Zun2CiTd3cNlpV0p0Z6puAiUpHe+mOY31DFvnFJBbhZLWq59VOOoojEC5CQ1c1IF1+MSccOkWkrBHvMOPwjUMQ+cX802+jqTkN7vysTKuR7d1ZRDMb6GxTSfcFlUa/HsgiaF86IEImefAgGuy1nTs0LOPnXu/GIhR00hU2JgRc74psEdCrFhgnmKUrkPjQq7Cd6Brn3Qd1ZmhDbiQFkh2HGn034gP5ahs/TOxvmpIDX5ZHta6Eu3yoMq3f+By5HznVXWrfZwkT1VrJw0S5VqFikY/Etnt8KLemUbHQ08xXa573MtvJLHv6IaU2w2hYdSiLiL/Gold+LQIAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/CDKMetadata/Default"
-   }
+   },
+   "Condition": "CDKMetadataAvailable"
   }
  },
  "Outputs": {
+  "RekognitionApiEndpoint0AC9B664": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "RekognitionApiFBDE99C9"
+      },
+      ".execute-api.",
+      {
+       "Ref": "AWS::Region"
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
   "DocumentsBucketName": {
    "Description": "Bucket for identity documents",
    "Value": {
@@ -841,6 +2152,48 @@
    "Description": "Bucket for user photos",
    "Value": {
     "Ref": "UserPhotosBucket4D5DE39B"
+   }
+  },
+  "FrontendBucketName": {
+   "Description": "Bucket for frontend hosting",
+   "Value": {
+    "Ref": "FrontendBucketEFE2E19C"
+   }
+  },
+  "FrontendUrl": {
+   "Description": "Frontend website URL",
+   "Value": {
+    "Fn::GetAtt": [
+     "FrontendBucketEFE2E19C",
+     "WebsiteURL"
+    ]
+   }
+  },
+  "ApiGatewayUrl": {
+   "Description": "API Gateway endpoint URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "RekognitionApiFBDE99C9"
+      },
+      ".execute-api.",
+      {
+       "Ref": "AWS::Region"
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+      },
+      "/"
+     ]
+    ]
    }
   },
   "IndexedDocumentsTableName": {
@@ -854,6 +2207,216 @@
    "Value": {
     "Ref": "ComparisonResultsTable188C61C4"
    }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-2"
+       ]
+      }
+     ]
+    }
+   ]
   }
  },
  "Parameters": {
