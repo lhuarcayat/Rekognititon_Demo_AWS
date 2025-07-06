@@ -377,7 +377,7 @@
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/SharedLayer/Resource",
-    "aws:asset:path": "asset.8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec",
+    "aws:asset:path": "C:\\Users\\Usuario\\Desktop\\Rekognition_project\\layers\\shared",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Content"
    }
@@ -578,7 +578,8 @@
          "Action": [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
-          "dynamodb:Query"
+          "dynamodb:Query",
+          "dynamodb:Scan"
          ],
          "Effect": "Allow",
          "Resource": [
@@ -642,7 +643,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
      },
-     "S3Key": "ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d.zip"
+     "S3Key": "7b0f7c8a88181f938c78f29db906b22ea398e41ea975f40add4667e19d81d83b.zip"
     },
     "Environment": {
      "Variables": {
@@ -677,7 +678,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/Resource",
-    "aws:asset:path": "asset.ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d",
+    "aws:asset:path": "asset.7b0f7c8a88181f938c78f29db906b22ea398e41ea975f40add4667e19d81d83b",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -1086,7 +1087,7 @@
     "aws:cdk:path": "RekognitionPocStack/RekognitionWebAPI/Resource"
    }
   },
-  "RekognitionWebAPIDeployment1998A473c3a5823449ad01c85c929b52eff72a28": {
+  "RekognitionWebAPIDeployment1998A4735b65291b30168330177d7a9385265ef3": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Web interface for Rekognition POC",
@@ -1118,7 +1119,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "RekognitionWebAPIDeployment1998A473c3a5823449ad01c85c929b52eff72a28"
+     "Ref": "RekognitionWebAPIDeployment1998A4735b65291b30168330177d7a9385265ef3"
     },
     "RestApiId": {
      "Ref": "RekognitionWebAPI5D87F7AA"
@@ -1796,6 +1797,14 @@
     "HttpMethod": "POST",
     "Integration": {
      "IntegrationHttpMethod": "POST",
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Origin": "'*'"
+       },
+       "StatusCode": "200"
+      }
+     ],
      "Type": "AWS_PROXY",
      "Uri": {
       "Fn::Join": [
@@ -1813,6 +1822,14 @@
       ]
      }
     },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Origin": true
+      },
+      "StatusCode": "200"
+     }
+    ],
     "ResourceId": {
      "Ref": "RekognitionWebAPIdocumentsindex2E8B1CE4"
     },

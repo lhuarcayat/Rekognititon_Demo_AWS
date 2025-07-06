@@ -3,7 +3,7 @@
   "files": {
     "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec": {
       "source": {
-        "path": "asset.8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec",
+        "path": "C:\\Users\\Usuario\\Desktop\\Rekognition_project\\layers\\shared",
         "packaging": "zip"
       },
       "destinations": {
@@ -15,15 +15,15 @@
         }
       }
     },
-    "ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d": {
+    "7b0f7c8a88181f938c78f29db906b22ea398e41ea975f40add4667e19d81d83b": {
       "source": {
-        "path": "asset.ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d",
+        "path": "asset.7b0f7c8a88181f938c78f29db906b22ea398e41ea975f40add4667e19d81d83b",
         "packaging": "zip"
       },
       "destinations": {
         "current_account-us-east-1": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d.zip",
+          "objectKey": "7b0f7c8a88181f938c78f29db906b22ea398e41ea975f40add4667e19d81d83b.zip",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }
@@ -43,7 +43,7 @@
         }
       }
     },
-    "96872b54f54bc2c3e2611d177b3b694e694a60c18ec0b696dc1d843482487786": {
+    "e7f5b1329d8bc6295b5cd27ce8b06ce1723ff1e1411d5bf1985f2e80c14709d1": {
       "source": {
         "path": "RekognitionPocStack.template.json",
         "packaging": "file"
@@ -51,7 +51,7 @@
       "destinations": {
         "current_account-us-east-1": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "96872b54f54bc2c3e2611d177b3b694e694a60c18ec0b696dc1d843482487786.json",
+          "objectKey": "e7f5b1329d8bc6295b5cd27ce8b06ce1723ff1e1411d5bf1985f2e80c14709d1.json",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }

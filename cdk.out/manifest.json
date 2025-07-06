@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/96872b54f54bc2c3e2611d177b3b694e694a60c18ec0b696dc1d843482487786.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/e7f5b1329d8bc6295b5cd27ce8b06ce1723ff1e1411d5bf1985f2e80c14709d1.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -203,7 +203,7 @@
         "/RekognitionPocStack/RekognitionWebAPI/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "RekognitionWebAPIDeployment1998A473c3a5823449ad01c85c929b52eff72a28"
+            "data": "RekognitionWebAPIDeployment1998A4735b65291b30168330177d7a9385265ef3"
           }
         ],
         "/RekognitionPocStack/RekognitionWebAPI/DeploymentStage.prod/Resource": [

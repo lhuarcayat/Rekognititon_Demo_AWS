@@ -251,7 +251,8 @@ class RekognitionStack(Stack):
                             actions=[
                                 'dynamodb:PutItem',
                                 'dynamodb:GetItem',
-                                'dynamodb:Query'
+                                'dynamodb:Query',
+                                'dynamodb:Scan'
                             ],
                             resources=[
                                 self.comparison_results_table.table_arn,
@@ -499,8 +500,24 @@ class RekognitionStack(Stack):
             'POST',
             apigateway.LambdaIntegration(
                 self.document_indexer,
-                proxy=True
-            )
+                proxy=True,
+                integration_responses=[
+                    apigateway.IntegrationResponse(
+                        status_code='200',
+                        response_parameters={
+                            'method.response.header.Access-Control-Allow-Origin': "'*'"
+                        }
+                    )
+                ]
+            ),
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code='200',
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                )
+            ]
         )
 
         # Permisos explícitos para Lambda

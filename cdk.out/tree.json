@@ -666,7 +666,8 @@
                               "Action": [
                                 "dynamodb:GetItem",
                                 "dynamodb:PutItem",
-                                "dynamodb:Query"
+                                "dynamodb:Query",
+                                "dynamodb:Scan"
                               ],
                               "Effect": "Allow",
                               "Resource": [
@@ -770,7 +771,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "ff181d1d59be2e7ef696a2e7dff3f2f8fde3c6e0124d489f6f11e9446b160c5d.zip"
+                      "s3Key": "7b0f7c8a88181f938c78f29db906b22ea398e41ea975f40add4667e19d81d83b.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1438,7 +1439,7 @@
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "RekognitionWebAPIDeployment1998A473c3a5823449ad01c85c929b52eff72a28"
+                          "Ref": "RekognitionWebAPIDeployment1998A4735b65291b30168330177d7a9385265ef3"
                         },
                         "restApiId": {
                           "Ref": "RekognitionWebAPI5D87F7AA"
@@ -2371,8 +2372,24 @@
                                           ]
                                         ]
                                       },
-                                      "integrationHttpMethod": "POST"
+                                      "integrationHttpMethod": "POST",
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "200",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'"
+                                          }
+                                        }
+                                      ]
                                     },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "200",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Origin": true
+                                        }
+                                      }
+                                    ],
                                     "resourceId": {
                                       "Ref": "RekognitionWebAPIdocumentsindex2E8B1CE4"
                                     },

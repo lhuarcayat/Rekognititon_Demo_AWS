@@ -67,6 +67,7 @@
     </div>
 
     <script>
+        const API_BASE = 'https://lceym11za4.execute-api.us-east-1.amazonaws.com/prod';
         try {
             const result = JSON.parse(localStorage.getItem('transactionResult') || '{}');
             const userContext = JSON.parse(localStorage.getItem('userContext') || '{}');
