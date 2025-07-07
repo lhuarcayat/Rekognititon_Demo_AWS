@@ -351,7 +351,7 @@ async function processDocumentPhoto() {
                 stopCamera();
                 showInterface('interface3');
                 startUserPhotoInterface();
-            }, 2000);
+            }, 1000);
             
         } else {
             throw new Error(indexResult.error || 'Document processing failed');
@@ -375,7 +375,7 @@ function startUserPhotoInterface() {
     // 🆕 INICIAR TIMER DE 1 MINUTO
     console.log('🕐 Starting 1-minute timer for user photo...');
     
-    let timeLeft = 60; // 60 segundos
+    let timeLeft = 30; // 30 segundos
     
     // Mostrar timer en la interfaz si existe
     const timerElement = document.getElementById('userPhotoTimer');
@@ -526,7 +526,7 @@ function startValidationPolling() {
     
     let attempts = 0;
     const maxAttempts = 5;
-    let timeLeft = 10;
+    let timeLeft = 5;
     
     const timerInterval = setInterval(() => {
         timeLeft--;
@@ -552,7 +552,7 @@ function startValidationPolling() {
             }
             
             if (attempts < maxAttempts) {
-                setTimeout(pollValidation, 2000);
+                setTimeout(pollValidation, 1000);
             } else {
                 clearInterval(timerInterval);
                 progressElement.classList.add('hidden');
@@ -563,7 +563,7 @@ function startValidationPolling() {
             console.error('Validation polling error:', error);
             
             if (attempts < maxAttempts) {
-                setTimeout(pollValidation, 2000);
+                setTimeout(pollValidation, 1000);
             } else {
                 clearInterval(timerInterval);
                 progressElement.classList.add('hidden');
