@@ -1020,7 +1020,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "3374b564d62d428ec097ecf4d1905693d289c0502e0ae83978d9c67219339fa1.zip"
+     "S3Key": "454b6af1f660eae658f0dbfcb8926247051dd19e20f51de15d08b198fe21181a.zip"
     },
     "Environment": {
      "Variables": {
@@ -1062,7 +1062,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/UserValidator/Resource",
-    "aws:asset:path": "asset.3374b564d62d428ec097ecf4d1905693d289c0502e0ae83978d9c67219339fa1",
+    "aws:asset:path": "asset.454b6af1f660eae658f0dbfcb8926247051dd19e20f51de15d08b198fe21181a",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -1162,7 +1162,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "2b0d5269a4439d22d0e84f18ea86bf5af98f59691a5c0a403bd7c4dfd9a3d0b8.zip"
+     "S3Key": "baadf662b7b1114c6966d26ec14ea0ac369f0e256e639e3006b414ba099f8dad.zip"
     },
     "Environment": {
      "Variables": {
@@ -1188,7 +1188,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/CheckValidationLambda/Resource",
-    "aws:asset:path": "asset.2b0d5269a4439d22d0e84f18ea86bf5af98f59691a5c0a403bd7c4dfd9a3d0b8",
+    "aws:asset:path": "asset.baadf662b7b1114c6966d26ec14ea0ac369f0e256e639e3006b414ba099f8dad",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -2565,7 +2565,7 @@
      }
     ],
     "SourceObjectKeys": [
-     "e19db73315fd4b272b12a19fcbcee7ffd62a2ed6cabcb6871087899376b0029d.zip"
+     "b64249efc4711d9d8389b4915c76e3c7fbfd3629837d67bc1f88f92e200f5447.zip"
     ],
     "DestinationBucketName": {
      "Ref": "FrontendBucketEFE2E19C"
