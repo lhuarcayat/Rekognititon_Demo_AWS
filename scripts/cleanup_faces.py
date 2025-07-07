@@ -70,12 +70,12 @@ def cleanup_rekognition_collection(collection_id='document-faces-collection'):
     except Exception as e:
         print(f"❌ Error inesperado: {str(e)}")
 
-def cleanup_dynamodb_records():
+def cleanup_dynamodb_records_index():
     """
     Opcional: También limpiar registros de DynamoDB
     """
     
-    print("\n🔍 ¿También quieres limpiar los registros de DynamoDB?")
+    print("\n🔍 ¿También quieres limpiar los registros de DynamoDB - indexed?")
     cleanup_db = input("Escribe 'SI' para limpiar la tabla indexed-documents: ")
     
     if cleanup_db == 'SI':
@@ -102,6 +102,40 @@ def cleanup_dynamodb_records():
         except Exception as e:
             print(f"❌ Error limpiando DynamoDB: {str(e)}")
 
+def cleanup_dynamodb_records_comparison():
+    """
+    Opcional: También limpiar registros de DynamoDB
+    """
+    
+    print("\n🔍 ¿También quieres limpiar los registros de DynamoDB - comparison?")
+    cleanup_db = input("Escribe 'SI' para limpiar la tabla comparison-results: ")
+    
+    if cleanup_db == 'SI':
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('rekognition-comparison-results')
+        
+        try:
+            # Scan y eliminar todos los items
+            response = table.scan()
+            items = response['Items']
+            
+            if not items:
+                print("✅ La tabla DynamoDB ya está vacía")
+                return
+            
+            print(f"📊 Encontrados {len(items)} registros en DynamoDB")
+            
+            with table.batch_writer() as batch:
+                for item in items:
+                    batch.delete_item(Key={'comparison_id': item['comparison_id'],
+                                           'timestamp':item['timestamp']
+                                           })
+            
+            print(f"✅ Eliminados {len(items)} registros de DynamoDB")
+            
+        except Exception as e:
+            print(f"❌ Error limpiando DynamoDB: {str(e)}")
+
 if __name__ == "__main__":
     collection_id = sys.argv[1] if len(sys.argv) > 1 else 'document-faces-collection'
     
@@ -109,6 +143,7 @@ if __name__ == "__main__":
     print("=" * 50)
     
     cleanup_rekognition_collection(collection_id)
-    cleanup_dynamodb_records()
+    cleanup_dynamodb_records_index()
+    cleanup_dynamodb_records_comparison()
     
     print("\n✅ Proceso de limpieza completado")

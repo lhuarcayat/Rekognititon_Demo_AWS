@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/729476b0727e8a677ae2e600b2dd02e08cc85b378d11823fc62327a58681ee85.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a65e1993f52e74d562f7667c5006e1b261ad00b5a3fc6c0ec8091e08af5616b5.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -152,6 +152,18 @@
             "data": "CheckValidationLambda112BA848"
           }
         ],
+        "/RekognitionPocStack/CheckDocumentExistsLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckDocumentExistsLambda69AABDCF"
+          }
+        ],
+        "/RekognitionPocStack/CleanupDocumentLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CleanupDocumentLambdaC43685DF"
+          }
+        ],
         "/RekognitionPocStack/FrontendOAI/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -173,7 +185,7 @@
         "/RekognitionPocStack/RekognitionApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "RekognitionApiDeployment12E716F5769cf81bdee2a61fa465fddddd67a8ac"
+            "data": "RekognitionApiDeployment12E716F58624e910cc3d7dfdbb970d6b6290ca04"
           }
         ],
         "/RekognitionPocStack/RekognitionApi/DeploymentStage.prod/Resource": [
@@ -294,6 +306,66 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "RekognitionApicheckvalidationnumerodocumentoGET0C8BBD20"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-document/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckdocumentEDA2D3AD"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-document/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckdocumentOPTIONS76B5C186"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckdocumentPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTcheckdocument1839CE1A"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckdocumentPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTcheckdocument607781BC"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/check-document/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicheckdocumentPOSTD9A65582"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/cleanup-document/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicleanupdocument845FA77A"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/cleanup-document/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicleanupdocumentOPTIONS81BFC836"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicleanupdocumentPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTcleanupdocumentCF27CED0"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicleanupdocumentPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTcleanupdocument7068EF07"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApicleanupdocumentPOST46D4C0DC"
           }
         ],
         "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource": [

@@ -813,7 +813,10 @@
                               ]
                             },
                             {
-                              "Action": "s3:GetObject",
+                              "Action": [
+                                "s3:DeleteObject",
+                                "s3:GetObject"
+                              ],
                               "Effect": "Allow",
                               "Resource": [
                                 {
@@ -850,7 +853,8 @@
                               "Action": [
                                 "dynamodb:GetItem",
                                 "dynamodb:PutItem",
-                                "dynamodb:Query"
+                                "dynamodb:Query",
+                                "dynamodb:Scan"
                               ],
                               "Effect": "Allow",
                               "Resource": [
@@ -895,6 +899,26 @@
                                   ]
                                 }
                               ]
+                            },
+                            {
+                              "Action": "lambda:InvokeFunction",
+                              "Effect": "Allow",
+                              "Resource": {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:aws:lambda:",
+                                    {
+                                      "Ref": "AWS::Region"
+                                    },
+                                    ":",
+                                    {
+                                      "Ref": "AWS::AccountId"
+                                    },
+                                    ":function:rekognition-poc-document-indexer"
+                                  ]
+                                ]
+                              }
                             }
                           ],
                           "Version": "2012-10-17"
@@ -965,7 +989,9 @@
                           "Statement": [
                             {
                               "Action": [
+                                "s3:DeleteObject",
                                 "s3:GetObject",
+                                "s3:HeadObject",
                                 "s3:PutObject"
                               ],
                               "Effect": "Allow",
@@ -999,6 +1025,16 @@
                                   ]
                                 }
                               ]
+                            },
+                            {
+                              "Action": "s3:ListBucket",
+                              "Effect": "Allow",
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "DocumentsBucket9EC9DEB9",
+                                  "Arn"
+                                ]
+                              }
                             },
                             {
                               "Action": [
@@ -1048,6 +1084,15 @@
                                   ]
                                 ]
                               }
+                            },
+                            {
+                              "Action": [
+                                "rekognition:CreateCollection",
+                                "rekognition:DescribeCollection",
+                                "rekognition:DetectFaces"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": "*"
                             }
                           ],
                           "Version": "2012-10-17"
@@ -1189,7 +1234,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
                       },
-                      "s3Key": "1dbc6e1ccaee469f93c215a29a1d12985bfd48154123368a7015d9fee35897fe.zip"
+                      "s3Key": "3374b564d62d428ec097ecf4d1905693d289c0502e0ae83978d9c67219339fa1.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1205,7 +1250,8 @@
                         },
                         "USER_PHOTOS_BUCKET": {
                           "Ref": "UserPhotosBucket4D5DE39B"
-                        }
+                        },
+                        "DOCUMENT_INDEXER_FUNCTION": "rekognition-poc-document-indexer"
                       }
                     },
                     "functionName": "rekognition-poc-user-validator",
@@ -1353,7 +1399,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
                       },
-                      "s3Key": "e8211f2c75a17c67099738e300763da70916054a2a82f0f698f7bbf0f3d9259b.zip"
+                      "s3Key": "705c145cc0170da5298d0493d0fb0cc1543bfcf9220230506753cc4a171ed22c.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1362,11 +1408,17 @@
                         },
                         "DOCUMENTS_BUCKET": {
                           "Ref": "DocumentsBucket9EC9DEB9"
-                        }
+                        },
+                        "COLLECTION_ID": "document-faces-collection"
                       }
                     },
                     "functionName": "rekognition-poc-document-indexer-api",
                     "handler": "handler.lambda_handler",
+                    "layers": [
+                      {
+                        "Ref": "SharedLayer27DFABF0"
+                      }
+                    ],
                     "memorySize": 256,
                     "role": {
                       "Fn::GetAtt": [
@@ -1439,6 +1491,152 @@
                       }
                     },
                     "functionName": "rekognition-poc-check-validation",
+                    "handler": "handler.lambda_handler",
+                    "memorySize": 128,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "ApiLambdaRole66D0B4CD",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.11",
+                    "timeout": 10
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.140.0"
+            }
+          },
+          "CheckDocumentExistsLambda": {
+            "id": "CheckDocumentExistsLambda",
+            "path": "RekognitionPocStack/CheckDocumentExistsLambda",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "RekognitionPocStack/CheckDocumentExistsLambda/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "RekognitionPocStack/CheckDocumentExistsLambda/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "RekognitionPocStack/CheckDocumentExistsLambda/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.140.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/CheckDocumentExistsLambda/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": {
+                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+                      },
+                      "s3Key": "07a6ad1d0232ef3623be7ebe556c56bc84e00802576a4f13ef149af4972cfe42.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "DOCUMENTS_BUCKET": {
+                          "Ref": "DocumentsBucket9EC9DEB9"
+                        }
+                      }
+                    },
+                    "functionName": "rekognition-poc-check-document-exists",
+                    "handler": "handler.lambda_handler",
+                    "memorySize": 128,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "ApiLambdaRole66D0B4CD",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.11",
+                    "timeout": 10
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.140.0"
+            }
+          },
+          "CleanupDocumentLambda": {
+            "id": "CleanupDocumentLambda",
+            "path": "RekognitionPocStack/CleanupDocumentLambda",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "RekognitionPocStack/CleanupDocumentLambda/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "RekognitionPocStack/CleanupDocumentLambda/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "RekognitionPocStack/CleanupDocumentLambda/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.140.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/CleanupDocumentLambda/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": {
+                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+                      },
+                      "s3Key": "4f72309455bdb81617a0d0a660ad19d935f03681d1acd56c428b5a7c22bb0fdf.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "DOCUMENTS_BUCKET": {
+                          "Ref": "DocumentsBucket9EC9DEB9"
+                        }
+                      }
+                    },
+                    "functionName": "rekognition-poc-cleanup-document",
                     "handler": "handler.lambda_handler",
                     "memorySize": 128,
                     "role": {
@@ -1637,7 +1835,7 @@
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "RekognitionApiDeployment12E716F5769cf81bdee2a61fa465fddddd67a8ac"
+                          "Ref": "RekognitionApiDeployment12E716F58624e910cc3d7dfdbb970d6b6290ca04"
                         },
                         "restApiId": {
                           "Ref": "RekognitionApiFBDE99C9"
@@ -2537,6 +2735,492 @@
                         },
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.140.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "check-document": {
+                    "id": "check-document",
+                    "path": "RekognitionPocStack/RekognitionApi/Default/check-document",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/check-document/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                          "aws:cdk:cloudformation:props": {
+                            "parentId": {
+                              "Fn::GetAtt": [
+                                "RekognitionApiFBDE99C9",
+                                "RootResourceId"
+                              ]
+                            },
+                            "pathPart": "check-document",
+                            "restApiId": {
+                              "Ref": "RekognitionApiFBDE99C9"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "OPTIONS": {
+                        "id": "OPTIONS",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/check-document/OPTIONS",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/OPTIONS/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "apiKeyRequired": false,
+                                "authorizationType": "NONE",
+                                "httpMethod": "OPTIONS",
+                                "integration": {
+                                  "type": "MOCK",
+                                  "requestTemplates": {
+                                    "application/json": "{ statusCode: 200 }"
+                                  },
+                                  "integrationResponses": [
+                                    {
+                                      "statusCode": "204",
+                                      "responseParameters": {
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "methodResponses": [
+                                  {
+                                    "statusCode": "204",
+                                    "responseParameters": {
+                                      "method.response.header.Access-Control-Allow-Headers": true,
+                                      "method.response.header.Access-Control-Allow-Origin": true,
+                                      "method.response.header.Access-Control-Allow-Methods": true
+                                    }
+                                  }
+                                ],
+                                "resourceId": {
+                                  "Ref": "RekognitionApicheckdocumentEDA2D3AD"
+                                },
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "POST": {
+                        "id": "POST",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST",
+                        "children": {
+                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document": {
+                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                              "aws:cdk:cloudformation:props": {
+                                "action": "lambda:InvokeFunction",
+                                "functionName": {
+                                  "Fn::GetAtt": [
+                                    "CheckDocumentExistsLambda69AABDCF",
+                                    "Arn"
+                                  ]
+                                },
+                                "principal": "apigateway.amazonaws.com",
+                                "sourceArn": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "arn:",
+                                      {
+                                        "Ref": "AWS::Partition"
+                                      },
+                                      ":execute-api:",
+                                      {
+                                        "Ref": "AWS::Region"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "AWS::AccountId"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "RekognitionApiFBDE99C9"
+                                      },
+                                      "/",
+                                      {
+                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                      },
+                                      "/POST/check-document"
+                                    ]
+                                  ]
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document": {
+                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                              "aws:cdk:cloudformation:props": {
+                                "action": "lambda:InvokeFunction",
+                                "functionName": {
+                                  "Fn::GetAtt": [
+                                    "CheckDocumentExistsLambda69AABDCF",
+                                    "Arn"
+                                  ]
+                                },
+                                "principal": "apigateway.amazonaws.com",
+                                "sourceArn": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "arn:",
+                                      {
+                                        "Ref": "AWS::Partition"
+                                      },
+                                      ":execute-api:",
+                                      {
+                                        "Ref": "AWS::Region"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "AWS::AccountId"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "RekognitionApiFBDE99C9"
+                                      },
+                                      "/test-invoke-stage/POST/check-document"
+                                    ]
+                                  ]
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "authorizationType": "NONE",
+                                "httpMethod": "POST",
+                                "integration": {
+                                  "type": "AWS_PROXY",
+                                  "uri": {
+                                    "Fn::Join": [
+                                      "",
+                                      [
+                                        "arn:",
+                                        {
+                                          "Ref": "AWS::Partition"
+                                        },
+                                        ":apigateway:",
+                                        {
+                                          "Ref": "AWS::Region"
+                                        },
+                                        ":lambda:path/2015-03-31/functions/",
+                                        {
+                                          "Fn::GetAtt": [
+                                            "CheckDocumentExistsLambda69AABDCF",
+                                            "Arn"
+                                          ]
+                                        },
+                                        "/invocations"
+                                      ]
+                                    ]
+                                  },
+                                  "integrationHttpMethod": "POST"
+                                },
+                                "resourceId": {
+                                  "Ref": "RekognitionApicheckdocumentEDA2D3AD"
+                                },
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.140.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "cleanup-document": {
+                    "id": "cleanup-document",
+                    "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                          "aws:cdk:cloudformation:props": {
+                            "parentId": {
+                              "Fn::GetAtt": [
+                                "RekognitionApiFBDE99C9",
+                                "RootResourceId"
+                              ]
+                            },
+                            "pathPart": "cleanup-document",
+                            "restApiId": {
+                              "Ref": "RekognitionApiFBDE99C9"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "OPTIONS": {
+                        "id": "OPTIONS",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/OPTIONS",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/OPTIONS/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "apiKeyRequired": false,
+                                "authorizationType": "NONE",
+                                "httpMethod": "OPTIONS",
+                                "integration": {
+                                  "type": "MOCK",
+                                  "requestTemplates": {
+                                    "application/json": "{ statusCode: 200 }"
+                                  },
+                                  "integrationResponses": [
+                                    {
+                                      "statusCode": "204",
+                                      "responseParameters": {
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "methodResponses": [
+                                  {
+                                    "statusCode": "204",
+                                    "responseParameters": {
+                                      "method.response.header.Access-Control-Allow-Headers": true,
+                                      "method.response.header.Access-Control-Allow-Origin": true,
+                                      "method.response.header.Access-Control-Allow-Methods": true
+                                    }
+                                  }
+                                ],
+                                "resourceId": {
+                                  "Ref": "RekognitionApicleanupdocument845FA77A"
+                                },
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "POST": {
+                        "id": "POST",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST",
+                        "children": {
+                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document": {
+                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                              "aws:cdk:cloudformation:props": {
+                                "action": "lambda:InvokeFunction",
+                                "functionName": {
+                                  "Fn::GetAtt": [
+                                    "CleanupDocumentLambdaC43685DF",
+                                    "Arn"
+                                  ]
+                                },
+                                "principal": "apigateway.amazonaws.com",
+                                "sourceArn": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "arn:",
+                                      {
+                                        "Ref": "AWS::Partition"
+                                      },
+                                      ":execute-api:",
+                                      {
+                                        "Ref": "AWS::Region"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "AWS::AccountId"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "RekognitionApiFBDE99C9"
+                                      },
+                                      "/",
+                                      {
+                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                      },
+                                      "/POST/cleanup-document"
+                                    ]
+                                  ]
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document": {
+                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                              "aws:cdk:cloudformation:props": {
+                                "action": "lambda:InvokeFunction",
+                                "functionName": {
+                                  "Fn::GetAtt": [
+                                    "CleanupDocumentLambdaC43685DF",
+                                    "Arn"
+                                  ]
+                                },
+                                "principal": "apigateway.amazonaws.com",
+                                "sourceArn": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "arn:",
+                                      {
+                                        "Ref": "AWS::Partition"
+                                      },
+                                      ":execute-api:",
+                                      {
+                                        "Ref": "AWS::Region"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "AWS::AccountId"
+                                      },
+                                      ":",
+                                      {
+                                        "Ref": "RekognitionApiFBDE99C9"
+                                      },
+                                      "/test-invoke-stage/POST/cleanup-document"
+                                    ]
+                                  ]
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "authorizationType": "NONE",
+                                "httpMethod": "POST",
+                                "integration": {
+                                  "type": "AWS_PROXY",
+                                  "uri": {
+                                    "Fn::Join": [
+                                      "",
+                                      [
+                                        "arn:",
+                                        {
+                                          "Ref": "AWS::Partition"
+                                        },
+                                        ":apigateway:",
+                                        {
+                                          "Ref": "AWS::Region"
+                                        },
+                                        ":lambda:path/2015-03-31/functions/",
+                                        {
+                                          "Fn::GetAtt": [
+                                            "CleanupDocumentLambdaC43685DF",
+                                            "Arn"
+                                          ]
+                                        },
+                                        "/invocations"
+                                      ]
+                                    ]
+                                  },
+                                  "integrationHttpMethod": "POST"
+                                },
+                                "resourceId": {
+                                  "Ref": "RekognitionApicleanupdocument845FA77A"
+                                },
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
                           "version": "2.140.0"
                         }
                       }

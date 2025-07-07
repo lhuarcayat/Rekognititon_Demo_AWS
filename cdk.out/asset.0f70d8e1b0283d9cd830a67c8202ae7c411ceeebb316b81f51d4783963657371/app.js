@@ -647,11 +647,11 @@ function checkSystemCompatibility() {
 }
 
 // ============================================
-// 🆕 EVENT LISTENERS - UPDATED & FIXED
+// 🆕 EVENT LISTENERS - UPDATED
 // ============================================
 
 function setupEventListeners() {
-    // 🔧 FIXED: Interface 1 - Form submission WITH DOCUMENT CHECK
+    // 🆕 Interface 1 - Form submission WITH DOCUMENT CHECK
     document.getElementById('documentForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -670,18 +670,9 @@ function setupEventListeners() {
         formData.numeroDocumento = numeroDocumento;
         formData.numeroCelular = numeroCelular;
         
-        // 🔧 FIXED: Get submit button correctly
-        const submitButton = this.querySelector('button[type="submit"]');
-        const submitButtonId = 'submitBtn';
-        
-        // 🔧 FIXED: Add ID to button for spinner functions
-        if (!submitButton.id) {
-            submitButton.id = submitButtonId;
-        }
-        
         // 🆕 CHECK IF DOCUMENT EXISTS
         try {
-            showSpinner(submitButtonId);
+            showSpinner('documentForm').querySelector('button[type="submit"]');
             
             console.log(`🔍 Checking if document exists: ${tipoDocumento}-${numeroDocumento}`);
             
@@ -693,10 +684,10 @@ function setupEventListeners() {
                 // 🆕 USUARIO EXISTENTE - Saltar a verification
                 console.log('✅ Existing user - skipping document capture');
                 
-                hideSpinner(submitButtonId);
+                hideSpinner('documentForm').querySelector('button[type="submit"]');
                 
                 // Mostrar mensaje y ir directo a interface3
-                showStatus('documentCheckStatus', '✅ ' + documentCheck.message, 'success');
+                showStatus('documentStatus', '✅ ' + documentCheck.message, 'success');
                 
                 setTimeout(() => {
                     showInterface('interfacePermission');
@@ -711,13 +702,13 @@ function setupEventListeners() {
                 // 🆕 USUARIO NUEVO - Proceso completo
                 console.log('🆕 New user - full registration required');
                 
-                hideSpinner(submitButtonId);
+                hideSpinner('documentForm').querySelector('button[type="submit"]');
                 showInterface('interfacePermission');
             }
             
         } catch (error) {
             console.error('Error checking document existence:', error);
-            hideSpinner(submitButtonId);
+            hideSpinner('documentForm').querySelector('button[type="submit"]');
             showError('Error verificando el documento. Por favor, intente nuevamente.');
         }
     });

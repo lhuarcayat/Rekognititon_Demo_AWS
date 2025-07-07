@@ -214,6 +214,7 @@ class RekognitionStack(Stack):
             }
         )
 
+        # 🆕 UPDATED VALIDATOR ROLE - Con permisos para invocar document indexer
         self.validator_role = iam.Role(
             self,'ValidatorLambdaRole',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -245,7 +246,8 @@ class RekognitionStack(Stack):
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
                             actions=[
-                                's3:GetObject'
+                                's3:GetObject',
+                                's3:DeleteObject'  # 🆕 Para cleanup de documentos
                             ],
                             resources=[
                                 f'{self.user_photos_bucket.bucket_arn}/*',
@@ -257,7 +259,8 @@ class RekognitionStack(Stack):
                             actions=[
                                 'dynamodb:PutItem',
                                 'dynamodb:GetItem',
-                                'dynamodb:Query'
+                                'dynamodb:Query',
+                                'dynamodb:Scan'  # 🆕 Para verificar documentos indexados
                             ],
                             resources=[
                                 self.comparison_results_table.table_arn,
@@ -265,13 +268,21 @@ class RekognitionStack(Stack):
                                 self.indexed_documents_table.table_arn,
                                 f'{self.indexed_documents_table.table_arn}/index/*'
                             ]
+                        ),
+                        # 🆕 PERMISSION TO INVOKE DOCUMENT INDEXER
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'lambda:InvokeFunction'
+                            ],
+                            resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:rekognition-poc-document-indexer']
                         )
                     ]
                 )
             }
         )
 
-        # 🔧 FIXED: Agregada coma faltante entre recursos
+        # 🆕 UPDATED API ROLE - Con permiso para bucket documents S3 HEAD
         self.api_role = iam.Role(
             self, 'ApiLambdaRole',
             assumed_by = iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -285,11 +296,22 @@ class RekognitionStack(Stack):
                             effect=iam.Effect.ALLOW,
                             actions=[
                                 's3:PutObject',
-                                's3:GetObject'
+                                's3:GetObject',
+                                's3:HeadObject',  # 🆕 Para check-document-exists
+                                's3:DeleteObject'  # 🆕 Para cleanup-document
                             ],
                             resources=[
-                                f'{self.documents_bucket.bucket_arn}/*',  # 🔧 FIXED: Agregada coma
+                                f'{self.documents_bucket.bucket_arn}/*',
                                 f'{self.user_photos_bucket.bucket_arn}/*'
+                            ]
+                        ),
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                's3:ListBucket'  # 🆕 Para check-document-exists
+                            ],
+                            resources=[
+                                self.documents_bucket.bucket_arn
                             ]
                         ),
                         iam.PolicyStatement(
@@ -309,6 +331,16 @@ class RekognitionStack(Stack):
                                 'lambda:InvokeFunction'
                             ],
                             resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:rekognition-poc-document-indexer']
+                        ),
+                        # 🆕 REKOGNITION PERMISSIONS FOR DOCUMENT INDEXER API
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'rekognition:DetectFaces',
+                                'rekognition:CreateCollection',
+                                'rekognition:DescribeCollection'
+                            ],
+                            resources=['*']
                         )
                     ]
                 )
@@ -333,6 +365,8 @@ class RekognitionStack(Stack):
                 'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name
             }
         )
+        
+        # 🆕 UPDATED USER VALIDATOR - Con nueva variable de entorno
         self.user_validator=lambda_.Function(
             self,'UserValidator',
             function_name='rekognition-poc-user-validator',
@@ -343,18 +377,19 @@ class RekognitionStack(Stack):
             timeout=Duration.seconds(30),
             memory_size=512,
             layers=[
-                self.shared_layer       # Tu código
+                self.shared_layer
             ],
             environment={
                 'COLLECTION_ID':'document-faces-collection',
                 'COMPARISON_RESULTS_TABLE':self.comparison_results_table.table_name,
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
                 'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
-                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name  
+                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name,
+                'DOCUMENT_INDEXER_FUNCTION': 'rekognition-poc-document-indexer'  # 🆕
             }
         )
 #=======================================================================
-#Nuevas lambdas para API
+#Lambdas para API
 #======================================================================
         self.presigned_urls_lambda = lambda_.Function(
             self, 'PresignedUrlsLambda',
@@ -371,7 +406,7 @@ class RekognitionStack(Stack):
             }
         )
 
-        # Lambda para endpoint de document indexer
+        # 🆕 UPDATED Document indexer API - Con variables adicionales
         self.document_indexer_api = lambda_.Function(
             self, 'DocumentIndexerApi',
             function_name='rekognition-poc-document-indexer-api',
@@ -381,13 +416,17 @@ class RekognitionStack(Stack):
             role=self.api_role,
             timeout=Duration.seconds(30),
             memory_size=256,
+            layers=[
+                self.shared_layer  # 🆕 Para DetectFaces inmediato
+            ],
             environment={
                 'DOCUMENT_INDEXER_FUNCTION': self.document_indexer.function_name,
-                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
+                'COLLECTION_ID': 'document-faces-collection'  # 🆕
             }
         )
 
-        # Lambda para check validation
+        # Lambda para check validation (sin cambios)
         self.check_validation_lambda = lambda_.Function(
             self, 'CheckValidationLambda',
             function_name='rekognition-poc-check-validation',
@@ -399,6 +438,36 @@ class RekognitionStack(Stack):
             memory_size=128,
             environment={
                 'COMPARISON_RESULTS_TABLE': self.comparison_results_table.table_name
+            }
+        )
+
+        # 🆕 NEW LAMBDA: Check Document Exists
+        self.check_document_exists_lambda = lambda_.Function(
+            self, 'CheckDocumentExistsLambda',
+            function_name='rekognition-poc-check-document-exists',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/check_document_exists'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
+            }
+        )
+
+        # 🆕 NEW LAMBDA: Cleanup Document
+        self.cleanup_document_lambda = lambda_.Function(
+            self, 'CleanupDocumentLambda',
+            function_name='rekognition-poc-cleanup-document',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/cleanup_document'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
             }
         )
 
@@ -448,7 +517,7 @@ class RekognitionStack(Stack):
         )
 
 # ======================================================================
-# API GATEWAY
+# 🆕 UPDATED API GATEWAY - Con nuevo endpoint
 # ======================================================================
         self.api = apigateway.RestApi(
             self, 'RekognitionApi',
@@ -461,7 +530,7 @@ class RekognitionStack(Stack):
             )
         )
 
-        # Endpoints
+        # Endpoints existentes
         # POST /presigned-urls
         presigned_resource = self.api.root.add_resource('presigned-urls')
         presigned_resource.add_method(
@@ -484,8 +553,22 @@ class RekognitionStack(Stack):
             apigateway.LambdaIntegration(self.check_validation_lambda)
         )
 
+        # 🆕 NEW ENDPOINT: POST /check-document
+        check_doc_resource = self.api.root.add_resource('check-document')
+        check_doc_resource.add_method(
+            'POST',
+            apigateway.LambdaIntegration(self.check_document_exists_lambda)
+        )
+
+        # 🆕 NEW ENDPOINT: POST /cleanup-document
+        cleanup_doc_resource = self.api.root.add_resource('cleanup-document')
+        cleanup_doc_resource.add_method(
+            'POST',
+            apigateway.LambdaIntegration(self.cleanup_document_lambda)
+        )
+
 # ======================================================================
-# S3 TRIGGERS
+# S3 TRIGGERS (sin cambios)
 # ======================================================================
         self.user_photos_bucket.add_event_notification(
             s3.EventType.OBJECT_CREATED,
@@ -564,7 +647,6 @@ class RekognitionStack(Stack):
             value=self.comparison_results_table.table_name,
             description='DynamoDB table for comparison results'
         )
-
 
 
 
