@@ -45,7 +45,7 @@ item = {
     'candidates_evaluated': 3  # Cuántos candidatos se evaluaron
 }
 
-
+python scripts/update_frontend_config.py RekognitionPocStack
 
 
 
