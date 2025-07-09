@@ -595,7 +595,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
                       },
-                      "s3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
+                      "s3Key": "e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
                     "layerName": "rekognition-poc-shared-layer"
@@ -1152,7 +1152,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
                       },
-                      "s3Key": "4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05.zip"
+                      "s3Key": "7e2b95cebcebb895d641fb2c97f3afb02cae4518223a0998d1759954c8e64c12.zip"
                     },
                     "environment": {
                       "variables": {

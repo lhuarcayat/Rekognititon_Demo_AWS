@@ -523,14 +523,14 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
+     "S3Key": "e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423.zip"
     },
     "Description": "Shared utilities with auto-compiled dependencies",
     "LayerName": "rekognition-poc-shared-layer"
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/SharedLayer/Resource",
-    "aws:asset:path": "asset.8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec",
+    "aws:asset:path": "asset.e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Content"
    }
@@ -973,7 +973,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05.zip"
+     "S3Key": "7e2b95cebcebb895d641fb2c97f3afb02cae4518223a0998d1759954c8e64c12.zip"
     },
     "Environment": {
      "Variables": {
@@ -1008,7 +1008,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexer/Resource",
-    "aws:asset:path": "asset.4bd1bad68367caeebcde0dc1673490be07cbb8f451334e2dfd5a4086f9af7e05",
+    "aws:asset:path": "asset.7e2b95cebcebb895d641fb2c97f3afb02cae4518223a0998d1759954c8e64c12",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -2565,7 +2565,7 @@
      }
     ],
     "SourceObjectKeys": [
-     "b64249efc4711d9d8389b4915c76e3c7fbfd3629837d67bc1f88f92e200f5447.zip"
+     "7a49c3e9854b29680a0a98a1b80663b734eac770db1744651ccd8f31fa6771c7.zip"
     ],
     "DestinationBucketName": {
      "Ref": "FrontendBucketEFE2E19C"
