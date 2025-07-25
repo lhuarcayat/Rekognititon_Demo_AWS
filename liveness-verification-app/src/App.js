@@ -27,7 +27,7 @@ function App(){
   };
 
   const resetVerification = () => {
-    setStep('Upload');
+    setStep('upload');
     setDocumentImage(null);
     setVerificationResult(null);
     setError(null);

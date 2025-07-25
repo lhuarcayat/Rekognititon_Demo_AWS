@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Configurar AWS
-const credentials = new AWS.sharedInifileCredentials({profile: process.env.AWS_PROFILE || 'default'});
+const credentials = new AWS.SharedIniFileCredentials({profile: process.env.AWS_PROFILE || 'default'});
 AWS.config.credentials = credentials;
 AWS.config.update({
     region: process.env.AWS_REGION || 'us-east-1'
