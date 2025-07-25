@@ -72,7 +72,7 @@ function LivenessCheck({ documentImage, onComplete, onError }) {
         <View className="liveness-detector-container">
           <FaceLivenessDetector
             sessionId={sessionId}
-            region={process.env.REACT_APP_AWS_REGION}
+            region="us-east-1"
             onAnalysisComplete={handleAnalysisComplete}
             onError={handleError}
             config={{

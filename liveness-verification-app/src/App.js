@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import {Authenticator} from '@aws-amplify/ui-react';
 import DocumentUpload from './components/DocumentUpload';
 import LivenessCheck from './components/LivenessCheck';
 import VerificationResult from './components/VerificationResult';
 import {Alert} from '@aws-amplify/ui-react';
+import './App.css'
 
 function App(){
   const [step, setStep] = useState('upload');
@@ -45,14 +45,14 @@ function App(){
             {error}
           </Alert>
         )}
-        {step == 'upload' && (
+        {step === 'upload' && (
           <DocumentUpload
             onUpload = {handleDocumentUpload}
             onError = {handleError}
           />
         )}
 
-        {step == 'liveness' && (
+        {step === 'liveness' && (
           <LivenessCheck
             documentImage = {documentImage}
             onComplete = {handleLivenessComplete}
@@ -60,18 +60,12 @@ function App(){
           />
         )}
         
-        {step == 'result' && (
+        {step === 'result' && (
           <VerificationResult
             result = {verificationResult}
             onReset = {resetVerification}
           />
         )}
-       
-        
-        
-        
-
-
       </main>
     </div>
   );
