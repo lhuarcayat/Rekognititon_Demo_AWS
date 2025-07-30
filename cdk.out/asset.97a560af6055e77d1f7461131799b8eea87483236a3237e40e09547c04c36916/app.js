@@ -456,7 +456,7 @@ function handleUserPhotoTimeout() {
     
     setTimeout(() => {
         hideError();
-        resetToInitialState(true);
+        resetToInitialState();
     }, 3000);
 }
 
@@ -766,7 +766,7 @@ function handleCriticalFailure() {
     
     setTimeout(() => {
         hideError();
-        resetToInitialState(true);
+        resetToInitialState();
     }, 3000);
 }
 
@@ -792,8 +792,8 @@ function showSuccessScreen(validationResult) {
 // UTILITY FUNCTIONS
 // ============================================
 
-function resetToInitialState(shouldCleanupDocument = false) {
-    if (shouldCleanupDocument && formData.numeroDocumento && !formData.documentExists){
+function resetToInitialState() {
+    if (formData.numeroDocumento && !formData.documentExists){
         console.log('cleaning up orphaned document');
         cleanupOrphanedDocument();
     }
@@ -956,7 +956,7 @@ function setupEventListeners() {
     
     // Permission interface - Back button
     document.getElementById('atrasPermission').addEventListener('click', function() {
-        resetToInitialState(false);
+        resetToInitialState();
     });
     
     // Interface 2 - Take document photo
@@ -1008,7 +1008,7 @@ function setupEventListeners() {
     
     // Success interface - Finalizar button
     document.getElementById('finalizarBtn').addEventListener('click', function() {
-        resetToInitialState(false);
+        resetToInitialState();
     });
     
     // Success interface - Pagar button
