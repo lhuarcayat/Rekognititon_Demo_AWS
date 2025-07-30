@@ -27,21 +27,7 @@
                         }
                       ]
                     },
-                    "bucketName": {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "rekognition-poc-documents-",
-                          {
-                            "Ref": "AWS::AccountId"
-                          },
-                          "-",
-                          {
-                            "Ref": "AWS::Region"
-                          }
-                        ]
-                      ]
-                    },
+                    "bucketName": "rekognition-poc-documents-442431377530-us-east-1",
                     "corsConfiguration": {
                       "corsRules": [
                         {
@@ -101,21 +87,7 @@
                         }
                       ]
                     },
-                    "bucketName": {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "rekognition-poc-user-photos-",
-                          {
-                            "Ref": "AWS::AccountId"
-                          },
-                          "-",
-                          {
-                            "Ref": "AWS::Region"
-                          }
-                        ]
-                      ]
-                    },
+                    "bucketName": "rekognition-poc-user-photos-442431377530-us-east-1",
                     "corsConfiguration": {
                       "corsRules": [
                         {
@@ -194,9 +166,7 @@
                       ]
                     },
                     "principal": "s3.amazonaws.com",
-                    "sourceAccount": {
-                      "Ref": "AWS::AccountId"
-                    },
+                    "sourceAccount": "442431377530",
                     "sourceArn": {
                       "Fn::GetAtt": [
                         "UserPhotosBucket4D5DE39B",
@@ -235,21 +205,7 @@
                         }
                       ]
                     },
-                    "bucketName": {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "rekognition-poc-frontend-",
-                          {
-                            "Ref": "AWS::AccountId"
-                          },
-                          "-",
-                          {
-                            "Ref": "AWS::Region"
-                          }
-                        ]
-                      ]
-                    },
+                    "bucketName": "rekognition-poc-frontend-442431377530-us-east-1",
                     "publicAccessBlockConfiguration": {
                       "blockPublicAcls": true,
                       "blockPublicPolicy": true,
@@ -592,9 +548,7 @@
                       "python3.11"
                     ],
                     "content": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
@@ -903,22 +857,7 @@
                             {
                               "Action": "lambda:InvokeFunction",
                               "Effect": "Allow",
-                              "Resource": {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:aws:lambda:",
-                                    {
-                                      "Ref": "AWS::Region"
-                                    },
-                                    ":",
-                                    {
-                                      "Ref": "AWS::AccountId"
-                                    },
-                                    ":function:rekognition-poc-document-indexer"
-                                  ]
-                                ]
-                              }
+                              "Resource": "arn:aws:lambda:us-east-1:442431377530:function:rekognition-poc-document-indexer"
                             }
                           ],
                           "Version": "2012-10-17"
@@ -1068,28 +1007,14 @@
                             {
                               "Action": "lambda:InvokeFunction",
                               "Effect": "Allow",
-                              "Resource": {
-                                "Fn::Join": [
-                                  "",
-                                  [
-                                    "arn:aws:lambda:",
-                                    {
-                                      "Ref": "AWS::Region"
-                                    },
-                                    ":",
-                                    {
-                                      "Ref": "AWS::AccountId"
-                                    },
-                                    ":function:rekognition-poc-document-indexer"
-                                  ]
-                                ]
-                              }
+                              "Resource": "arn:aws:lambda:us-east-1:442431377530:function:rekognition-poc-document-indexer"
                             },
                             {
                               "Action": [
                                 "rekognition:CreateCollection",
                                 "rekognition:DescribeCollection",
-                                "rekognition:DetectFaces"
+                                "rekognition:DetectFaces",
+                                "textract:AnalyzeDocument"
                               ],
                               "Effect": "Allow",
                               "Resource": "*"
@@ -1149,9 +1074,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "7e2b95cebcebb895d641fb2c97f3afb02cae4518223a0998d1759954c8e64c12.zip"
                     },
                     "environment": {
@@ -1231,9 +1154,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "454b6af1f660eae658f0dbfcb8926247051dd19e20f51de15d08b198fe21181a.zip"
                     },
                     "environment": {
@@ -1320,9 +1241,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "8bc3a639dfa35557e0996b0029448deb662b8ff09e2dd08dbada4b5c0f34d21c.zip"
                     },
                     "environment": {
@@ -1396,10 +1315,8 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
-                      "s3Key": "705c145cc0170da5298d0493d0fb0cc1543bfcf9220230506753cc4a171ed22c.zip"
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+                      "s3Key": "4890f0975b4cb77148934c142388b4dd3cbccf0b04306778ebe1f4d29eae77c9.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1478,9 +1395,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "baadf662b7b1114c6966d26ec14ea0ac369f0e256e639e3006b414ba099f8dad.zip"
                     },
                     "environment": {
@@ -1551,9 +1466,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "07a6ad1d0232ef3623be7ebe556c56bc84e00802576a4f13ef149af4972cfe42.zip"
                     },
                     "environment": {
@@ -1624,9 +1537,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "4f72309455bdb81617a0d0a660ad19d935f03681d1acd56c428b5a7c22bb0fdf.zip"
                     },
                     "environment": {
@@ -1835,7 +1746,7 @@
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "RekognitionApiDeployment12E716F58624e910cc3d7dfdbb970d6b6290ca04"
+                          "Ref": "RekognitionApiDeployment12E716F5f13ece26fc20198ba331b91755a08d21"
                         },
                         "restApiId": {
                           "Ref": "RekognitionApiFBDE99C9"
@@ -2034,19 +1945,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -2083,19 +1982,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -2124,15 +2011,7 @@
                                     "Fn::Join": [
                                       "",
                                       [
-                                        "arn:",
-                                        {
-                                          "Ref": "AWS::Partition"
-                                        },
-                                        ":apigateway:",
-                                        {
-                                          "Ref": "AWS::Region"
-                                        },
-                                        ":lambda:path/2015-03-31/functions/",
+                                        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
                                             "PresignedUrlsLambda4D3A70EC",
@@ -2277,19 +2156,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -2326,19 +2193,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -2367,15 +2222,7 @@
                                     "Fn::Join": [
                                       "",
                                       [
-                                        "arn:",
-                                        {
-                                          "Ref": "AWS::Partition"
-                                        },
-                                        ":apigateway:",
-                                        {
-                                          "Ref": "AWS::Region"
-                                        },
-                                        ":lambda:path/2015-03-31/functions/",
+                                        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
                                             "DocumentIndexerApiD0843226",
@@ -2602,19 +2449,7 @@
                                       "Fn::Join": [
                                         "",
                                         [
-                                          "arn:",
-                                          {
-                                            "Ref": "AWS::Partition"
-                                          },
-                                          ":execute-api:",
-                                          {
-                                            "Ref": "AWS::Region"
-                                          },
-                                          ":",
-                                          {
-                                            "Ref": "AWS::AccountId"
-                                          },
-                                          ":",
+                                          "arn:aws:execute-api:us-east-1:442431377530:",
                                           {
                                             "Ref": "RekognitionApiFBDE99C9"
                                           },
@@ -2651,19 +2486,7 @@
                                       "Fn::Join": [
                                         "",
                                         [
-                                          "arn:",
-                                          {
-                                            "Ref": "AWS::Partition"
-                                          },
-                                          ":execute-api:",
-                                          {
-                                            "Ref": "AWS::Region"
-                                          },
-                                          ":",
-                                          {
-                                            "Ref": "AWS::AccountId"
-                                          },
-                                          ":",
+                                          "arn:aws:execute-api:us-east-1:442431377530:",
                                           {
                                             "Ref": "RekognitionApiFBDE99C9"
                                           },
@@ -2692,15 +2515,7 @@
                                         "Fn::Join": [
                                           "",
                                           [
-                                            "arn:",
-                                            {
-                                              "Ref": "AWS::Partition"
-                                            },
-                                            ":apigateway:",
-                                            {
-                                              "Ref": "AWS::Region"
-                                            },
-                                            ":lambda:path/2015-03-31/functions/",
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                             {
                                               "Fn::GetAtt": [
                                                 "CheckValidationLambda112BA848",
@@ -2851,19 +2666,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -2900,19 +2703,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -2941,15 +2732,7 @@
                                     "Fn::Join": [
                                       "",
                                       [
-                                        "arn:",
-                                        {
-                                          "Ref": "AWS::Partition"
-                                        },
-                                        ":apigateway:",
-                                        {
-                                          "Ref": "AWS::Region"
-                                        },
-                                        ":lambda:path/2015-03-31/functions/",
+                                        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
                                             "CheckDocumentExistsLambda69AABDCF",
@@ -3094,19 +2877,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -3143,19 +2914,7 @@
                                   "Fn::Join": [
                                     "",
                                     [
-                                      "arn:",
-                                      {
-                                        "Ref": "AWS::Partition"
-                                      },
-                                      ":execute-api:",
-                                      {
-                                        "Ref": "AWS::Region"
-                                      },
-                                      ":",
-                                      {
-                                        "Ref": "AWS::AccountId"
-                                      },
-                                      ":",
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
                                         "Ref": "RekognitionApiFBDE99C9"
                                       },
@@ -3184,15 +2943,7 @@
                                     "Fn::Join": [
                                       "",
                                       [
-                                        "arn:",
-                                        {
-                                          "Ref": "AWS::Partition"
-                                        },
-                                        ":apigateway:",
-                                        {
-                                          "Ref": "AWS::Region"
-                                        },
-                                        ":lambda:path/2015-03-31/functions/",
+                                        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
                                             "CleanupDocumentLambdaC43685DF",
@@ -3397,9 +3148,7 @@
                       "aws:cdk:cloudformation:type": "AWS::Lambda::LayerVersion",
                       "aws:cdk:cloudformation:props": {
                         "content": {
-                          "s3Bucket": {
-                            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                          },
+                          "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                           "s3Key": "1b2c92f2cd21c170884393633bd4c732676df6290562199b6e3ca5e2a1be7d18.zip"
                         },
                         "description": "/opt/awscli/aws"
@@ -3549,37 +3298,8 @@
                                   ],
                                   "Effect": "Allow",
                                   "Resource": [
-                                    {
-                                      "Fn::Join": [
-                                        "",
-                                        [
-                                          "arn:",
-                                          {
-                                            "Ref": "AWS::Partition"
-                                          },
-                                          ":s3:::",
-                                          {
-                                            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                                          },
-                                          "/*"
-                                        ]
-                                      ]
-                                    },
-                                    {
-                                      "Fn::Join": [
-                                        "",
-                                        [
-                                          "arn:",
-                                          {
-                                            "Ref": "AWS::Partition"
-                                          },
-                                          ":s3:::",
-                                          {
-                                            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                                          }
-                                        ]
-                                      ]
-                                    }
+                                    "arn:aws:s3:::cdk-hnb659fds-assets-442431377530-us-east-1",
+                                    "arn:aws:s3:::cdk-hnb659fds-assets-442431377530-us-east-1/*"
                                   ]
                                 },
                                 {
@@ -3688,9 +3408,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": {
-                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
-                      },
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
                       "s3Key": "2d56e153cac88d3e0c2f842e8e6f6783b8725bf91f95e0673b4725448a56e96d.zip"
                     },
                     "environment": {
@@ -3798,14 +3516,6 @@
                 "path": "RekognitionPocStack/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
-                  "version": "2.140.0"
-                }
-              },
-              "Condition": {
-                "id": "Condition",
-                "path": "RekognitionPocStack/CDKMetadata/Condition",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CfnCondition",
                   "version": "2.140.0"
                 }
               }

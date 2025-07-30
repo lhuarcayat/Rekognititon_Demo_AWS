@@ -11,21 +11,21 @@
     },
     "RekognitionPocStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://unknown-account/unknown-region",
+      "environment": "aws://442431377530/us-east-1",
       "properties": {
         "templateFile": "RekognitionPocStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/62d59d4fc60d9d5f6991650a06540ea1c820b9508447bb573c95492b167e2588.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-deploy-role-442431377530-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-cfn-exec-role-442431377530-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-442431377530-us-east-1/3bb7375f8371217c53730a8ea0ea4bb802f172208afa38c7724b53fa0ee45922.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "RekognitionPocStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "arn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-lookup-role-442431377530-us-east-1",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
@@ -185,7 +185,7 @@
         "/RekognitionPocStack/RekognitionApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "RekognitionApiDeployment12E716F58624e910cc3d7dfdbb970d6b6290ca04"
+            "data": "RekognitionApiDeployment12E716F5f13ece26fc20198ba331b91755a08d21"
           }
         ],
         "/RekognitionPocStack/RekognitionApi/DeploymentStage.prod/Resource": [
@@ -468,12 +468,6 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
-          }
-        ],
-        "/RekognitionPocStack/CDKMetadata/Condition": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CDKMetadataAvailable"
           }
         ],
         "/RekognitionPocStack/BootstrapVersion": [

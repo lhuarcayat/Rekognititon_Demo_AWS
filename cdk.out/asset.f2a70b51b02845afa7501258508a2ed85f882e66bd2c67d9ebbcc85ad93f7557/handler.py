@@ -193,12 +193,12 @@ def validate_document_with_textract_and_faces(s3_key: str) -> dict:
         if not textract_result['success']:
             return {
                 'success' : False,
-                'error'   : f'Document number validation failed: {textract_result["error"]}',
+                'error'   : f'Document number validation failed: {textract_result['error']}',
                 'validation_stage': 'TEXTRACT_VALIDATION',
                 'expected_number': expected_number,
                 'extracted_numbers': textract_result.get('extracted_numbers',[])
             }
-        logger.info(f'TEXTRACT: Number validated - {textract_result["matched_number"]}')
+        logger.info(f'TEXTRACT: Number validated - {textract_result['matched_number']}')
         logger.info(f'REKOGNITION: starting face detection')
 
         face_detection = rekognition_client.detect_faces(processed_bytes)
@@ -287,13 +287,11 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
                 extracted_numbers = []
 
                 for block in response['Blocks']:
-                    if block['BlockType'] == 'QUERY_RESULT':
-                        if block.get('Query',{}).get('Alias') == query['Alias']:
-                            if block.get('Text') and block['Text'].strip():
-                                extracted_numbers.append({
-                                    'text':block['Text'].strip(),
-                                    'confidence': block.get('Confidence',0)
-                                })
+                    if block.get('Text') and block['Text'].strip():
+                        extracted_numbers.append({
+                            'text':block['Text'].strip(),
+                            'confidence': block.get('Confidence',0)
+                        })
                 
                 logger.info(f'Query {i+1} extracted: {extracted_numbers}')
 
@@ -313,7 +311,7 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
                         logger.error(f'Primary query returned multiple DIFFERENT numbers: {unique_numbers}')
                         return {
                             'success' : False,
-                            'error'   : f'Multiple different numbers found in document: {[e["text"] for e in valid_extractions]}',
+                            'error'   : f'Multiple different numbers found in document: {[e['text'] for e in valid_extractions]}',
                             'extracted_numbers': valid_extractions
                         }
                 
@@ -325,7 +323,7 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
 
                     logger.info(f'Comparing: {cleaned_extracted} vs {cleaned_expected}')
 
-                    if cleaned_extracted in cleaned_expected:
+                    if cleaned_extracted == cleaned_expected:
                         logger.info(f'Match found with query {i+1}')
                         return {
                             'success':True,
@@ -354,7 +352,6 @@ def clean_document_number(number_str:str) -> str:
         return ''
     cleaned = number_str.strip()
     cleaned = cleaned.replace('.','')
-    cleaned = re.sub(r'[^\d]', '', cleaned)
     return cleaned
 
 

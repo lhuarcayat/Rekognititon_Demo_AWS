@@ -341,6 +341,13 @@ class RekognitionStack(Stack):
                                 'rekognition:DescribeCollection'
                             ],
                             resources=['*']
+                        ),
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'textract:AnalyzeDocument'
+                            ],
+                            resources=['*']
                         )
                     ]
                 )

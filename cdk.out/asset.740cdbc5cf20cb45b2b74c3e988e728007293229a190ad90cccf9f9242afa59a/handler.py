@@ -287,13 +287,11 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
                 extracted_numbers = []
 
                 for block in response['Blocks']:
-                    if block['BlockType'] == 'QUERY_RESULT':
-                        if block.get('Query',{}).get('Alias') == query['Alias']:
-                            if block.get('Text') and block['Text'].strip():
-                                extracted_numbers.append({
-                                    'text':block['Text'].strip(),
-                                    'confidence': block.get('Confidence',0)
-                                })
+                    if block.get('Text') and block['Text'].strip():
+                        extracted_numbers.append({
+                            'text':block['Text'].strip(),
+                            'confidence': block.get('Confidence',0)
+                        })
                 
                 logger.info(f'Query {i+1} extracted: {extracted_numbers}')
 
@@ -325,7 +323,7 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
 
                     logger.info(f'Comparing: {cleaned_extracted} vs {cleaned_expected}')
 
-                    if cleaned_extracted in cleaned_expected:
+                    if cleaned_extracted == cleaned_expected:
                         logger.info(f'Match found with query {i+1}')
                         return {
                             'success':True,
@@ -354,7 +352,6 @@ def clean_document_number(number_str:str) -> str:
         return ''
     cleaned = number_str.strip()
     cleaned = cleaned.replace('.','')
-    cleaned = re.sub(r'[^\d]', '', cleaned)
     return cleaned
 
 
