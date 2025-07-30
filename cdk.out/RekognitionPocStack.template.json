@@ -484,7 +484,7 @@
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/SharedLayer/Resource",
-    "aws:asset:path": "C:\\Users\\Usuario\\Desktop\\Rekognition_project\\layers\\shared",
+    "aws:asset:path": "asset.e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Content"
    }
@@ -941,7 +941,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-     "S3Key": "454b6af1f660eae658f0dbfcb8926247051dd19e20f51de15d08b198fe21181a.zip"
+     "S3Key": "d09dffc85f993cf3bb1d3d80f64e2d87eab3abdb5addfa6ff3e8bc803c4824b4.zip"
     },
     "Environment": {
      "Variables": {
@@ -983,7 +983,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/UserValidator/Resource",
-    "aws:asset:path": "asset.454b6af1f660eae658f0dbfcb8926247051dd19e20f51de15d08b198fe21181a",
+    "aws:asset:path": "asset.d09dffc85f993cf3bb1d3d80f64e2d87eab3abdb5addfa6ff3e8bc803c4824b4",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -1032,7 +1032,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-     "S3Key": "4890f0975b4cb77148934c142388b4dd3cbccf0b04306778ebe1f4d29eae77c9.zip"
+     "S3Key": "0dff9ce950014b4da7672fad727c1aae540ad0b5ba69c12e23b697e44acdffc6.zip"
     },
     "Environment": {
      "Variables": {
@@ -1067,7 +1067,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/DocumentIndexerApi/Resource",
-    "aws:asset:path": "asset.4890f0975b4cb77148934c142388b4dd3cbccf0b04306778ebe1f4d29eae77c9",
+    "aws:asset:path": "asset.0dff9ce950014b4da7672fad727c1aae540ad0b5ba69c12e23b697e44acdffc6",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -2312,7 +2312,7 @@
      "cdk-hnb659fds-assets-442431377530-us-east-1"
     ],
     "SourceObjectKeys": [
-     "c70123fcdadce2005bad9a5b427beb1c3bb02f4f34ca7f7b776092910187a256.zip"
+     "3882cf80ed00cc9a634a652234f15c9da82dab2924c7f2a305d86424633f792a.zip"
     ],
     "DestinationBucketName": {
      "Ref": "FrontendBucketEFE2E19C"

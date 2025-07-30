@@ -269,14 +269,6 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
             {
                 'Text': 'what is the number in NUIP',
                 'Alias': 'NUIP_FALLBACK'
-            },
-            {
-                'Text': 'what is the number in DNI',
-                'Alias': 'DNI_FALLBACK'
-            },
-            {
-                'Text': 'what is the number in Nro de Licencia',
-                'Alias': 'DNI_FALLBACK'
             }
         ]
 

@@ -269,14 +269,6 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
             {
                 'Text': 'what is the number in NUIP',
                 'Alias': 'NUIP_FALLBACK'
-            },
-            {
-                'Text': 'what is the number in DNI',
-                'Alias': 'DNI_FALLBACK'
-            },
-            {
-                'Text': 'what is the number in Nro de Licencia',
-                'Alias': 'DNI_FALLBACK'
             }
         ]
 
@@ -292,46 +284,102 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
                     QueriesConfig = {'Queries':[query]}
                 )
 
-                # 🔧 FIX: Solo buscar QUERY_RESULT blocks - ignorar el Alias
-                extracted_numbers = []
+                # 🔍 DEBUG COMPLETO: Log TODA la respuesta de Textract
+                logger.info(f"🔍 FULL TEXTRACT RESPONSE for query {i+1}:")
+                logger.info(f"   Total blocks: {len(response.get('Blocks', []))}")
                 
+                # Log todos los tipos de bloques
+                block_types = {}
+                for block in response.get('Blocks', []):
+                    block_type = block.get('BlockType', 'UNKNOWN')
+                    block_types[block_type] = block_types.get(block_type, 0) + 1
+                
+                logger.info(f"   Block types found: {block_types}")
+                
+                # Log TODOS los bloques con texto
+                text_blocks = []
+                for block in response.get('Blocks', []):
+                    if block.get('Text'):
+                        text_blocks.append({
+                            'BlockType': block.get('BlockType'),
+                            'Text': block.get('Text'),
+                            'Confidence': block.get('Confidence', 0),
+                            'Query': block.get('Query', {}),
+                            'Id': block.get('Id', 'NO_ID')
+                        })
+                
+                logger.info(f"🔍 ALL BLOCKS WITH TEXT:")
+                for tb in text_blocks:
+                    logger.info(f"   {tb}")
+                
+                # Método original (restrictivo)
+                extracted_numbers_original = []
                 for block in response['Blocks']:
                     if block['BlockType'] == 'QUERY_RESULT':
-                        # 🆕 NUEVO: No verificar Alias, solo tomar TODOS los QUERY_RESULT
-                        if block.get('Text') and block['Text'].strip():
-                            extracted_numbers.append({
-                                'text': block['Text'].strip(),
-                                'confidence': block.get('Confidence', 0)
+                        if block.get('Query',{}).get('Alias') == query['Alias']:
+                            if block.get('Text') and block['Text'].strip():
+                                extracted_numbers_original.append({
+                                    'text':block['Text'].strip(),
+                                    'confidence': block.get('Confidence',0)
+                                })
+                
+                logger.info(f'🔍 ORIGINAL METHOD extracted: {extracted_numbers_original}')
+                
+                # 🆕 MÉTODO ALTERNATIVO: Buscar ANY block con texto y confidence > 50%
+                extracted_numbers_alternative = []
+                for block in response['Blocks']:
+                    if block.get('Text') and block['Text'].strip():
+                        # Filtrar solo texto que parezca números
+                        text = block['Text'].strip()
+                        if re.search(r'\d', text):  # Contiene al menos un dígito
+                            extracted_numbers_alternative.append({
+                                'text': text,
+                                'confidence': block.get('Confidence', 0),
+                                'block_type': block.get('BlockType'),
+                                'block_id': block.get('Id', 'NO_ID')
                             })
-                            logger.info(f"🔍 Found QUERY_RESULT: '{block['Text']}' (confidence: {block.get('Confidence', 0)})")
+                
+                logger.info(f'🔍 ALTERNATIVE METHOD (any text with digits): {extracted_numbers_alternative}')
+                
+                # 🆕 MÉTODO MÁS PERMISIVO: Usar el método alternativo si el original falla
+                extracted_numbers = extracted_numbers_original
+                if not extracted_numbers and extracted_numbers_alternative:
+                    logger.info(f"🔄 Original method failed, using alternative method")
+                    # Convertir formato alternativo al formato esperado
+                    extracted_numbers = [
+                        {
+                            'text': item['text'],
+                            'confidence': item['confidence']
+                        }
+                        for item in extracted_numbers_alternative
+                        if item['confidence'] >= 50.0  # Lower threshold for alternative method
+                    ]
+                    logger.info(f'🔄 Converted alternative results: {extracted_numbers}')
 
-                logger.info(f'Query {i+1} extracted: {extracted_numbers}')
-
-                # Usar threshold de 80% como originalmente
+                # Usar threshold más bajo para debugging
                 valid_extractions = [
                     e for e in extracted_numbers
-                    if e['confidence'] >= 80.0
+                    if e['confidence'] >= 50.0  # 🆕 Lower threshold
                 ]
+                
+                logger.info(f'🔍 Valid extractions (confidence >= 50%): {valid_extractions}')
 
                 if not valid_extractions:
-                    logger.info(f'Query {i+1}: No valid extractions (confidence < 80%)')
+                    logger.info(f'Query {i+1}: No valid extractions (confidence < 50%)')
                     continue
-                
-                # 🔧 FIX: Solo verificar múltiples números en query principal si realmente hay múltiples
-                if i == 0 and len(valid_extractions) > 1:
-                    # Verificar si son realmente diferentes después de limpiar
+                    
+                if i==0 and len(valid_extractions) > 1:
                     cleaned_numbers = [clean_document_number(e['text']) for e in valid_extractions]
                     unique_numbers = list(set(cleaned_numbers))
 
                     if len(unique_numbers) > 1:
                         logger.error(f'Primary query returned multiple DIFFERENT numbers: {unique_numbers}')
                         return {
-                            'success': False,
-                            'error': f'Multiple different numbers found in document: {[e["text"] for e in valid_extractions]}',
+                            'success' : False,
+                            'error'   : f'Multiple different numbers found in document: {[e["text"] for e in valid_extractions]}',
                             'extracted_numbers': valid_extractions
                         }
                 
-                # Comparar cada extracción válida
                 for extraction in valid_extractions:
                     extracted_text = extraction['text']
 
@@ -344,7 +392,7 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
                     logger.info(f'   Original expected: "{expected_number}"')
                     logger.info(f'   Cleaned expected: "{cleaned_expected}"')
 
-                    # Verificar presencia en ambas direcciones
+                    # 🆕 Multiple comparison methods
                     match_found = False
                     match_method = ""
                     
@@ -363,7 +411,7 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
                     if match_found:
                         logger.info(f'✅ Match found with query {i+1} using {match_method}')
                         return {
-                            'success': True,
+                            'success':True,
                             'matched_number': extracted_text,
                             'expected_number': expected_number,
                             'confidence': extraction['confidence'],
@@ -386,8 +434,8 @@ def validate_document_number_with_textract(image_bytes: bytes, expected_number: 
     except Exception as e:
         logger.error(f'Textract validation error: {str(e)}')
         return {
-            'success': False,
-            'error': f'Textract analysis failed: {str(e)}'
+            'success' : False,
+            'error'   : f'Textract analysis failed: {str(e)}'
         }
 def clean_document_number(number_str:str) -> str:
     if not number_str:
