@@ -107,43 +107,50 @@
     <!-- ============================================ -->
     <!-- INTERFACE 3: CAPTURA USUARIO -->
     <!-- ============================================ -->
-    <div id="interface3" class="interface">
-        <div class="container">
-            <div class="camera-section">
-                <div class="form-badge">Paso 2 de 2</div>
-                <h2> Verificación Biométrica</h2>
-                <p>Mire directamente a la cámara para completar el proceso de verificación de identidad mediante reconocimiento facial.</p>
-                
-                <!-- 🆕 TIMER DISPLAY -->
-                <div class="timer-container">
-                    <div class="timer-icon">⏱️</div>
-                    <div class="timer-text">
-                        <span>Tiempo restante:</span>
-                        <span id="userPhotoTimer" class="timer-value hidden">30s</span>
-                    </div>
-                </div>
-                
-                <div class="camera-container">
-                    <video id="videoUser" autoplay playsinline></video>
-                    <canvas id="canvasUser" style="display: none;"></canvas>
-                </div>
-                
-                <div class="camera-controls">
-                    <button id="tomarFotoUsuario" class="btn btn-primary">
-                        <span> Verificar Identidad</span>
-                        <div class="spinner hidden"></div>
-                    </button>
-                    <button id="atrasUsuario" class="btn btn-secondary">Volver</button>
-                </div>
-                
-                <div id="userStatus" class="status-message hidden"></div>
-                <div id="validationProgress" class="validation-progress hidden">
-                    <div class="progress-spinner"></div>
-                    <p>Procesando verificación biométrica... <span id="progressTimer">5</span>s</p>
-                </div>
+<div id="interface3" class="interface">
+    <div class="container">
+        <div class="liveness-section">
+            <div class="form-badge">Paso 2 de 2</div>
+            <h2>🔒 Verificación de Presencia Real</h2>
+            <p>Utilizamos AWS Face Liveness para verificar que eres una persona real y no un intento de suplantación.</p>
+            
+            <!-- Estado de carga inicial -->
+            <div id="livenessLoading" class="loading-container">
+                <div class="spinner"></div>
+                <p id="livenessLoadingText">Preparando verificación facial...</p>
             </div>
+            
+            <!-- Contenedor para Face Liveness Detector -->
+            <div id="livenessDetectorContainer" class="liveness-detector-container" style="display: none;">
+                <div class="liveness-info">
+                    <p><strong>Instrucciones:</strong></p>
+                    <ul>
+                        <li>Asegúrate de tener buena iluminación</li>
+                        <li>Mantén tu rostro centrado en el óvalo</li>
+                        <li>Sigue las instrucciones que aparezcan en pantalla</li>
+                        <li>El proceso toma aproximadamente 10-15 segundos</li>
+                    </ul>
+                </div>
+                
+                <!-- Aquí se insertará el componente de Face Liveness -->
+                <div id="faceLivenessDetector"></div>
+            </div>
+            
+            <!-- Contenedor de progreso de validación -->
+            <div id="livenessValidationProgress" class="validation-progress hidden">
+                <div class="progress-spinner"></div>
+                <p>Validando con tu documento... <span id="livenessProgressTimer">10</span>s</p>
+            </div>
+            
+            <div class="camera-controls">
+                <button id="atrasLiveness" class="btn btn-secondary">Volver</button>
+                <button id="retryLiveness" class="btn btn-secondary" style="display: none;">🔄 Reintentar</button>
+            </div>
+            
+            <div id="livenessStatus" class="status-message hidden"></div>
         </div>
     </div>
+</div>
 
     <!-- ============================================ -->
     <!-- INTERFACE SUCCESS -->

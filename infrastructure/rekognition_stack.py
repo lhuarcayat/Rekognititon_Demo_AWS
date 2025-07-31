@@ -10,6 +10,7 @@ from aws_cdk import(
     aws_apigateway as apigateway,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
+    aws_cognito as cognito,
     RemovalPolicy,
     Duration
 )
@@ -353,6 +354,19 @@ class RekognitionStack(Stack):
                 )
             }
         )
+
+        self.api_role.add_to_policy(
+            iam.PolicyStatement(
+                effect = iam.Effect.ALLOW,
+                actions = [
+                    'rekognition:CreateFaceLivenessSession',
+                    'rekognition:GetFaceLivenessSessionResults'
+                ],
+                resources = ['*']
+            )
+        )
+
+
     #====================================================
         self.document_indexer = lambda_.Function(
             self, 'DocumentIndexer',
@@ -477,6 +491,65 @@ class RekognitionStack(Stack):
                 'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
             }
         )
+        
+        self.face_liveness_session = lambda_.Function(
+            self, 'FaceLivenessSession',
+            function_name = 'rekognition-poc-face-liveness-session',
+            runtime = lambda_.Runtime.PYTHON_3_11,
+            handler = 'handler.lambda_handler',
+            code = lambda_.Code.from_asset('functions/face_liveness_session'),
+            role = self.api_role,
+            timeout = Duration.seconds(30),
+            memory_size = 256,
+            environment = {
+                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name
+            }
+        )
+
+        self.identity_pool = cognito.CfnIdentityPool(
+            self, 'LivenessIdentityPool',
+            identity_pool_name = 'rekognition-poc-liveness-pool',
+            allow_unauthenticated_identities = True,
+            cognito_identity_providers = []
+        )
+
+        self.unauth_role = iam.Role(
+            self, 'LivenessUnauthRole',
+            assumed_by = iam.FederatedPrincipal(
+                'cognito-identity.amazonws.com',
+                {
+                    'StringEquals':{
+                        'cognito-identity.amazonaws.com:aud': self.identity_pool.ref
+                    },
+                    'ForAnyValue:StringLike':{
+                        'cognito-identity.amazonaws.com:amr':'unauthenticated'
+                    }
+                },
+                'sts:AssumeRoleWithWebIdentity'
+            ),
+            inline_policies = {
+                'LivenessPolicy': iam.PolicyDocument(
+                    statements = [
+                        iam.PolicyStatement(
+                            effect = iam.Effect.ALLOW,
+                            actions = [
+                                'rekognition:StartFaceLivenessSession'
+                            ],
+                            resources = ['*']
+                        )
+                    ]
+                )
+
+            }
+        )
+
+        cognito.CfnIdentityPoolRoleAttachment(
+            self, 'LivenessIdentityPoolRoleAttachment',
+            identity_pool_id = self.identity_pool.ref,
+            roles = {
+                'unauthenticated': self.unauth_role.role_arn
+            }
+        )
 
 # ======================================================================
 # 🆕 CLOUDFRONT DISTRIBUTION - HTTPS Frontend
@@ -574,6 +647,18 @@ class RekognitionStack(Stack):
             apigateway.LambdaIntegration(self.cleanup_document_lambda)
         )
 
+        liveness_session_resource = self.api.root.add_resource('liveness-session')
+        liveness_session_resource.add_method(
+            'POST',
+            apigateway.LambdaIntegration(self.face_liveness_session)
+        )
+
+        session_id_resource = liveness_session_resource.add_resource('{sessionId}')
+        session_id_resource.add_method(
+            'GET',
+            apigateway.LambdaIntegration(self.face_liveness_session)
+        )
+
 # ======================================================================
 # S3 TRIGGERS (sin cambios)
 # ======================================================================
@@ -653,6 +738,11 @@ class RekognitionStack(Stack):
             self,'ComparisonResultsTableName',
             value=self.comparison_results_table.table_name,
             description='DynamoDB table for comparison results'
+        )
+        cdk.CfnOutput(
+            self, 'LivenessIdentityPoolId',
+            value = self.identity_pool.ref,
+            description = 'Cognito Identity Pool ID for Face Liveness'
         )
 
 
