@@ -3,32 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Verificación de Identidad</title>
+    <title>Sistema de Verificación de Identidad - AWS Face Liveness Real</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- AWS Amplify UI Components for Face Liveness -->
-    <script type="module">
-        import { Amplify } from 'https://cdn.jsdelivr.net/npm/aws-amplify@6/+esm';
-        import { FaceLivenessDetector } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-react-liveness@3/+esm';
-        
-        // Configure Amplify
-        Amplify.configure({
-            Auth: {
-                Cognito: {
-                    identityPoolId: 'us-east-1:IDENTITY_POOL_ID_PLACEHOLDER',
-                    region: 'us-east-1',
-                    allowGuestAccess: true
-                }
-            }
-        });
-        
-        // Make available globally
-        window.Amplify = Amplify;
-        window.FaceLivenessDetector = FaceLivenessDetector;
-    </script>
 </head>
 <body>
     <!-- ============================================ -->
@@ -39,7 +18,7 @@
             <div class="header">
                 <div class="form-badge">Sistema Seguro</div>
                 <h1>🔐 Verificación de Identidad</h1>
-                <p>Sistema biométrico de autenticación mediante reconocimiento facial</p>
+                <p>Sistema biométrico con <strong>AWS Rekognition Face Liveness Real</strong></p>
             </div>
             
             <form id="documentForm" class="form">
@@ -79,20 +58,16 @@
     <div id="interfacePermission" class="interface">
         <div class="container">
             <div class="permission-content">
-                <div class="camera-icon">
-                    📷
-                </div>
+                <div class="camera-icon">📷</div>
                 <h2>Autorización de Cámara</h2>
-                <p>Para proceder con la verificación biométrica, necesitamos acceso a su cámara web. Este proceso garantiza la autenticidad de su identidad mediante tecnología de reconocimiento facial avanzada.</p>
+                <p>Para proceder con la verificación biométrica usando <strong>AWS Face Liveness</strong>, necesitamos acceso a su cámara web.</p>
                 
                 <button id="permitirCamara" class="btn btn-primary">
                     <span>Autorizar Acceso a Cámara</span>
                     <div class="spinner hidden"></div>
                 </button>
                 
-                <button id="atrasPermission" class="btn btn-secondary">
-                    Volver
-                </button>
+                <button id="atrasPermission" class="btn btn-secondary">Volver</button>
             </div>
         </div>
     </div>
@@ -105,7 +80,7 @@
             <div class="camera-section">
                 <div class="form-badge">Paso 1 de 2</div>
                 <h2>📄 Captura de Documento</h2>
-                <p>Posicione su <span id="tipoDocumentoDisplay"></span> frente a la cámara. Asegúrese de que el documento esté completamente visible y bien iluminado.</p>
+                <p>Posicione su <span id="tipoDocumentoDisplay"></span> frente a la cámara.</p>
                 
                 <div class="camera-container">
                     <video id="videoDocument" autoplay playsinline></video>
@@ -132,44 +107,27 @@
         <div class="container">
             <div class="liveness-section">
                 <div class="form-badge">Paso 2 de 2</div>
-                <h2>🔒 Verificación de Presencia Real</h2>
-                <p>Utilizamos AWS Face Liveness para verificar que eres una persona real y no un intento de suplantación.</p>
+                <h2>🔒 AWS Rekognition Face Liveness</h2>
+                <p><strong>Verificación real con AWS</strong> - Sin simulaciones</p>
                 
-                <!-- Loading state -->
-                <div id="livenessLoading" class="loading-container" style="display: none;">
-                    <div class="spinner"></div>
-                    <p id="livenessLoadingText">Preparando verificación facial...</p>
-                </div>
-                
-                <!-- Real AWS Face Liveness Component Container -->
-                <div id="livenessDetectorContainer" class="liveness-detector-container">
+                <!-- AWS Face Liveness Component Mount Point -->
+                <div id="awsFaceLivenessContainer" class="aws-liveness-container">
                     <div class="liveness-info">
-                        <p><strong>Instrucciones:</strong></p>
+                        <p><strong>Instrucciones para AWS Face Liveness:</strong></p>
                         <ul>
-                            <li>Asegúrate de tener buena iluminación</li>
-                            <li>Mantén tu rostro centrado</li>
-                            <li>Sigue las instrucciones en pantalla</li>
-                            <li>El proceso toma aproximadamente 10-15 segundos</li>
+                            <li>Mantenga su rostro centrado en el óvalo</li>
+                            <li>Siga las luces de colores en pantalla</li>
+                            <li>No se mueva hasta completar el proceso</li>
+                            <li>El análisis es realizado por AWS en tiempo real</li>
                         </ul>
                     </div>
                     
-                    <!-- This will be replaced with real AWS Face Liveness Detector -->
-                    <div id="faceLivenessDetector">
-                        <div class="liveness-ready-message">
-                            <p>🎯 AWS Face Liveness está listo</p>
-                            <button id="startRealLiveness" class="btn btn-primary btn-large">
-                                Iniciar Verificación Facial
-                            </button>
+                    <!-- React Component Mount Point -->
+                    <div id="faceLivenessMount" class="face-liveness-mount">
+                        <div class="loading-placeholder">
+                            <div class="spinner"></div>
+                            <p>Cargando AWS Face Liveness...</p>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Progress for real liveness -->
-                <div id="livenessValidationProgress" class="validation-progress hidden">
-                    <div class="progress-spinner"></div>
-                    <p>Validando con tu documento... <span id="livenessProgressTimer">15</span>s</p>
-                    <div class="progress-details">
-                        <small>Procesando con AWS Face Liveness...</small>
                     </div>
                 </div>
                 
@@ -196,21 +154,24 @@
                 <div class="success-badge">
                     <div class="check-icon">✅</div>
                     <div class="success-text">
-                        <h3>Identidad Verificada Exitosamente</h3>
-                        <p>Su identidad ha sido autenticada mediante sistema biométrico de reconocimiento facial.</p>
+                        <h3>Identidad Verificada con AWS Face Liveness</h3>
+                        <p>Su identidad ha sido autenticada usando AWS Rekognition Face Liveness real.</p>
                     </div>
                 </div>
                 
                 <div class="user-info">
                     <h2 id="personName">USUARIO VERIFICADO</h2>
-                    <p>Los siguientes servicios están disponibles para su perfil verificado</p>
+                    <p>Verificación completada exitosamente</p>
                 </div>
                 
-                <!-- Información adicional para liveness -->
-                <div class="liveness-verification-info" style="display: none;">
+                <div class="liveness-verification-info">
                     <div class="verification-badge">
                         <span class="badge-icon">🔒</span>
-                        <span class="badge-text">Verificado con AWS Face Liveness</span>
+                        <span class="badge-text">Verificado con AWS Rekognition Face Liveness</span>
+                    </div>
+                    <div class="liveness-details">
+                        <p><strong>Confidence Score:</strong> <span id="livenessConfidence">0%</span></p>
+                        <p><strong>Session ID:</strong> <span id="sessionIdDisplay">N/A</span></p>
                     </div>
                 </div>
                 
@@ -236,13 +197,13 @@
                     </div>
                     
                     <div class="detail-row">
-                        <span class="label">Verificación Facial:</span>
-                        <span class="status-received">Completada</span>
+                        <span class="label">AWS Face Liveness:</span>
+                        <span class="status-received">✅ Completada</span>
                     </div>
                     
                     <div class="detail-row">
                         <span class="label">Documento Digital:</span>
-                        <span class="status-received">Validado</span>
+                        <span class="status-received">✅ Validado</span>
                     </div>
                 </div>
                 
@@ -272,9 +233,36 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT LIBRARIES - FIXED -->
     <!-- ============================================ -->
+    
+    <!-- React (required for Face Liveness) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- AWS Amplify complete bundle -->
+    <script src="https://unpkg.com/aws-amplify@5.3.0/dist/aws-amplify.min.js"></script>
+    
+    <!-- AWS Amplify UI React Liveness -->
+    <script src="https://unpkg.com/@aws-amplify/ui-react-liveness@3.0.0/dist/index.umd.js"></script>
+    
+    <!-- Configuration -->
     <script src="config.js"></script>
+    
+    <!-- Main Application -->
     <script src="app.js"></script>
+    
+    <!-- Debug script to verify libraries loaded -->
+    <script>
+        console.log('📚 Libraries check:');
+        console.log('   React:', typeof React !== 'undefined' ? '✅' : '❌');
+        console.log('   ReactDOM:', typeof ReactDOM !== 'undefined' ? '✅' : '❌');
+        console.log('   AWS Amplify:', typeof window.Amplify !== 'undefined' ? '✅' : '❌');
+        console.log('   Face Liveness:', typeof window.AmplifyUIReactLiveness !== 'undefined' ? '✅' : '❌');
+        
+        if (typeof window.Amplify !== 'undefined') {
+            console.log('   Amplify Auth:', typeof window.Amplify.Auth !== 'undefined' ? '✅' : '❌');
+        }
+    </script>
 </body>
 </html>
