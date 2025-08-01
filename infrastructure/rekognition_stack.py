@@ -19,8 +19,8 @@ class RekognitionStack(Stack):
 #1. Bucket S3
 # ======================================================================
         self.documents_bucket = s3.Bucket(
-            self, 'DocumentsBucket',
-            bucket_name=f'rekognition-poc-documents-{self.account}-{self.region}',
+            self, 'DocumentsBucketBasic',
+            bucket_name=f'rekognition-basic-documents-{self.account}-{self.region}',
             versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
             # lifecycle_rules=[
@@ -42,8 +42,8 @@ class RekognitionStack(Stack):
             removal_policy=RemovalPolicy.RETAIN
         )
         self.user_photos_bucket=s3.Bucket(
-            self,'UserPhotosBucket',
-            bucket_name=f'rekognition-poc-user-photos-{self.account}-{self.region}',
+            self,'UserPhotosBucketBasic',
+            bucket_name=f'rekognition-basic-user-photos-{self.account}-{self.region}',
             encryption=s3.BucketEncryption.S3_MANAGED,
             lifecycle_rules=[
                 s3.LifecycleRule(
@@ -72,8 +72,8 @@ class RekognitionStack(Stack):
     #============================================================
         #Tabla para metadatos de documentos indexados
         self.indexed_documents_table=dynamodb.Table(
-            self,'IndexedDocumentsTable',
-            table_name='rekognition-indexed-documents',
+            self,'IndexedDocumentsTableBasic',
+            table_name='rekognition-basic-indexed-documents',
             partition_key=dynamodb.Attribute(
                 name='document_id',
                 type=dynamodb.AttributeType.STRING
@@ -99,8 +99,8 @@ class RekognitionStack(Stack):
         )
     #================================================
         self.comparison_results_table=dynamodb.Table(
-            self,'ComparisonResultsTable',
-            table_name='rekognition-comparison-results',
+            self,'ComparisonResultsTableBasic',
+            table_name='rekognition-basic-comparison-results',
             partition_key=dynamodb.Attribute(
                 name='comparison_id',
                 type=dynamodb.AttributeType.STRING
@@ -140,7 +140,7 @@ class RekognitionStack(Stack):
     #========================IAM ROLE
         self.shared_layer = lambda_.LayerVersion(
             self, 'SharedLayer',
-            layer_version_name='rekognition-poc-shared-layer',
+            layer_version_name='rekognition-basic-shared-layer',
             code=lambda_.Code.from_asset(
                 'layers/shared',
                 bundling=cdk.BundlingOptions(
@@ -157,7 +157,7 @@ class RekognitionStack(Stack):
         )
 
         self.indexer_role=iam.Role(
-            self,'IndexerLambdaRole',
+            self,'IndexerLambdaRoleBasic',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
@@ -206,7 +206,7 @@ class RekognitionStack(Stack):
         )
 
         self.validator_role = iam.Role(
-            self,'ValidatorLambdaRole',
+            self,'ValidatorLambdaRoleBasic',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
@@ -263,8 +263,8 @@ class RekognitionStack(Stack):
         )
     #====================================================
         self.document_indexer = lambda_.Function(
-            self, 'DocumentIndexer',
-            function_name='rekognition-poc-document-indexer',
+            self, 'DocumentIndexerBasic',
+            function_name='rekognition-basic-document-indexer',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/document_indexer'),
@@ -281,8 +281,8 @@ class RekognitionStack(Stack):
             }
         )
         self.user_validator=lambda_.Function(
-            self,'UserValidator',
-            function_name='rekognition-poc-user-validator',
+            self,'UserValidatorBasic',
+            function_name='rekognition-basic-user-validator',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/user_validator'),

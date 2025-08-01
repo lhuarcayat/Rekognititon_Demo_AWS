@@ -4,17 +4,17 @@
     "id": "App",
     "path": "",
     "children": {
-      "RekognitionPocStack": {
-        "id": "RekognitionPocStack",
-        "path": "RekognitionPocStack",
+      "RekognitionPocBasicStack": {
+        "id": "RekognitionPocBasicStack",
+        "path": "RekognitionPocBasicStack",
         "children": {
-          "DocumentsBucket": {
-            "id": "DocumentsBucket",
-            "path": "RekognitionPocStack/DocumentsBucket",
+          "DocumentsBucketBasic": {
+            "id": "DocumentsBucketBasic",
+            "path": "RekognitionPocBasicStack/DocumentsBucketBasic",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/DocumentsBucket/Resource",
+                "path": "RekognitionPocBasicStack/DocumentsBucketBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
@@ -31,7 +31,7 @@
                       "Fn::Join": [
                         "",
                         [
-                          "rekognition-poc-documents-",
+                          "rekognition-basic-documents-",
                           {
                             "Ref": "AWS::AccountId"
                           },
@@ -61,13 +61,13 @@
               "version": "2.140.0"
             }
           },
-          "UserPhotosBucket": {
-            "id": "UserPhotosBucket",
-            "path": "RekognitionPocStack/UserPhotosBucket",
+          "UserPhotosBucketBasic": {
+            "id": "UserPhotosBucketBasic",
+            "path": "RekognitionPocBasicStack/UserPhotosBucketBasic",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/UserPhotosBucket/Resource",
+                "path": "RekognitionPocBasicStack/UserPhotosBucketBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
@@ -84,7 +84,7 @@
                       "Fn::Join": [
                         "",
                         [
-                          "rekognition-poc-user-photos-",
+                          "rekognition-basic-user-photos-",
                           {
                             "Ref": "AWS::AccountId"
                           },
@@ -139,11 +139,11 @@
               },
               "Notifications": {
                 "id": "Notifications",
-                "path": "RekognitionPocStack/UserPhotosBucket/Notifications",
+                "path": "RekognitionPocBasicStack/UserPhotosBucketBasic/Notifications",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/UserPhotosBucket/Notifications/Resource",
+                    "path": "RekognitionPocBasicStack/UserPhotosBucketBasic/Notifications/Resource",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.CfnResource",
                       "version": "2.140.0"
@@ -155,16 +155,16 @@
                   "version": "10.4.2"
                 }
               },
-              "AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0": {
-                "id": "AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0",
-                "path": "RekognitionPocStack/UserPhotosBucket/AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0",
+              "AllowBucketNotificationsToRekognitionPocBasicStackUserValidatorBasicECF05014": {
+                "id": "AllowBucketNotificationsToRekognitionPocBasicStackUserValidatorBasicECF05014",
+                "path": "RekognitionPocBasicStack/UserPhotosBucketBasic/AllowBucketNotificationsToRekognitionPocBasicStackUserValidatorBasicECF05014",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                   "aws:cdk:cloudformation:props": {
                     "action": "lambda:InvokeFunction",
                     "functionName": {
                       "Fn::GetAtt": [
-                        "UserValidatorF49AEC8F",
+                        "UserValidatorBasic6717E317",
                         "Arn"
                       ]
                     },
@@ -174,7 +174,7 @@
                     },
                     "sourceArn": {
                       "Fn::GetAtt": [
-                        "UserPhotosBucket4D5DE39B",
+                        "UserPhotosBucketBasic841BB3B6",
                         "Arn"
                       ]
                     }
@@ -191,13 +191,13 @@
               "version": "2.140.0"
             }
           },
-          "IndexedDocumentsTable": {
-            "id": "IndexedDocumentsTable",
-            "path": "RekognitionPocStack/IndexedDocumentsTable",
+          "IndexedDocumentsTableBasic": {
+            "id": "IndexedDocumentsTableBasic",
+            "path": "RekognitionPocBasicStack/IndexedDocumentsTableBasic",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/IndexedDocumentsTable/Resource",
+                "path": "RekognitionPocBasicStack/IndexedDocumentsTableBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
                   "aws:cdk:cloudformation:props": {
@@ -248,7 +248,7 @@
                         "keyType": "HASH"
                       }
                     ],
-                    "tableName": "rekognition-indexed-documents"
+                    "tableName": "rekognition-basic-indexed-documents"
                   }
                 },
                 "constructInfo": {
@@ -258,7 +258,7 @@
               },
               "ScalingRole": {
                 "id": "ScalingRole",
-                "path": "RekognitionPocStack/IndexedDocumentsTable/ScalingRole",
+                "path": "RekognitionPocBasicStack/IndexedDocumentsTableBasic/ScalingRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -270,13 +270,13 @@
               "version": "2.140.0"
             }
           },
-          "ComparisonResultsTable": {
-            "id": "ComparisonResultsTable",
-            "path": "RekognitionPocStack/ComparisonResultsTable",
+          "ComparisonResultsTableBasic": {
+            "id": "ComparisonResultsTableBasic",
+            "path": "RekognitionPocBasicStack/ComparisonResultsTableBasic",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/ComparisonResultsTable/Resource",
+                "path": "RekognitionPocBasicStack/ComparisonResultsTableBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
                   "aws:cdk:cloudformation:props": {
@@ -347,7 +347,7 @@
                         "keyType": "RANGE"
                       }
                     ],
-                    "tableName": "rekognition-comparison-results",
+                    "tableName": "rekognition-basic-comparison-results",
                     "timeToLiveSpecification": {
                       "attributeName": "ttl",
                       "enabled": true
@@ -361,7 +361,7 @@
               },
               "ScalingRole": {
                 "id": "ScalingRole",
-                "path": "RekognitionPocStack/ComparisonResultsTable/ScalingRole",
+                "path": "RekognitionPocBasicStack/ComparisonResultsTableBasic/ScalingRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -375,15 +375,15 @@
           },
           "SharedLayer": {
             "id": "SharedLayer",
-            "path": "RekognitionPocStack/SharedLayer",
+            "path": "RekognitionPocBasicStack/SharedLayer",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/SharedLayer/Code",
+                "path": "RekognitionPocBasicStack/SharedLayer/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/SharedLayer/Code/Stage",
+                    "path": "RekognitionPocBasicStack/SharedLayer/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -391,7 +391,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/SharedLayer/Code/AssetBucket",
+                    "path": "RekognitionPocBasicStack/SharedLayer/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -405,7 +405,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/SharedLayer/Resource",
+                "path": "RekognitionPocBasicStack/SharedLayer/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::LayerVersion",
                   "aws:cdk:cloudformation:props": {
@@ -419,7 +419,7 @@
                       "s3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
-                    "layerName": "rekognition-poc-shared-layer"
+                    "layerName": "rekognition-basic-shared-layer"
                   }
                 },
                 "constructInfo": {
@@ -433,13 +433,13 @@
               "version": "2.140.0"
             }
           },
-          "IndexerLambdaRole": {
-            "id": "IndexerLambdaRole",
-            "path": "RekognitionPocStack/IndexerLambdaRole",
+          "IndexerLambdaRoleBasic": {
+            "id": "IndexerLambdaRoleBasic",
+            "path": "RekognitionPocBasicStack/IndexerLambdaRoleBasic",
             "children": {
-              "ImportIndexerLambdaRole": {
-                "id": "ImportIndexerLambdaRole",
-                "path": "RekognitionPocStack/IndexerLambdaRole/ImportIndexerLambdaRole",
+              "ImportIndexerLambdaRoleBasic": {
+                "id": "ImportIndexerLambdaRoleBasic",
+                "path": "RekognitionPocBasicStack/IndexerLambdaRoleBasic/ImportIndexerLambdaRoleBasic",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -447,7 +447,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/IndexerLambdaRole/Resource",
+                "path": "RekognitionPocBasicStack/IndexerLambdaRoleBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -498,7 +498,7 @@
                               "Effect": "Allow",
                               "Resource": {
                                 "Fn::GetAtt": [
-                                  "DocumentsBucket9EC9DEB9",
+                                  "DocumentsBucketBasic6A70FCE4",
                                   "Arn"
                                 ]
                               }
@@ -512,7 +512,7 @@
                                   [
                                     {
                                       "Fn::GetAtt": [
-                                        "DocumentsBucket9EC9DEB9",
+                                        "DocumentsBucketBasic6A70FCE4",
                                         "Arn"
                                       ]
                                     },
@@ -531,7 +531,7 @@
                               "Effect": "Allow",
                               "Resource": {
                                 "Fn::GetAtt": [
-                                  "IndexedDocumentsTable2C59B6EB",
+                                  "IndexedDocumentsTableBasic38A69D7F",
                                   "Arn"
                                 ]
                               }
@@ -554,13 +554,13 @@
               "version": "2.140.0"
             }
           },
-          "ValidatorLambdaRole": {
-            "id": "ValidatorLambdaRole",
-            "path": "RekognitionPocStack/ValidatorLambdaRole",
+          "ValidatorLambdaRoleBasic": {
+            "id": "ValidatorLambdaRoleBasic",
+            "path": "RekognitionPocBasicStack/ValidatorLambdaRoleBasic",
             "children": {
-              "ImportValidatorLambdaRole": {
-                "id": "ImportValidatorLambdaRole",
-                "path": "RekognitionPocStack/ValidatorLambdaRole/ImportValidatorLambdaRole",
+              "ImportValidatorLambdaRoleBasic": {
+                "id": "ImportValidatorLambdaRoleBasic",
+                "path": "RekognitionPocBasicStack/ValidatorLambdaRoleBasic/ImportValidatorLambdaRoleBasic",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -568,7 +568,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/ValidatorLambdaRole/Resource",
+                "path": "RekognitionPocBasicStack/ValidatorLambdaRoleBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -618,13 +618,13 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "DocumentsBucket9EC9DEB9",
+                                    "DocumentsBucketBasic6A70FCE4",
                                     "Arn"
                                   ]
                                 },
                                 {
                                   "Fn::GetAtt": [
-                                    "UserPhotosBucket4D5DE39B",
+                                    "UserPhotosBucketBasic841BB3B6",
                                     "Arn"
                                   ]
                                 }
@@ -640,7 +640,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "DocumentsBucket9EC9DEB9",
+                                          "DocumentsBucketBasic6A70FCE4",
                                           "Arn"
                                         ]
                                       },
@@ -654,7 +654,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "UserPhotosBucket4D5DE39B",
+                                          "UserPhotosBucketBasic841BB3B6",
                                           "Arn"
                                         ]
                                       },
@@ -674,13 +674,13 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "ComparisonResultsTable188C61C4",
+                                    "ComparisonResultsTableBasic37BC9648",
                                     "Arn"
                                   ]
                                 },
                                 {
                                   "Fn::GetAtt": [
-                                    "IndexedDocumentsTable2C59B6EB",
+                                    "IndexedDocumentsTableBasic38A69D7F",
                                     "Arn"
                                   ]
                                 },
@@ -690,7 +690,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "ComparisonResultsTable188C61C4",
+                                          "ComparisonResultsTableBasic37BC9648",
                                           "Arn"
                                         ]
                                       },
@@ -704,7 +704,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "IndexedDocumentsTable2C59B6EB",
+                                          "IndexedDocumentsTableBasic38A69D7F",
                                           "Arn"
                                         ]
                                       },
@@ -732,17 +732,17 @@
               "version": "2.140.0"
             }
           },
-          "DocumentIndexer": {
-            "id": "DocumentIndexer",
-            "path": "RekognitionPocStack/DocumentIndexer",
+          "DocumentIndexerBasic": {
+            "id": "DocumentIndexerBasic",
+            "path": "RekognitionPocBasicStack/DocumentIndexerBasic",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/DocumentIndexer/Code",
+                "path": "RekognitionPocBasicStack/DocumentIndexerBasic/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/DocumentIndexer/Code/Stage",
+                    "path": "RekognitionPocBasicStack/DocumentIndexerBasic/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -750,7 +750,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/DocumentIndexer/Code/AssetBucket",
+                    "path": "RekognitionPocBasicStack/DocumentIndexerBasic/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -764,7 +764,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/DocumentIndexer/Resource",
+                "path": "RekognitionPocBasicStack/DocumentIndexerBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -778,14 +778,14 @@
                       "variables": {
                         "COLLECTION_ID": "document-faces-collection",
                         "INDEXED_DOCUMENTS_TABLE": {
-                          "Ref": "IndexedDocumentsTable2C59B6EB"
+                          "Ref": "IndexedDocumentsTableBasic38A69D7F"
                         },
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "DocumentsBucketBasic6A70FCE4"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-document-indexer",
+                    "functionName": "rekognition-basic-document-indexer",
                     "handler": "handler.lambda_handler",
                     "layers": [
                       {
@@ -795,7 +795,7 @@
                     "memorySize": 1024,
                     "role": {
                       "Fn::GetAtt": [
-                        "IndexerLambdaRole34F05CC2",
+                        "IndexerLambdaRoleBasic3AEFF255",
                         "Arn"
                       ]
                     },
@@ -814,17 +814,17 @@
               "version": "2.140.0"
             }
           },
-          "UserValidator": {
-            "id": "UserValidator",
-            "path": "RekognitionPocStack/UserValidator",
+          "UserValidatorBasic": {
+            "id": "UserValidatorBasic",
+            "path": "RekognitionPocBasicStack/UserValidatorBasic",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/UserValidator/Code",
+                "path": "RekognitionPocBasicStack/UserValidatorBasic/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/UserValidator/Code/Stage",
+                    "path": "RekognitionPocBasicStack/UserValidatorBasic/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -832,7 +832,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/UserValidator/Code/AssetBucket",
+                    "path": "RekognitionPocBasicStack/UserValidatorBasic/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -846,7 +846,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/UserValidator/Resource",
+                "path": "RekognitionPocBasicStack/UserValidatorBasic/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -860,20 +860,20 @@
                       "variables": {
                         "COLLECTION_ID": "document-faces-collection",
                         "COMPARISON_RESULTS_TABLE": {
-                          "Ref": "ComparisonResultsTable188C61C4"
+                          "Ref": "ComparisonResultsTableBasic37BC9648"
                         },
                         "INDEXED_DOCUMENTS_TABLE": {
-                          "Ref": "IndexedDocumentsTable2C59B6EB"
+                          "Ref": "IndexedDocumentsTableBasic38A69D7F"
                         },
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "DocumentsBucketBasic6A70FCE4"
                         },
                         "USER_PHOTOS_BUCKET": {
-                          "Ref": "UserPhotosBucket4D5DE39B"
+                          "Ref": "UserPhotosBucketBasic841BB3B6"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-user-validator",
+                    "functionName": "rekognition-basic-user-validator",
                     "handler": "handler.lambda_handler",
                     "layers": [
                       {
@@ -883,7 +883,7 @@
                     "memorySize": 512,
                     "role": {
                       "Fn::GetAtt": [
-                        "ValidatorLambdaRoleD4191E2F",
+                        "ValidatorLambdaRoleBasic8ED29FE6",
                         "Arn"
                       ]
                     },
@@ -904,15 +904,15 @@
           },
           "BucketNotificationsHandler050a0587b7544547bf325f094a3db834": {
             "id": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834",
-            "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834",
+            "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834",
             "children": {
               "Role": {
                 "id": "Role",
-                "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role",
+                "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role",
                 "children": {
                   "ImportRole": {
                     "id": "ImportRole",
-                    "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/ImportRole",
+                    "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/ImportRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.140.0"
@@ -920,7 +920,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource",
+                    "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -959,11 +959,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy",
+                    "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource",
+                        "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -1004,7 +1004,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource",
+                "path": "RekognitionPocBasicStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.140.0"
@@ -1018,7 +1018,7 @@
           },
           "DocumentsBucketName": {
             "id": "DocumentsBucketName",
-            "path": "RekognitionPocStack/DocumentsBucketName",
+            "path": "RekognitionPocBasicStack/DocumentsBucketName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
@@ -1026,7 +1026,7 @@
           },
           "UserPhotosBucketName": {
             "id": "UserPhotosBucketName",
-            "path": "RekognitionPocStack/UserPhotosBucketName",
+            "path": "RekognitionPocBasicStack/UserPhotosBucketName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
@@ -1034,7 +1034,7 @@
           },
           "IndexedDocumentsTableName": {
             "id": "IndexedDocumentsTableName",
-            "path": "RekognitionPocStack/IndexedDocumentsTableName",
+            "path": "RekognitionPocBasicStack/IndexedDocumentsTableName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
@@ -1042,7 +1042,7 @@
           },
           "ComparisonResultsTableName": {
             "id": "ComparisonResultsTableName",
-            "path": "RekognitionPocStack/ComparisonResultsTableName",
+            "path": "RekognitionPocBasicStack/ComparisonResultsTableName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
@@ -1050,11 +1050,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "RekognitionPocStack/CDKMetadata",
+            "path": "RekognitionPocBasicStack/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "RekognitionPocStack/CDKMetadata/Default",
+                "path": "RekognitionPocBasicStack/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.140.0"
@@ -1068,7 +1068,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "RekognitionPocStack/BootstrapVersion",
+            "path": "RekognitionPocBasicStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.140.0"
@@ -1076,7 +1076,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "RekognitionPocStack/CheckBootstrapVersion",
+            "path": "RekognitionPocBasicStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.140.0"

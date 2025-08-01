@@ -16,7 +16,7 @@
      "Fn::Join": [
       "",
       [
-       "rekognition-poc-documents-",
+       "rekognition-basic-documents-",
        {
         "Ref": "AWS::AccountId"
        },
@@ -56,7 +56,7 @@
      "Fn::Join": [
       "",
       [
-       "rekognition-poc-user-photos-",
+       "rekognition-basic-user-photos-",
        {
         "Ref": "AWS::AccountId"
        },
