@@ -1,15 +1,129 @@
 #!/usr/bin/env python3
 """
-Script to update frontend configuration with actual API Gateway URL
-This script should be run after CDK deployment to update the frontend config
+Script rápido para deployment del frontend usando boto3 directamente
 """
 
-import json
 import os
 import sys
-import subprocess
 import boto3
-from botocore.exceptions import ClientError
+import mimetypes
+from pathlib import Path
+
+def upload_file_to_s3(s3_client, file_path, bucket_name, s3_key):
+    """Upload a single file to S3 with correct content type"""
+    try:
+        # Determine content type
+        content_type, _ = mimetypes.guess_type(file_path)
+        if content_type is None:
+            content_type = 'application/octet-stream'
+        
+        # Special handling for common web files
+        if file_path.endswith('.js'):
+            content_type = 'application/javascript'
+        elif file_path.endswith('.css'):
+            content_type = 'text/css'
+        elif file_path.endswith('.html'):
+            content_type = 'text/html'
+        
+        extra_args = {
+            'ContentType': content_type
+        }
+        
+        # Add cache control for static assets
+        if file_path.endswith(('.css', '.js', '.png', '.jpg', '.jpeg', '.ico')):
+            extra_args['CacheControl'] = 'public, max-age=31536000'  # 1 year
+        else:
+            extra_args['CacheControl'] = 'public, max-age=300'  # 5 minutes
+        
+        s3_client.upload_file(file_path, bucket_name, s3_key, ExtraArgs=extra_args)
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error uploading {s3_key}: {str(e)}")
+        return False
+
+def sync_frontend_to_s3(bucket_name):
+    """Sync frontend files to S3 using boto3"""
+    try:
+        # Initialize S3 client
+        s3_client = boto3.client('s3')
+        
+        # Get frontend directory
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        frontend_dir = os.path.join(script_dir, '..', 'frontend', 'dist')
+        frontend_path = Path(frontend_dir)
+        
+        if not frontend_path.exists():
+            print(f"❌ Frontend directory not found: {frontend_path}")
+            return False
+        
+        print(f"📁 Frontend directory: {frontend_path}")
+        print(f"🪣 Target bucket: {bucket_name}")
+        
+        # Get all files in frontend directory
+        files_to_upload = []
+        for file_path in frontend_path.rglob('*'):
+            if file_path.is_file():
+                # Calculate relative path for S3 key
+                relative_path = file_path.relative_to(frontend_path)
+                s3_key = str(relative_path).replace('\\', '/')  # Fix Windows path separators
+                files_to_upload.append((str(file_path), s3_key))
+        
+        if not files_to_upload:
+            print("❌ No files found to upload")
+            return False
+        
+        print(f"📦 Found {len(files_to_upload)} files to upload")
+        
+        # Upload files one by one
+        successful_uploads = 0
+        for file_path, s3_key in files_to_upload:
+            print(f"⬆️  Uploading: {s3_key}")
+            if upload_file_to_s3(s3_client, file_path, bucket_name, s3_key):
+                successful_uploads += 1
+            else:
+                print(f"❌ Failed to upload: {s3_key}")
+        
+        print(f"\n✅ Successfully uploaded {successful_uploads}/{len(files_to_upload)} files")
+        
+        if successful_uploads == len(files_to_upload):
+            print("🎉 All files uploaded successfully!")
+            return True
+        else:
+            print("⚠️  Some files failed to upload")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Error syncing to S3: {str(e)}")
+        return False
+
+def invalidate_cloudfront(distribution_id):
+    """Invalidate CloudFront cache"""
+    try:
+        cloudfront_client = boto3.client('cloudfront')
+        
+        print(f"🔄 Creating CloudFront invalidation for distribution: {distribution_id}")
+        
+        response = cloudfront_client.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                'Paths': {
+                    'Quantity': 1,
+                    'Items': ['/*']
+                },
+                'CallerReference': str(hash(f"{distribution_id}-{os.urandom(8).hex()}"))
+            }
+        )
+        
+        invalidation_id = response['Invalidation']['Id']
+        print(f"✅ CloudFront invalidation created: {invalidation_id}")
+        print("⏰ Cache invalidation will take 5-15 minutes to complete")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error invalidating CloudFront: {str(e)}")
+        return False
 
 def get_stack_outputs(stack_name):
     """Get CloudFormation stack outputs"""
@@ -28,112 +142,57 @@ def get_stack_outputs(stack_name):
         
         return outputs
         
-    except ClientError as e:
+    except Exception as e:
         raise Exception(f"Error accessing CloudFormation: {e}")
-
-def update_config_file(api_gateway_url, config_path):
-    """Update the frontend config.js file with the actual API Gateway URL"""
-    
-    config_content = f"""// ============================================
-// CONFIGURATION FILE
-// ============================================
-
-// This file was automatically updated with the actual API Gateway URL
-// Generated at deployment time
-
-window.API_GATEWAY_URL = '{api_gateway_url}';
-
-console.log('🔧 Config loaded - API Gateway URL:', window.API_GATEWAY_URL);"""
-
-    try:
-        # Write updated config
-        with open(config_path, 'w', encoding='utf-8') as f:
-            f.write(config_content)
-        
-        print(f"✅ Updated {config_path} with API Gateway URL: {api_gateway_url}")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error updating config file: {e}")
-        return False
-
-def deploy_frontend(bucket_name):
-    """Deploy frontend to S3 bucket"""
-    try:
-        # Use AWS CLI to sync frontend files
-        frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dist')
-        
-        result = subprocess.run([
-            'aws', 's3', 'sync', 
-            frontend_path, 
-            f's3://{bucket_name}/',
-            '--delete'
-        ], capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print(f"✅ Frontend deployed to S3 bucket: {bucket_name}")
-            return True
-        else:
-            print(f"❌ Frontend deployment failed: {result.stderr}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Error deploying frontend: {e}")
-        return False
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python update_frontend_config.py <stack-name>")
-        print("Example: python update_frontend_config.py RekognitionPocStack")
+        print("Usage: python quick_deploy.py <stack-name>")
+        print("Example: python quick_deploy.py RekognitionPocStack")
         sys.exit(1)
     
     stack_name = sys.argv[1]
     
-    print(f"🚀 Updating frontend configuration for stack: {stack_name}")
+    print("🚀 Quick Frontend Deployment")
+    print("=" * 50)
     
     try:
         # Get stack outputs
-        print("📋 Getting CloudFormation stack outputs...")
+        print("📋 Getting stack information...")
         outputs = get_stack_outputs(stack_name)
         
-        # Extract required values
+        bucket_name = outputs.get('FrontendBucketName')
+        distribution_id = outputs.get('CloudFrontDistributionId')
         api_gateway_url = outputs.get('ApiGatewayUrl')
-        frontend_bucket = outputs.get('FrontendBucketName')
+        frontend_url = outputs.get('FrontendUrl')
         
-        if not api_gateway_url:
-            raise Exception("ApiGatewayUrl not found in stack outputs")
-        
-        if not frontend_bucket:
+        if not bucket_name:
             raise Exception("FrontendBucketName not found in stack outputs")
         
-        # Remove trailing slash from API Gateway URL
-        api_gateway_url = api_gateway_url.rstrip('/')
+        print(f"🪣 Frontend Bucket: {bucket_name}")
+        print(f"🌐 Distribution ID: {distribution_id}")
+        print(f"📡 API Gateway: {api_gateway_url}")
         
-        print(f"📡 API Gateway URL: {api_gateway_url}")
-        print(f"🪣 Frontend Bucket: {frontend_bucket}")
+        # Sync frontend to S3
+        if not sync_frontend_to_s3(bucket_name):
+            raise Exception("Failed to sync frontend to S3")
         
-        # Update config file
-        config_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dist', 'config.js')
+        # Invalidate CloudFront cache
+        if distribution_id:
+            invalidate_cloudfront(distribution_id)
         
-        if not update_config_file(api_gateway_url, config_path):
-            sys.exit(1)
-        
-        # Deploy frontend
-        print("🚀 Deploying frontend to S3...")
-        if not deploy_frontend(frontend_bucket):
-            sys.exit(1)
-        
-        # Print success message with URLs
-        frontend_url = outputs.get('FrontendUrl', f'http://{frontend_bucket}.s3-website-us-east-1.amazonaws.com')
-        
-        print("\n" + "="*60)
+        # Print success
+        print("\n" + "=" * 60)
         print("🎉 DEPLOYMENT SUCCESSFUL!")
-        print("="*60)
+        print("=" * 60)
         print(f"🌐 Frontend URL: {frontend_url}")
         print(f"📡 API Gateway: {api_gateway_url}")
-        print(f"🪣 S3 Bucket: {frontend_bucket}")
-        print("="*60)
-        print("\n✅ Frontend is ready to use!")
+        print(f"🪣 S3 Bucket: {bucket_name}")
+        print("=" * 60)
+        print("\n✅ Your application is ready!")
+        
+        if distribution_id:
+            print("⏰ Note: Changes may take 5-15 minutes to appear due to CloudFront caching")
         
     except Exception as e:
         print(f"\n❌ Deployment failed: {e}")

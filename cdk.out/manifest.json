@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-deploy-role-442431377530-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-cfn-exec-role-442431377530-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-442431377530-us-east-1/e14f23e0bc9597672d04978037f1cbd57016d42363eaa1ae0cd747c321fef4f8.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-442431377530-us-east-1/45537adce4388321140f0ec43e01932ade2763cb3fc22dd0a2cd8a81fb743e6f.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -122,6 +122,24 @@
             "data": "ApiLambdaRole66D0B4CD"
           }
         ],
+        "/RekognitionPocStack/LivenessIdentityPool": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LivenessIdentityPool"
+          }
+        ],
+        "/RekognitionPocStack/LivenessUnauthRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LivenessUnauthRoleD5DBE369"
+          }
+        ],
+        "/RekognitionPocStack/LivenessIdentityPoolRoleAttachment": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LivenessIdentityPoolRoleAttachment"
+          }
+        ],
         "/RekognitionPocStack/DocumentIndexer/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -164,6 +182,12 @@
             "data": "CleanupDocumentLambdaC43685DF"
           }
         ],
+        "/RekognitionPocStack/FaceLivenessSession/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FaceLivenessSession9FDE33E4"
+          }
+        ],
         "/RekognitionPocStack/FrontendOAI/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -185,7 +209,7 @@
         "/RekognitionPocStack/RekognitionApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "RekognitionApiDeployment12E716F5f13ece26fc20198ba331b91755a08d21"
+            "data": "RekognitionApiDeployment12E716F5f3a1e3e984758724a3897a610dad40f8"
           }
         ],
         "/RekognitionPocStack/RekognitionApi/DeploymentStage.prod/Resource": [
@@ -368,6 +392,66 @@
             "data": "RekognitionApicleanupdocumentPOST46D4C0DC"
           }
         ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssession2A46B0F7"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionOPTIONS9513020A"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionPOSTApiPermissionRekognitionPocStackRekognitionApiF810B10BPOSTlivenesssessionABACD73E"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionPOSTApiPermissionTestRekognitionPocStackRekognitionApiF810B10BPOSTlivenesssessionC5A1AADB"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionPOSTA50C91BA"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionsessionIdFA42192F"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionsessionIdOPTIONS20B361A3"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionsessionIdGETApiPermissionRekognitionPocStackRekognitionApiF810B10BGETlivenesssessionsessionId6E3A6C01"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionsessionIdGETApiPermissionTestRekognitionPocStackRekognitionApiF810B10BGETlivenesssessionsessionId3E933405"
+          }
+        ],
+        "/RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RekognitionApilivenesssessionsessionIdGETB7D2D993"
+          }
+        ],
         "/RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -384,36 +468,6 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691"
-          }
-        ],
-        "/RekognitionPocStack/FrontendDeployment/AwsCliLayer/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendDeploymentAwsCliLayer77737BA0"
-          }
-        ],
-        "/RekognitionPocStack/FrontendDeployment/CustomResource/Default": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendDeploymentCustomResource068A52DB"
-          }
-        ],
-        "/RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
-          }
-        ],
-        "/RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF"
-          }
-        ],
-        "/RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
           }
         ],
         "/RekognitionPocStack/DocumentsBucketName": [
@@ -462,6 +516,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "ComparisonResultsTableName"
+          }
+        ],
+        "/RekognitionPocStack/LivenessIdentityPoolId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LivenessIdentityPoolId"
           }
         ],
         "/RekognitionPocStack/CDKMetadata/Default": [

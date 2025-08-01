@@ -1,3 +1,4 @@
-aws-cdk-lib==2.140.0 #necesario para trabajar con cdk, desplegar infra con código
-constructs>=10.0.0 #necesario para trabajar con aws-cdk-lib
-boto3>=1.34.0#SDK para crear e interactuar con los servicios de AWS
+aws-cdk-lib==2.140.0
+constructs>=10.0.0
+boto3>=1.34.0
+requests>=2.31.0

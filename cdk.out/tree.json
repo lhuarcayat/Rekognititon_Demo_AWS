@@ -211,13 +211,7 @@
                       "blockPublicPolicy": true,
                       "ignorePublicAcls": true,
                       "restrictPublicBuckets": true
-                    },
-                    "tags": [
-                      {
-                        "key": "aws-cdk:cr-owned:29cf9ae3",
-                        "value": "true"
-                      }
-                    ]
+                    }
                   }
                 },
                 "constructInfo": {
@@ -549,7 +543,7 @@
                     ],
                     "content": {
                       "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423.zip"
+                      "s3Key": "c7994d6dad73c46b6f918a0ab2a339d3fe468c1204715bbd8d94c8fabff0f184.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
                     "layerName": "rekognition-poc-shared-layer"
@@ -743,6 +737,7 @@
                               "Action": [
                                 "rekognition:CompareFaces",
                                 "rekognition:DetectFaces",
+                                "rekognition:GetFaceLivenessSessionResults",
                                 "rekognition:SearchFacesByImage"
                               ],
                               "Effect": "Allow",
@@ -1012,8 +1007,10 @@
                             {
                               "Action": [
                                 "rekognition:CreateCollection",
+                                "rekognition:CreateFaceLivenessSession",
                                 "rekognition:DescribeCollection",
                                 "rekognition:DetectFaces",
+                                "rekognition:GetFaceLivenessSessionResults",
                                 "textract:AnalyzeDocument"
                               ],
                               "Effect": "Allow",
@@ -1034,6 +1031,114 @@
             },
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_iam.Role",
+              "version": "2.140.0"
+            }
+          },
+          "LivenessIdentityPool": {
+            "id": "LivenessIdentityPool",
+            "path": "RekognitionPocStack/LivenessIdentityPool",
+            "attributes": {
+              "aws:cdk:cloudformation:type": "AWS::Cognito::IdentityPool",
+              "aws:cdk:cloudformation:props": {
+                "allowUnauthenticatedIdentities": true,
+                "cognitoIdentityProviders": [],
+                "identityPoolName": "rekognition-poc-liveness-pool"
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.CfnIdentityPool",
+              "version": "2.140.0"
+            }
+          },
+          "LivenessUnauthRole": {
+            "id": "LivenessUnauthRole",
+            "path": "RekognitionPocStack/LivenessUnauthRole",
+            "children": {
+              "ImportLivenessUnauthRole": {
+                "id": "ImportLivenessUnauthRole",
+                "path": "RekognitionPocStack/LivenessUnauthRole/ImportLivenessUnauthRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/LivenessUnauthRole/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                  "aws:cdk:cloudformation:props": {
+                    "assumeRolePolicyDocument": {
+                      "Statement": [
+                        {
+                          "Action": "sts:AssumeRoleWithWebIdentity",
+                          "Condition": {
+                            "StringEquals": {
+                              "cognito-identity.amazonaws.com:aud": {
+                                "Ref": "LivenessIdentityPool"
+                              }
+                            },
+                            "ForAnyValue:StringLike": {
+                              "cognito-identity.amazonaws.com:amr": "unauthenticated"
+                            }
+                          },
+                          "Effect": "Allow",
+                          "Principal": {
+                            "Federated": "cognito-identity.amazonaws.com"
+                          }
+                        }
+                      ],
+                      "Version": "2012-10-17"
+                    },
+                    "policies": [
+                      {
+                        "policyName": "LivenessPolicy",
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "rekognition:StartFaceLivenessSession",
+                              "Effect": "Allow",
+                              "Resource": "*"
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_iam.Role",
+              "version": "2.140.0"
+            }
+          },
+          "LivenessIdentityPoolRoleAttachment": {
+            "id": "LivenessIdentityPoolRoleAttachment",
+            "path": "RekognitionPocStack/LivenessIdentityPoolRoleAttachment",
+            "attributes": {
+              "aws:cdk:cloudformation:type": "AWS::Cognito::IdentityPoolRoleAttachment",
+              "aws:cdk:cloudformation:props": {
+                "identityPoolId": {
+                  "Ref": "LivenessIdentityPool"
+                },
+                "roles": {
+                  "unauthenticated": {
+                    "Fn::GetAtt": [
+                      "LivenessUnauthRoleD5DBE369",
+                      "Arn"
+                    ]
+                  }
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.CfnIdentityPoolRoleAttachment",
               "version": "2.140.0"
             }
           },
@@ -1155,7 +1260,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "d09dffc85f993cf3bb1d3d80f64e2d87eab3abdb5addfa6ff3e8bc803c4824b4.zip"
+                      "s3Key": "552552de1889d64c0a9b1921c29a18d25fdd854c65f7dc470689de47a593b44c.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1182,7 +1287,7 @@
                         "Ref": "SharedLayer27DFABF0"
                       }
                     ],
-                    "memorySize": 512,
+                    "memorySize": 1024,
                     "role": {
                       "Fn::GetAtt": [
                         "ValidatorLambdaRoleD4191E2F",
@@ -1190,7 +1295,7 @@
                       ]
                     },
                     "runtime": "python3.11",
-                    "timeout": 30
+                    "timeout": 120
                   }
                 },
                 "constructInfo": {
@@ -1571,6 +1676,77 @@
               "version": "2.140.0"
             }
           },
+          "FaceLivenessSession": {
+            "id": "FaceLivenessSession",
+            "path": "RekognitionPocStack/FaceLivenessSession",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "RekognitionPocStack/FaceLivenessSession/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "RekognitionPocStack/FaceLivenessSession/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "RekognitionPocStack/FaceLivenessSession/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.140.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/FaceLivenessSession/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+                      "s3Key": "2454fdc347c6e9050f305aa623e54f896f5ecb7fa5acc2394d64413aee64ae2b.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "USER_PHOTOS_BUCKET": {
+                          "Ref": "UserPhotosBucket4D5DE39B"
+                        }
+                      }
+                    },
+                    "functionName": "rekognition-poc-face-liveness-session",
+                    "handler": "handler.lambda_handler",
+                    "memorySize": 256,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "ApiLambdaRole66D0B4CD",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.11",
+                    "timeout": 30
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.140.0"
+            }
+          },
           "FrontendOAI": {
             "id": "FrontendOAI",
             "path": "RekognitionPocStack/FrontendOAI",
@@ -1746,7 +1922,7 @@
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "RekognitionApiDeployment12E716F5f13ece26fc20198ba331b91755a08d21"
+                          "Ref": "RekognitionApiDeployment12E716F5f3a1e3e984758724a3897a610dad40f8"
                         },
                         "restApiId": {
                           "Ref": "RekognitionApiFBDE99C9"
@@ -2980,6 +3156,425 @@
                       "fqn": "aws-cdk-lib.aws_apigateway.Resource",
                       "version": "2.140.0"
                     }
+                  },
+                  "liveness-session": {
+                    "id": "liveness-session",
+                    "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                          "aws:cdk:cloudformation:props": {
+                            "parentId": {
+                              "Fn::GetAtt": [
+                                "RekognitionApiFBDE99C9",
+                                "RootResourceId"
+                              ]
+                            },
+                            "pathPart": "liveness-session",
+                            "restApiId": {
+                              "Ref": "RekognitionApiFBDE99C9"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "OPTIONS": {
+                        "id": "OPTIONS",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/OPTIONS",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/OPTIONS/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "apiKeyRequired": false,
+                                "authorizationType": "NONE",
+                                "httpMethod": "OPTIONS",
+                                "integration": {
+                                  "type": "MOCK",
+                                  "requestTemplates": {
+                                    "application/json": "{ statusCode: 200 }"
+                                  },
+                                  "integrationResponses": [
+                                    {
+                                      "statusCode": "204",
+                                      "responseParameters": {
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "methodResponses": [
+                                  {
+                                    "statusCode": "204",
+                                    "responseParameters": {
+                                      "method.response.header.Access-Control-Allow-Headers": true,
+                                      "method.response.header.Access-Control-Allow-Origin": true,
+                                      "method.response.header.Access-Control-Allow-Methods": true
+                                    }
+                                  }
+                                ],
+                                "resourceId": {
+                                  "Ref": "RekognitionApilivenesssession2A46B0F7"
+                                },
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "POST": {
+                        "id": "POST",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST",
+                        "children": {
+                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session": {
+                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                              "aws:cdk:cloudformation:props": {
+                                "action": "lambda:InvokeFunction",
+                                "functionName": {
+                                  "Fn::GetAtt": [
+                                    "FaceLivenessSession9FDE33E4",
+                                    "Arn"
+                                  ]
+                                },
+                                "principal": "apigateway.amazonaws.com",
+                                "sourceArn": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
+                                      {
+                                        "Ref": "RekognitionApiFBDE99C9"
+                                      },
+                                      "/",
+                                      {
+                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                      },
+                                      "/POST/liveness-session"
+                                    ]
+                                  ]
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session": {
+                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                              "aws:cdk:cloudformation:props": {
+                                "action": "lambda:InvokeFunction",
+                                "functionName": {
+                                  "Fn::GetAtt": [
+                                    "FaceLivenessSession9FDE33E4",
+                                    "Arn"
+                                  ]
+                                },
+                                "principal": "apigateway.amazonaws.com",
+                                "sourceArn": {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      "arn:aws:execute-api:us-east-1:442431377530:",
+                                      {
+                                        "Ref": "RekognitionApiFBDE99C9"
+                                      },
+                                      "/test-invoke-stage/POST/liveness-session"
+                                    ]
+                                  ]
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "authorizationType": "NONE",
+                                "httpMethod": "POST",
+                                "integration": {
+                                  "type": "AWS_PROXY",
+                                  "uri": {
+                                    "Fn::Join": [
+                                      "",
+                                      [
+                                        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                        {
+                                          "Fn::GetAtt": [
+                                            "FaceLivenessSession9FDE33E4",
+                                            "Arn"
+                                          ]
+                                        },
+                                        "/invocations"
+                                      ]
+                                    ]
+                                  },
+                                  "integrationHttpMethod": "POST"
+                                },
+                                "resourceId": {
+                                  "Ref": "RekognitionApilivenesssession2A46B0F7"
+                                },
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.140.0"
+                        }
+                      },
+                      "{sessionId}": {
+                        "id": "{sessionId}",
+                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Ref": "RekognitionApilivenesssession2A46B0F7"
+                                },
+                                "pathPart": "{sessionId}",
+                                "restApiId": {
+                                  "Ref": "RekognitionApiFBDE99C9"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "RekognitionApilivenesssessionsessionIdFA42192F"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "RekognitionApiFBDE99C9"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.140.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.140.0"
+                            }
+                          },
+                          "GET": {
+                            "id": "GET",
+                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET",
+                            "children": {
+                              "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}": {
+                                "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
+                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "FaceLivenessSession9FDE33E4",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:442431377530:",
+                                          {
+                                            "Ref": "RekognitionApiFBDE99C9"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                          },
+                                          "/GET/liveness-session/*"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.140.0"
+                                }
+                              },
+                              "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}": {
+                                "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
+                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "FaceLivenessSession9FDE33E4",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:442431377530:",
+                                          {
+                                            "Ref": "RekognitionApiFBDE99C9"
+                                          },
+                                          "/test-invoke-stage/GET/liveness-session/*"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.140.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "GET",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "FaceLivenessSession9FDE33E4",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "RekognitionApilivenesssessionsessionIdFA42192F"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "RekognitionApiFBDE99C9"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.140.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.140.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.140.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                      "version": "2.140.0"
+                    }
                   }
                 },
                 "constructInfo": {
@@ -3107,342 +3702,6 @@
               "version": "10.4.2"
             }
           },
-          "FrontendDeployment": {
-            "id": "FrontendDeployment",
-            "path": "RekognitionPocStack/FrontendDeployment",
-            "children": {
-              "AwsCliLayer": {
-                "id": "AwsCliLayer",
-                "path": "RekognitionPocStack/FrontendDeployment/AwsCliLayer",
-                "children": {
-                  "Code": {
-                    "id": "Code",
-                    "path": "RekognitionPocStack/FrontendDeployment/AwsCliLayer/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "RekognitionPocStack/FrontendDeployment/AwsCliLayer/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.140.0"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "RekognitionPocStack/FrontendDeployment/AwsCliLayer/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.140.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.140.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "RekognitionPocStack/FrontendDeployment/AwsCliLayer/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::Lambda::LayerVersion",
-                      "aws:cdk:cloudformation:props": {
-                        "content": {
-                          "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                          "s3Key": "1b2c92f2cd21c170884393633bd4c732676df6290562199b6e3ca5e2a1be7d18.zip"
-                        },
-                        "description": "/opt/awscli/aws"
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.CfnLayerVersion",
-                      "version": "2.140.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.lambda_layer_awscli.AwsCliLayer",
-                  "version": "2.140.0"
-                }
-              },
-              "CustomResourceHandler": {
-                "id": "CustomResourceHandler",
-                "path": "RekognitionPocStack/FrontendDeployment/CustomResourceHandler",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.SingletonFunction",
-                  "version": "2.140.0"
-                }
-              },
-              "Asset1": {
-                "id": "Asset1",
-                "path": "RekognitionPocStack/FrontendDeployment/Asset1",
-                "children": {
-                  "Stage": {
-                    "id": "Stage",
-                    "path": "RekognitionPocStack/FrontendDeployment/Asset1/Stage",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.AssetStaging",
-                      "version": "2.140.0"
-                    }
-                  },
-                  "AssetBucket": {
-                    "id": "AssetBucket",
-                    "path": "RekognitionPocStack/FrontendDeployment/Asset1/AssetBucket",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                      "version": "2.140.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                  "version": "2.140.0"
-                }
-              },
-              "CustomResource": {
-                "id": "CustomResource",
-                "path": "RekognitionPocStack/FrontendDeployment/CustomResource",
-                "children": {
-                  "Default": {
-                    "id": "Default",
-                    "path": "RekognitionPocStack/FrontendDeployment/CustomResource/Default",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.CfnResource",
-                      "version": "2.140.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.CustomResource",
-                  "version": "2.140.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_s3_deployment.BucketDeployment",
-              "version": "2.140.0"
-            }
-          },
-          "Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C": {
-            "id": "Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C",
-            "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C",
-            "children": {
-              "ServiceRole": {
-                "id": "ServiceRole",
-                "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole",
-                "children": {
-                  "ImportServiceRole": {
-                    "id": "ImportServiceRole",
-                    "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/ImportServiceRole",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.140.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                      "aws:cdk:cloudformation:props": {
-                        "assumeRolePolicyDocument": {
-                          "Statement": [
-                            {
-                              "Action": "sts:AssumeRole",
-                              "Effect": "Allow",
-                              "Principal": {
-                                "Service": "lambda.amazonaws.com"
-                              }
-                            }
-                          ],
-                          "Version": "2012-10-17"
-                        },
-                        "managedPolicyArns": [
-                          {
-                            "Fn::Join": [
-                              "",
-                              [
-                                "arn:",
-                                {
-                                  "Ref": "AWS::Partition"
-                                },
-                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                              ]
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                      "version": "2.140.0"
-                    }
-                  },
-                  "DefaultPolicy": {
-                    "id": "DefaultPolicy",
-                    "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy",
-                    "children": {
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                          "aws:cdk:cloudformation:props": {
-                            "policyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": [
-                                    "s3:GetBucket*",
-                                    "s3:GetObject*",
-                                    "s3:List*"
-                                  ],
-                                  "Effect": "Allow",
-                                  "Resource": [
-                                    "arn:aws:s3:::cdk-hnb659fds-assets-442431377530-us-east-1",
-                                    "arn:aws:s3:::cdk-hnb659fds-assets-442431377530-us-east-1/*"
-                                  ]
-                                },
-                                {
-                                  "Action": [
-                                    "s3:Abort*",
-                                    "s3:DeleteObject*",
-                                    "s3:GetBucket*",
-                                    "s3:GetObject*",
-                                    "s3:List*",
-                                    "s3:PutObject",
-                                    "s3:PutObjectLegalHold",
-                                    "s3:PutObjectRetention",
-                                    "s3:PutObjectTagging",
-                                    "s3:PutObjectVersionTagging"
-                                  ],
-                                  "Effect": "Allow",
-                                  "Resource": [
-                                    {
-                                      "Fn::GetAtt": [
-                                        "FrontendBucketEFE2E19C",
-                                        "Arn"
-                                      ]
-                                    },
-                                    {
-                                      "Fn::Join": [
-                                        "",
-                                        [
-                                          {
-                                            "Fn::GetAtt": [
-                                              "FrontendBucketEFE2E19C",
-                                              "Arn"
-                                            ]
-                                          },
-                                          "/*"
-                                        ]
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "Action": [
-                                    "cloudfront:CreateInvalidation",
-                                    "cloudfront:GetInvalidation"
-                                  ],
-                                  "Effect": "Allow",
-                                  "Resource": "*"
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "policyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
-                            "roles": [
-                              {
-                                "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                          "version": "2.140.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Policy",
-                      "version": "2.140.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_iam.Role",
-                  "version": "2.140.0"
-                }
-              },
-              "Code": {
-                "id": "Code",
-                "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code",
-                "children": {
-                  "Stage": {
-                    "id": "Stage",
-                    "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code/Stage",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.AssetStaging",
-                      "version": "2.140.0"
-                    }
-                  },
-                  "AssetBucket": {
-                    "id": "AssetBucket",
-                    "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code/AssetBucket",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                      "version": "2.140.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                  "version": "2.140.0"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "RekognitionPocStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                  "aws:cdk:cloudformation:props": {
-                    "code": {
-                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "2d56e153cac88d3e0c2f842e8e6f6783b8725bf91f95e0673b4725448a56e96d.zip"
-                    },
-                    "environment": {
-                      "variables": {
-                        "AWS_CA_BUNDLE": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
-                      }
-                    },
-                    "handler": "index.handler",
-                    "layers": [
-                      {
-                        "Ref": "FrontendDeploymentAwsCliLayer77737BA0"
-                      }
-                    ],
-                    "role": {
-                      "Fn::GetAtt": [
-                        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
-                        "Arn"
-                      ]
-                    },
-                    "runtime": "python3.9",
-                    "timeout": 900
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                  "version": "2.140.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_lambda.Function",
-              "version": "2.140.0"
-            }
-          },
           "DocumentsBucketName": {
             "id": "DocumentsBucketName",
             "path": "RekognitionPocStack/DocumentsBucketName",
@@ -3502,6 +3761,14 @@
           "ComparisonResultsTableName": {
             "id": "ComparisonResultsTableName",
             "path": "RekognitionPocStack/ComparisonResultsTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.140.0"
+            }
+          },
+          "LivenessIdentityPoolId": {
+            "id": "LivenessIdentityPoolId",
+            "path": "RekognitionPocStack/LivenessIdentityPoolId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"

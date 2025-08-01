@@ -20,8 +20,9 @@ import os
 class RekognitionStack(Stack):
     def __init__(self,scope:Construct, construct_id:str,**kwargs)->None:
         super().__init__(scope,construct_id,**kwargs)
+
 # ======================================================================
-#1. Bucket S3
+# 1. S3 BUCKETS
 # ======================================================================
         self.documents_bucket = s3.Bucket(
             self, 'DocumentsBucket',
@@ -39,6 +40,7 @@ class RekognitionStack(Stack):
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.RETAIN
         )
+        
         self.user_photos_bucket=s3.Bucket(
             self,'UserPhotosBucket',
             bucket_name=f'rekognition-poc-user-photos-{self.account}-{self.region}',
@@ -68,18 +70,19 @@ class RekognitionStack(Stack):
             removal_policy=RemovalPolicy.DESTROY
         )
         
-        # 🆕 FRONTEND BUCKET - Configurado para CloudFront (NO website hosting)
+        # FRONTEND BUCKET - Configured for CloudFront
         self.frontend_bucket = s3.Bucket(
             self, 'FrontendBucket',
             bucket_name = f'rekognition-poc-frontend-{self.account}-{self.region}',
             encryption=s3.BucketEncryption.S3_MANAGED,
-            # NO website hosting - CloudFront lo manejará
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # Más seguro
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY
         )
 
-    #============================================================
-        #Tabla para metadatos de documentos indexados
+# ======================================================================
+# 2. DYNAMODB TABLES
+# ======================================================================
+        # Table for indexed documents metadata
         self.indexed_documents_table=dynamodb.Table(
             self,'IndexedDocumentsTable',
             table_name='rekognition-indexed-documents',
@@ -106,7 +109,8 @@ class RekognitionStack(Stack):
                 type=dynamodb.AttributeType.STRING
             )
         )
-    #================================================
+        
+        # Table for comparison results
         self.comparison_results_table=dynamodb.Table(
             self,'ComparisonResultsTable',
             table_name='rekognition-comparison-results',
@@ -146,7 +150,10 @@ class RekognitionStack(Stack):
                 type=dynamodb.AttributeType.NUMBER
             )
         )
-    #========================IAM ROLE
+
+# ======================================================================
+# 3. LAMBDA LAYERS
+# ======================================================================
         self.shared_layer = lambda_.LayerVersion(
             self, 'SharedLayer',
             layer_version_name='rekognition-poc-shared-layer',
@@ -165,6 +172,9 @@ class RekognitionStack(Stack):
             description='Shared utilities with auto-compiled dependencies'
         )
 
+# ======================================================================
+# 4. IAM ROLES
+# ======================================================================
         self.indexer_role=iam.Role(
             self,'IndexerLambdaRole',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -215,7 +225,7 @@ class RekognitionStack(Stack):
             }
         )
 
-        # 🆕 UPDATED VALIDATOR ROLE - Con permisos para invocar document indexer
+        # UPDATED VALIDATOR ROLE - With permissions to invoke document indexer
         self.validator_role = iam.Role(
             self,'ValidatorLambdaRole',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -230,7 +240,8 @@ class RekognitionStack(Stack):
                             actions=[
                                 'rekognition:SearchFacesByImage',
                                 'rekognition:CompareFaces',
-                                'rekognition:DetectFaces'
+                                'rekognition:DetectFaces',
+                                'rekognition:GetFaceLivenessSessionResults'
                             ],
                             resources=['*']
                         ),
@@ -248,7 +259,7 @@ class RekognitionStack(Stack):
                             effect=iam.Effect.ALLOW,
                             actions=[
                                 's3:GetObject',
-                                's3:DeleteObject'  # 🆕 Para cleanup de documentos
+                                's3:DeleteObject'
                             ],
                             resources=[
                                 f'{self.user_photos_bucket.bucket_arn}/*',
@@ -261,7 +272,7 @@ class RekognitionStack(Stack):
                                 'dynamodb:PutItem',
                                 'dynamodb:GetItem',
                                 'dynamodb:Query',
-                                'dynamodb:Scan'  # 🆕 Para verificar documentos indexados
+                                'dynamodb:Scan'
                             ],
                             resources=[
                                 self.comparison_results_table.table_arn,
@@ -270,7 +281,7 @@ class RekognitionStack(Stack):
                                 f'{self.indexed_documents_table.table_arn}/index/*'
                             ]
                         ),
-                        # 🆕 PERMISSION TO INVOKE DOCUMENT INDEXER
+                        # PERMISSION TO INVOKE DOCUMENT INDEXER
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
                             actions=[
@@ -283,7 +294,7 @@ class RekognitionStack(Stack):
             }
         )
 
-        # 🆕 UPDATED API ROLE - Con permiso para bucket documents S3 HEAD
+        # UPDATED API ROLE - With enhanced permissions
         self.api_role = iam.Role(
             self, 'ApiLambdaRole',
             assumed_by = iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -298,8 +309,8 @@ class RekognitionStack(Stack):
                             actions=[
                                 's3:PutObject',
                                 's3:GetObject',
-                                's3:HeadObject',  # 🆕 Para check-document-exists
-                                's3:DeleteObject'  # 🆕 Para cleanup-document
+                                's3:HeadObject',
+                                's3:DeleteObject'
                             ],
                             resources=[
                                 f'{self.documents_bucket.bucket_arn}/*',
@@ -309,7 +320,7 @@ class RekognitionStack(Stack):
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
                             actions=[
-                                's3:ListBucket'  # 🆕 Para check-document-exists
+                                's3:ListBucket'
                             ],
                             resources=[
                                 self.documents_bucket.bucket_arn
@@ -333,13 +344,15 @@ class RekognitionStack(Stack):
                             ],
                             resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:rekognition-poc-document-indexer']
                         ),
-                        # 🆕 REKOGNITION PERMISSIONS FOR DOCUMENT INDEXER API
+                        # REKOGNITION PERMISSIONS FOR DOCUMENT INDEXER API
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
                             actions=[
                                 'rekognition:DetectFaces',
                                 'rekognition:CreateCollection',
-                                'rekognition:DescribeCollection'
+                                'rekognition:DescribeCollection',
+                                'rekognition:CreateFaceLivenessSession',
+                                'rekognition:GetFaceLivenessSessionResults'
                             ],
                             resources=['*']
                         ),
@@ -355,157 +368,9 @@ class RekognitionStack(Stack):
             }
         )
 
-        self.api_role.add_to_policy(
-            iam.PolicyStatement(
-                effect = iam.Effect.ALLOW,
-                actions = [
-                    'rekognition:CreateFaceLivenessSession',
-                    'rekognition:GetFaceLivenessSessionResults'
-                ],
-                resources = ['*']
-            )
-        )
-
-
-    #====================================================
-        self.document_indexer = lambda_.Function(
-            self, 'DocumentIndexer',
-            function_name='rekognition-poc-document-indexer',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler='handler.lambda_handler',
-            code=lambda_.Code.from_asset('functions/document_indexer'),
-            role=self.indexer_role,
-            timeout=Duration.minutes(5),
-            memory_size=1024,
-            layers=[
-                self.shared_layer       
-            ],
-            environment={
-                'COLLECTION_ID':'document-faces-collection',
-                'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
-                'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name
-            }
-        )
-        
-        # 🆕 UPDATED USER VALIDATOR - Con nueva variable de entorno
-        self.user_validator=lambda_.Function(
-            self,'UserValidator',
-            function_name='rekognition-poc-user-validator',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler='handler.lambda_handler',
-            code=lambda_.Code.from_asset('functions/user_validator'),
-            role=self.validator_role,
-            timeout=Duration.seconds(30),
-            memory_size=512,
-            layers=[
-                self.shared_layer
-            ],
-            environment={
-                'COLLECTION_ID':'document-faces-collection',
-                'COMPARISON_RESULTS_TABLE':self.comparison_results_table.table_name,
-                'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
-                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
-                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name,
-                'DOCUMENT_INDEXER_FUNCTION': 'rekognition-poc-document-indexer'  # 🆕
-            }
-        )
-#=======================================================================
-#Lambdas para API
-#======================================================================
-        self.presigned_urls_lambda = lambda_.Function(
-            self, 'PresignedUrlsLambda',
-            function_name= 'rekognition-poc-presigned-urls',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler ='handler.lambda_handler',
-            code = lambda_.Code.from_asset('functions/presigned_urls'),
-            role=self.api_role,
-            timeout=Duration.seconds(10),
-            memory_size=128,
-            environment={
-                'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name,
-                'USER_PHOTOS_BUCKET':self.user_photos_bucket.bucket_name
-            }
-        )
-
-        # 🆕 UPDATED Document indexer API - Con variables adicionales
-        self.document_indexer_api = lambda_.Function(
-            self, 'DocumentIndexerApi',
-            function_name='rekognition-poc-document-indexer-api',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler='handler.lambda_handler',
-            code=lambda_.Code.from_asset('functions/document_indexer_api'),
-            role=self.api_role,
-            timeout=Duration.seconds(30),
-            memory_size=256,
-            layers=[
-                self.shared_layer  # 🆕 Para DetectFaces inmediato
-            ],
-            environment={
-                'DOCUMENT_INDEXER_FUNCTION': self.document_indexer.function_name,
-                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
-                'COLLECTION_ID': 'document-faces-collection'  # 🆕
-            }
-        )
-
-        # Lambda para check validation (sin cambios)
-        self.check_validation_lambda = lambda_.Function(
-            self, 'CheckValidationLambda',
-            function_name='rekognition-poc-check-validation',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler='handler.lambda_handler',
-            code=lambda_.Code.from_asset('functions/check_validation'),
-            role=self.api_role,
-            timeout=Duration.seconds(10),
-            memory_size=128,
-            environment={
-                'COMPARISON_RESULTS_TABLE': self.comparison_results_table.table_name
-            }
-        )
-
-        # 🆕 NEW LAMBDA: Check Document Exists
-        self.check_document_exists_lambda = lambda_.Function(
-            self, 'CheckDocumentExistsLambda',
-            function_name='rekognition-poc-check-document-exists',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler='handler.lambda_handler',
-            code=lambda_.Code.from_asset('functions/check_document_exists'),
-            role=self.api_role,
-            timeout=Duration.seconds(10),
-            memory_size=128,
-            environment={
-                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
-            }
-        )
-
-        # 🆕 NEW LAMBDA: Cleanup Document
-        self.cleanup_document_lambda = lambda_.Function(
-            self, 'CleanupDocumentLambda',
-            function_name='rekognition-poc-cleanup-document',
-            runtime=lambda_.Runtime.PYTHON_3_11,
-            handler='handler.lambda_handler',
-            code=lambda_.Code.from_asset('functions/cleanup_document'),
-            role=self.api_role,
-            timeout=Duration.seconds(10),
-            memory_size=128,
-            environment={
-                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
-            }
-        )
-        
-        self.face_liveness_session = lambda_.Function(
-            self, 'FaceLivenessSession',
-            function_name = 'rekognition-poc-face-liveness-session',
-            runtime = lambda_.Runtime.PYTHON_3_11,
-            handler = 'handler.lambda_handler',
-            code = lambda_.Code.from_asset('functions/face_liveness_session'),
-            role = self.api_role,
-            timeout = Duration.seconds(30),
-            memory_size = 256,
-            environment = {
-                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name
-            }
-        )
-
+# ======================================================================
+# 5. COGNITO IDENTITY POOL FOR FACE LIVENESS
+# ======================================================================
         self.identity_pool = cognito.CfnIdentityPool(
             self, 'LivenessIdentityPool',
             identity_pool_name = 'rekognition-poc-liveness-pool',
@@ -516,7 +381,7 @@ class RekognitionStack(Stack):
         self.unauth_role = iam.Role(
             self, 'LivenessUnauthRole',
             assumed_by = iam.FederatedPrincipal(
-                'cognito-identity.amazonws.com',
+                'cognito-identity.amazonaws.com',
                 {
                     'StringEquals':{
                         'cognito-identity.amazonaws.com:aud': self.identity_pool.ref
@@ -539,7 +404,6 @@ class RekognitionStack(Stack):
                         )
                     ]
                 )
-
             }
         )
 
@@ -552,18 +416,161 @@ class RekognitionStack(Stack):
         )
 
 # ======================================================================
-# 🆕 CLOUDFRONT DISTRIBUTION - HTTPS Frontend
+# 6. LAMBDA FUNCTIONS
 # ======================================================================
-        # Crear Origin Access Identity para acceso seguro a S3
+        self.document_indexer = lambda_.Function(
+            self, 'DocumentIndexer',
+            function_name='rekognition-poc-document-indexer',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/document_indexer'),
+            role=self.indexer_role,
+            timeout=Duration.minutes(5),
+            memory_size=1024,
+            layers=[
+                self.shared_layer       
+            ],
+            environment={
+                'COLLECTION_ID':'document-faces-collection',
+                'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
+                'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name
+            }
+        )
+        
+        # UPDATED USER VALIDATOR - With increased timeout and memory
+        self.user_validator=lambda_.Function(
+            self,'UserValidator',
+            function_name='rekognition-poc-user-validator',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/user_validator'),
+            role=self.validator_role,
+            timeout=Duration.minutes(2),  # INCREASED from 30s to 2 minutes
+            memory_size=1024,  # INCREASED from 512 to 1024
+            layers=[
+                self.shared_layer
+            ],
+            environment={
+                'COLLECTION_ID':'document-faces-collection',
+                'COMPARISON_RESULTS_TABLE':self.comparison_results_table.table_name,
+                'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
+                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name,
+                'DOCUMENT_INDEXER_FUNCTION': 'rekognition-poc-document-indexer'
+            }
+        )
+
+# ======================================================================
+# 7. API LAMBDA FUNCTIONS
+# ======================================================================
+        self.presigned_urls_lambda = lambda_.Function(
+            self, 'PresignedUrlsLambda',
+            function_name= 'rekognition-poc-presigned-urls',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler ='handler.lambda_handler',
+            code = lambda_.Code.from_asset('functions/presigned_urls'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name,
+                'USER_PHOTOS_BUCKET':self.user_photos_bucket.bucket_name
+            }
+        )
+
+        # UPDATED Document indexer API - With enhanced variables
+        self.document_indexer_api = lambda_.Function(
+            self, 'DocumentIndexerApi',
+            function_name='rekognition-poc-document-indexer-api',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/document_indexer_api'),
+            role=self.api_role,
+            timeout=Duration.seconds(30),
+            memory_size=256,
+            layers=[
+                self.shared_layer
+            ],
+            environment={
+                'DOCUMENT_INDEXER_FUNCTION': self.document_indexer.function_name,
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
+                'COLLECTION_ID': 'document-faces-collection'
+            }
+        )
+
+        # Check validation lambda
+        self.check_validation_lambda = lambda_.Function(
+            self, 'CheckValidationLambda',
+            function_name='rekognition-poc-check-validation',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/check_validation'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'COMPARISON_RESULTS_TABLE': self.comparison_results_table.table_name
+            }
+        )
+
+        # NEW LAMBDA: Check Document Exists
+        self.check_document_exists_lambda = lambda_.Function(
+            self, 'CheckDocumentExistsLambda',
+            function_name='rekognition-poc-check-document-exists',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/check_document_exists'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
+            }
+        )
+
+        # NEW LAMBDA: Cleanup Document
+        self.cleanup_document_lambda = lambda_.Function(
+            self, 'CleanupDocumentLambda',
+            function_name='rekognition-poc-cleanup-document',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/cleanup_document'),
+            role=self.api_role,
+            timeout=Duration.seconds(10),
+            memory_size=128,
+            environment={
+                'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name
+            }
+        )
+        
+        # NEW LAMBDA: Face Liveness Session
+        self.face_liveness_session = lambda_.Function(
+            self, 'FaceLivenessSession',
+            function_name = 'rekognition-poc-face-liveness-session',
+            runtime = lambda_.Runtime.PYTHON_3_11,
+            handler = 'handler.lambda_handler',
+            code = lambda_.Code.from_asset('functions/face_liveness_session'),
+            role = self.api_role,
+            timeout = Duration.seconds(30),
+            memory_size = 256,
+            environment = {
+                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name
+            }
+        )
+
+# ======================================================================
+# 8. CLOUDFRONT DISTRIBUTION - SIMPLIFIED WITHOUT BUCKET DEPLOYMENT
+# ======================================================================
+        # Create Origin Access Identity for secure S3 access
         self.origin_access_identity = cloudfront.OriginAccessIdentity(
             self, 'FrontendOAI',
             comment='OAI for Rekognition POC Frontend'
         )
         
-        # Permitir que CloudFront acceda al bucket
+        # Allow CloudFront to access the bucket
         self.frontend_bucket.grant_read(self.origin_access_identity)
 
-        # Crear distribución CloudFront
+        # Create CloudFront distribution
         self.distribution = cloudfront.Distribution(
             self, 'FrontendDistribution',
             default_behavior=cloudfront.BehaviorOptions(
@@ -592,12 +599,12 @@ class RekognitionStack(Stack):
                     ttl=Duration.minutes(5)
                 )
             ],
-            price_class=cloudfront.PriceClass.PRICE_CLASS_100,  # Solo US/EU para reducir costos
+            price_class=cloudfront.PriceClass.PRICE_CLASS_100,
             comment='Rekognition POC Frontend Distribution'
         )
 
 # ======================================================================
-# 🆕 UPDATED API GATEWAY - Con nuevo endpoint
+# 9. API GATEWAY - With all endpoints
 # ======================================================================
         self.api = apigateway.RestApi(
             self, 'RekognitionApi',
@@ -610,7 +617,6 @@ class RekognitionStack(Stack):
             )
         )
 
-        # Endpoints existentes
         # POST /presigned-urls
         presigned_resource = self.api.root.add_resource('presigned-urls')
         presigned_resource.add_method(
@@ -633,20 +639,21 @@ class RekognitionStack(Stack):
             apigateway.LambdaIntegration(self.check_validation_lambda)
         )
 
-        # 🆕 NEW ENDPOINT: POST /check-document
+        # POST /check-document
         check_doc_resource = self.api.root.add_resource('check-document')
         check_doc_resource.add_method(
             'POST',
             apigateway.LambdaIntegration(self.check_document_exists_lambda)
         )
 
-        # 🆕 NEW ENDPOINT: POST /cleanup-document
+        # POST /cleanup-document
         cleanup_doc_resource = self.api.root.add_resource('cleanup-document')
         cleanup_doc_resource.add_method(
             'POST',
             apigateway.LambdaIntegration(self.cleanup_document_lambda)
         )
 
+        # Face Liveness endpoints
         liveness_session_resource = self.api.root.add_resource('liveness-session')
         liveness_session_resource.add_method(
             'POST',
@@ -660,7 +667,7 @@ class RekognitionStack(Stack):
         )
 
 # ======================================================================
-# S3 TRIGGERS (sin cambios)
+# 10. S3 TRIGGERS
 # ======================================================================
         self.user_photos_bucket.add_event_notification(
             s3.EventType.OBJECT_CREATED,
@@ -673,25 +680,13 @@ class RekognitionStack(Stack):
             s3.NotificationKeyFilter(suffix=".jpeg")
         )
         self.user_photos_bucket.add_event_notification(
-                    s3.EventType.OBJECT_CREATED,
-                    s3n.LambdaDestination(self.user_validator), 
-                    s3.NotificationKeyFilter(suffix=".png")
-                )
-        
-# ======================================================================
-# 🆕 FRONTEND DEPLOYMENT
-# ======================================================================
-        self.frontend_deployment = s3deploy.BucketDeployment(
-            self, 'FrontendDeployment',
-            sources=[s3deploy.Source.asset('frontend/dist')],
-            destination_bucket=self.frontend_bucket,
-            distribution=self.distribution,  # 🆕 Invalidar cache automáticamente
-            distribution_paths=['/*'],  # 🆕 Invalidar todos los archivos
-            retain_on_delete=False
-        )       
+            s3.EventType.OBJECT_CREATED,
+            s3n.LambdaDestination(self.user_validator), 
+            s3.NotificationKeyFilter(suffix=".png")
+        )
 
 # ======================================================================
-# OUTPUTS - UPDATED
+# 11. OUTPUTS
 # ======================================================================
         cdk.CfnOutput(
             self,'DocumentsBucketName',
@@ -710,14 +705,14 @@ class RekognitionStack(Stack):
             description='Bucket for frontend hosting'
         )
         
-        # 🆕 NUEVA URL con HTTPS via CloudFront
+        # HTTPS URL via CloudFront
         cdk.CfnOutput(
             self, 'FrontendUrl',
             value=f'https://{self.distribution.distribution_domain_name}',
             description='Frontend website URL (HTTPS via CloudFront)'
         )
         
-        # 🆕 OUTPUT adicional para CloudFront
+        # CloudFront distribution ID
         cdk.CfnOutput(
             self, 'CloudFrontDistributionId',
             value=self.distribution.distribution_id,
@@ -744,37 +739,3 @@ class RekognitionStack(Stack):
             value = self.identity_pool.ref,
             description = 'Cognito Identity Pool ID for Face Liveness'
         )
-
-
-
-
-
-
-
-
-
-
-
-                                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

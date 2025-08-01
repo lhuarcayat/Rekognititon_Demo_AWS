@@ -8,6 +8,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AWS Amplify UI Components for Face Liveness -->
+    <script type="module">
+        import { Amplify } from 'https://cdn.jsdelivr.net/npm/aws-amplify@6/+esm';
+        import { FaceLivenessDetector } from 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-react-liveness@3/+esm';
+        
+        // Configure Amplify
+        Amplify.configure({
+            Auth: {
+                Cognito: {
+                    identityPoolId: 'us-east-1:IDENTITY_POOL_ID_PLACEHOLDER',
+                    region: 'us-east-1',
+                    allowGuestAccess: true
+                }
+            }
+        });
+        
+        // Make available globally
+        window.Amplify = Amplify;
+        window.FaceLivenessDetector = FaceLivenessDetector;
+    </script>
 </head>
 <body>
     <!-- ============================================ -->
@@ -42,12 +63,11 @@
                     <input type="tel" id="numeroCelular" placeholder="Ingrese su número de contacto" required>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
                     <span>Iniciar Verificación</span>
                     <div class="spinner hidden"></div>
                 </button>
                 
-                <!-- 🆕 Status message for document check -->
                 <div id="documentCheckStatus" class="status-message hidden"></div>
             </form>
         </div>
@@ -66,7 +86,8 @@
                 <p>Para proceder con la verificación biométrica, necesitamos acceso a su cámara web. Este proceso garantiza la autenticidad de su identidad mediante tecnología de reconocimiento facial avanzada.</p>
                 
                 <button id="permitirCamara" class="btn btn-primary">
-                    Autorizar Acceso a Cámara
+                    <span>Autorizar Acceso a Cámara</span>
+                    <div class="spinner hidden"></div>
                 </button>
                 
                 <button id="atrasPermission" class="btn btn-secondary">
@@ -83,7 +104,7 @@
         <div class="container">
             <div class="camera-section">
                 <div class="form-badge">Paso 1 de 2</div>
-                <h2> Captura de Documento</h2>
+                <h2>📄 Captura de Documento</h2>
                 <p>Posicione su <span id="tipoDocumentoDisplay"></span> frente a la cámara. Asegúrese de que el documento esté completamente visible y bien iluminado.</p>
                 
                 <div class="camera-container">
@@ -93,7 +114,7 @@
                 
                 <div class="camera-controls">
                     <button id="tomarFotoDocumento" class="btn btn-primary">
-                        <span> Capturar Documento</span>
+                        <span>📸 Capturar Documento</span>
                         <div class="spinner hidden"></div>
                     </button>
                     <button id="atrasDocumento" class="btn btn-secondary">Volver</button>
@@ -105,52 +126,62 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- INTERFACE 3: CAPTURA USUARIO -->
+    <!-- INTERFACE 3: AWS FACE LIVENESS REAL -->
     <!-- ============================================ -->
-<div id="interface3" class="interface">
-    <div class="container">
-        <div class="liveness-section">
-            <div class="form-badge">Paso 2 de 2</div>
-            <h2>🔒 Verificación de Presencia Real</h2>
-            <p>Utilizamos AWS Face Liveness para verificar que eres una persona real y no un intento de suplantación.</p>
-            
-            <!-- Estado de carga inicial -->
-            <div id="livenessLoading" class="loading-container">
-                <div class="spinner"></div>
-                <p id="livenessLoadingText">Preparando verificación facial...</p>
-            </div>
-            
-            <!-- Contenedor para Face Liveness Detector -->
-            <div id="livenessDetectorContainer" class="liveness-detector-container" style="display: none;">
-                <div class="liveness-info">
-                    <p><strong>Instrucciones:</strong></p>
-                    <ul>
-                        <li>Asegúrate de tener buena iluminación</li>
-                        <li>Mantén tu rostro centrado en el óvalo</li>
-                        <li>Sigue las instrucciones que aparezcan en pantalla</li>
-                        <li>El proceso toma aproximadamente 10-15 segundos</li>
-                    </ul>
+    <div id="interface3" class="interface">
+        <div class="container">
+            <div class="liveness-section">
+                <div class="form-badge">Paso 2 de 2</div>
+                <h2>🔒 Verificación de Presencia Real</h2>
+                <p>Utilizamos AWS Face Liveness para verificar que eres una persona real y no un intento de suplantación.</p>
+                
+                <!-- Loading state -->
+                <div id="livenessLoading" class="loading-container" style="display: none;">
+                    <div class="spinner"></div>
+                    <p id="livenessLoadingText">Preparando verificación facial...</p>
                 </div>
                 
-                <!-- Aquí se insertará el componente de Face Liveness -->
-                <div id="faceLivenessDetector"></div>
+                <!-- Real AWS Face Liveness Component Container -->
+                <div id="livenessDetectorContainer" class="liveness-detector-container">
+                    <div class="liveness-info">
+                        <p><strong>Instrucciones:</strong></p>
+                        <ul>
+                            <li>Asegúrate de tener buena iluminación</li>
+                            <li>Mantén tu rostro centrado</li>
+                            <li>Sigue las instrucciones en pantalla</li>
+                            <li>El proceso toma aproximadamente 10-15 segundos</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- This will be replaced with real AWS Face Liveness Detector -->
+                    <div id="faceLivenessDetector">
+                        <div class="liveness-ready-message">
+                            <p>🎯 AWS Face Liveness está listo</p>
+                            <button id="startRealLiveness" class="btn btn-primary btn-large">
+                                Iniciar Verificación Facial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress for real liveness -->
+                <div id="livenessValidationProgress" class="validation-progress hidden">
+                    <div class="progress-spinner"></div>
+                    <p>Validando con tu documento... <span id="livenessProgressTimer">15</span>s</p>
+                    <div class="progress-details">
+                        <small>Procesando con AWS Face Liveness...</small>
+                    </div>
+                </div>
+                
+                <div class="camera-controls">
+                    <button id="atrasLiveness" class="btn btn-secondary">Volver</button>
+                    <button id="retryLiveness" class="btn btn-secondary btn-retry" style="display: none;">🔄 Reintentar</button>
+                </div>
+                
+                <div id="livenessStatus" class="status-message hidden"></div>
             </div>
-            
-            <!-- Contenedor de progreso de validación -->
-            <div id="livenessValidationProgress" class="validation-progress hidden">
-                <div class="progress-spinner"></div>
-                <p>Validando con tu documento... <span id="livenessProgressTimer">10</span>s</p>
-            </div>
-            
-            <div class="camera-controls">
-                <button id="atrasLiveness" class="btn btn-secondary">Volver</button>
-                <button id="retryLiveness" class="btn btn-secondary" style="display: none;">🔄 Reintentar</button>
-            </div>
-            
-            <div id="livenessStatus" class="status-message hidden"></div>
         </div>
     </div>
-</div>
 
     <!-- ============================================ -->
     <!-- INTERFACE SUCCESS -->
@@ -173,6 +204,14 @@
                 <div class="user-info">
                     <h2 id="personName">USUARIO VERIFICADO</h2>
                     <p>Los siguientes servicios están disponibles para su perfil verificado</p>
+                </div>
+                
+                <!-- Información adicional para liveness -->
+                <div class="liveness-verification-info" style="display: none;">
+                    <div class="verification-badge">
+                        <span class="badge-icon">🔒</span>
+                        <span class="badge-text">Verificado con AWS Face Liveness</span>
+                    </div>
                 </div>
                 
                 <div class="transaction-details">
