@@ -15,6 +15,11 @@ import os
 class RekognitionStack(Stack):
     def __init__(self,scope:Construct, construct_id:str,**kwargs)->None:
         super().__init__(scope,construct_id,**kwargs)
+
+        # Get validation mode from context or default to HYBRID
+        validation_mode = self.node.try_get_context('validation_mode') or 'HYBRID'
+        direct_compare_threshold = self.node.try_get_context('direct_compare_threshold') or '80.0'
+
 # ======================================================================
 #1. Bucket S3
 # ======================================================================
@@ -23,24 +28,10 @@ class RekognitionStack(Stack):
             bucket_name=f'rekognition-basic-documents-{self.account}-{self.region}',
             versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
-            # lifecycle_rules=[
-            #     s3.LifecycleRule(
-            #         id='documents_archive',
-            #         transitions=[
-            #             s3.Transition(
-            #                 storage_class=s3.StorageClass.GLACIER,
-            #                 transition_after=Duration.days(30)
-            #             ),
-            #             s3.Transition(
-            #                 storage_class=s3.StorageClass.DEEP_ARCHIVE,
-            #                 transition_after=Duration.days(90)
-            #             )
-            #         ]
-            #     )
-            # ],
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.RETAIN
         )
+        
         self.user_photos_bucket=s3.Bucket(
             self,'UserPhotosBucketBasic',
             bucket_name=f'rekognition-basic-user-photos-{self.account}-{self.region}',
@@ -66,11 +57,12 @@ class RekognitionStack(Stack):
                     max_age=3000
                 )
             ],
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,#####
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY
         )
+
     #============================================================
-        #Tabla para metadatos de documentos indexados
+        # Tabla para metadatos de documentos indexados
         self.indexed_documents_table=dynamodb.Table(
             self,'IndexedDocumentsTableBasic',
             table_name='rekognition-basic-indexed-documents',
@@ -97,7 +89,9 @@ class RekognitionStack(Stack):
                 type=dynamodb.AttributeType.STRING
             )
         )
+
     #================================================
+        # Tabla de resultados con campos adicionales para modo directo
         self.comparison_results_table=dynamodb.Table(
             self,'ComparisonResultsTableBasic',
             table_name='rekognition-basic-comparison-results',
@@ -127,9 +121,9 @@ class RekognitionStack(Stack):
         )
         
         self.comparison_results_table.add_global_secondary_index(
-            index_name='face-id-index',
+            index_name='validation-mode-index',
             partition_key=dynamodb.Attribute(
-                name='matched_face_id',
+                name='validation_mode',
                 type=dynamodb.AttributeType.STRING
             ),
             sort_key=dynamodb.Attribute(
@@ -137,7 +131,8 @@ class RekognitionStack(Stack):
                 type=dynamodb.AttributeType.NUMBER
             )
         )
-    #========================IAM ROLE
+
+    #======================== SHARED LAYER
         self.shared_layer = lambda_.LayerVersion(
             self, 'SharedLayer',
             layer_version_name='rekognition-basic-shared-layer',
@@ -156,6 +151,7 @@ class RekognitionStack(Stack):
             description='Shared utilities with auto-compiled dependencies'
         )
 
+    #======================== IAM ROLES
         self.indexer_role=iam.Role(
             self,'IndexerLambdaRoleBasic',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -163,7 +159,7 @@ class RekognitionStack(Stack):
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
             ],
             inline_policies={
-                'RekognitionIndexerPolicy':iam.PolicyDocument(
+                'RekognitionIndexerBasicPolicy':iam.PolicyDocument(
                     statements=[
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
@@ -205,6 +201,7 @@ class RekognitionStack(Stack):
             }
         )
 
+        # Enhanced validator role with additional permissions for direct comparison
         self.validator_role = iam.Role(
             self,'ValidatorLambdaRoleBasic',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -212,7 +209,7 @@ class RekognitionStack(Stack):
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
             ],
             inline_policies={
-                'RekognitionValidatorPolicy':iam.PolicyDocument(
+                'RekognitionValidatorBasicPolicy':iam.PolicyDocument(
                     statements=[
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
@@ -248,7 +245,8 @@ class RekognitionStack(Stack):
                             actions=[
                                 'dynamodb:PutItem',
                                 'dynamodb:GetItem',
-                                'dynamodb:Query'
+                                'dynamodb:Query',
+                                'dynamodb:Scan'
                             ],
                             resources=[
                                 self.comparison_results_table.table_arn,
@@ -261,7 +259,8 @@ class RekognitionStack(Stack):
                 )
             }
         )
-    #====================================================
+
+    #==================================================== LAMBDA FUNCTIONS
         self.document_indexer = lambda_.Function(
             self, 'DocumentIndexerBasic',
             function_name='rekognition-basic-document-indexer',
@@ -275,11 +274,13 @@ class RekognitionStack(Stack):
                 self.shared_layer       
             ],
             environment={
-                'COLLECTION_ID':'document-faces-collection',
+                'COLLECTION_ID':'document-faces-basic-collection',
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
                 'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name
             }
         )
+
+        # Enhanced user validator with dual mode support
         self.user_validator=lambda_.Function(
             self,'UserValidatorBasic',
             function_name='rekognition-basic-user-validator',
@@ -290,16 +291,21 @@ class RekognitionStack(Stack):
             timeout=Duration.seconds(30),
             memory_size=512,
             layers=[
-                self.shared_layer       # Tu código
+                self.shared_layer       
             ],
             environment={
-                'COLLECTION_ID':'document-faces-collection',
+                'COLLECTION_ID':'document-faces-basic-collection',
                 'COMPARISON_RESULTS_TABLE':self.comparison_results_table.table_name,
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
                 'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
-                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name  
+                'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name,
+                # NEW: Validation mode configuration
+                'VALIDATION_MODE': validation_mode,
+                'DIRECT_COMPARE_THRESHOLD': direct_compare_threshold
             }
         )
+
+        # S3 event notifications (unchanged)
         self.user_photos_bucket.add_event_notification(
             s3.EventType.OBJECT_CREATED,
             s3n.LambdaDestination(self.user_validator),
@@ -311,29 +317,41 @@ class RekognitionStack(Stack):
             s3.NotificationKeyFilter(suffix=".jpeg")
         )
         self.user_photos_bucket.add_event_notification(
-                    s3.EventType.OBJECT_CREATED,
-                    s3n.LambdaDestination(self.user_validator), 
-                    s3.NotificationKeyFilter(suffix=".png")
-                )
+            s3.EventType.OBJECT_CREATED,
+            s3n.LambdaDestination(self.user_validator), 
+            s3.NotificationKeyFilter(suffix=".png")
+        )
+
+    #==================================================== OUTPUTS
         cdk.CfnOutput(
-            self,'DocumentsBucketName',
+            self,'DocumentsBucketNameBasic',
             value=self.documents_bucket.bucket_name,
             description='Bucket for identity documents'
         )
         cdk.CfnOutput(
-            self, 'UserPhotosBucketName',
+            self, 'UserPhotosBucketNameBasic',
             value=self.user_photos_bucket.bucket_name,
             description='Bucket for user photos'
         )
         cdk.CfnOutput(
-            self,'IndexedDocumentsTableName',
+            self,'IndexedDocumentsTableNameBasic',
             value=self.indexed_documents_table.table_name,
             description='DynamoDB table for indexed documents metadata'
         )
         cdk.CfnOutput(
-            self,'ComparisonResultsTableName',
+            self,'ComparisonResultsTableNameBasic',
             value=self.comparison_results_table.table_name,
             description='DynamoDB table for comparison results'
+        )
+        cdk.CfnOutput(
+            self,'ValidationMode',
+            value=validation_mode,
+            description='Current validation mode (HYBRID or DIRECT_COMPARE)'
+        )
+        cdk.CfnOutput(
+            self,'DirectCompareThreshold',
+            value=direct_compare_threshold,
+            description='Threshold for direct comparison mode'
         )
 
 

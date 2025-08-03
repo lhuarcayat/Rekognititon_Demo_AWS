@@ -294,7 +294,7 @@
                         "attributeType": "S"
                       },
                       {
-                        "attributeName": "matched_face_id",
+                        "attributeName": "validation_mode",
                         "attributeType": "S"
                       },
                       {
@@ -321,10 +321,10 @@
                         }
                       },
                       {
-                        "indexName": "face-id-index",
+                        "indexName": "validation-mode-index",
                         "keySchema": [
                           {
-                            "attributeName": "matched_face_id",
+                            "attributeName": "validation_mode",
                             "keyType": "HASH"
                           },
                           {
@@ -479,7 +479,7 @@
                     ],
                     "policies": [
                       {
-                        "policyName": "RekognitionIndexerPolicy",
+                        "policyName": "RekognitionIndexerBasicPolicy",
                         "policyDocument": {
                           "Statement": [
                             {
@@ -600,7 +600,7 @@
                     ],
                     "policies": [
                       {
-                        "policyName": "RekognitionValidatorPolicy",
+                        "policyName": "RekognitionValidatorBasicPolicy",
                         "policyDocument": {
                           "Statement": [
                             {
@@ -668,7 +668,8 @@
                               "Action": [
                                 "dynamodb:GetItem",
                                 "dynamodb:PutItem",
-                                "dynamodb:Query"
+                                "dynamodb:Query",
+                                "dynamodb:Scan"
                               ],
                               "Effect": "Allow",
                               "Resource": [
@@ -776,7 +777,7 @@
                     },
                     "environment": {
                       "variables": {
-                        "COLLECTION_ID": "document-faces-collection",
+                        "COLLECTION_ID": "document-faces-basic-collection",
                         "INDEXED_DOCUMENTS_TABLE": {
                           "Ref": "IndexedDocumentsTableBasic38A69D7F"
                         },
@@ -854,11 +855,11 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "1dbc6e1ccaee469f93c215a29a1d12985bfd48154123368a7015d9fee35897fe.zip"
+                      "s3Key": "cb2f7195e86a6e6867b4196153ac6ea4c96a7bda5f9dee744ddc83d668692672.zip"
                     },
                     "environment": {
                       "variables": {
-                        "COLLECTION_ID": "document-faces-collection",
+                        "COLLECTION_ID": "document-faces-basic-collection",
                         "COMPARISON_RESULTS_TABLE": {
                           "Ref": "ComparisonResultsTableBasic37BC9648"
                         },
@@ -870,7 +871,9 @@
                         },
                         "USER_PHOTOS_BUCKET": {
                           "Ref": "UserPhotosBucketBasic841BB3B6"
-                        }
+                        },
+                        "VALIDATION_MODE": "DIRECT_COMPARE",
+                        "DIRECT_COMPARE_THRESHOLD": "90.0"
                       }
                     },
                     "functionName": "rekognition-basic-user-validator",
@@ -1016,33 +1019,49 @@
               "version": "10.4.2"
             }
           },
-          "DocumentsBucketName": {
-            "id": "DocumentsBucketName",
-            "path": "RekognitionPocBasicStack/DocumentsBucketName",
+          "DocumentsBucketNameBasic": {
+            "id": "DocumentsBucketNameBasic",
+            "path": "RekognitionPocBasicStack/DocumentsBucketNameBasic",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "UserPhotosBucketName": {
-            "id": "UserPhotosBucketName",
-            "path": "RekognitionPocBasicStack/UserPhotosBucketName",
+          "UserPhotosBucketNameBasic": {
+            "id": "UserPhotosBucketNameBasic",
+            "path": "RekognitionPocBasicStack/UserPhotosBucketNameBasic",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "IndexedDocumentsTableName": {
-            "id": "IndexedDocumentsTableName",
-            "path": "RekognitionPocBasicStack/IndexedDocumentsTableName",
+          "IndexedDocumentsTableNameBasic": {
+            "id": "IndexedDocumentsTableNameBasic",
+            "path": "RekognitionPocBasicStack/IndexedDocumentsTableNameBasic",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "ComparisonResultsTableName": {
-            "id": "ComparisonResultsTableName",
-            "path": "RekognitionPocBasicStack/ComparisonResultsTableName",
+          "ComparisonResultsTableNameBasic": {
+            "id": "ComparisonResultsTableNameBasic",
+            "path": "RekognitionPocBasicStack/ComparisonResultsTableNameBasic",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.140.0"
+            }
+          },
+          "ValidationMode": {
+            "id": "ValidationMode",
+            "path": "RekognitionPocBasicStack/ValidationMode",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.140.0"
+            }
+          },
+          "DirectCompareThreshold": {
+            "id": "DirectCompareThreshold",
+            "path": "RekognitionPocBasicStack/DirectCompareThreshold",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"

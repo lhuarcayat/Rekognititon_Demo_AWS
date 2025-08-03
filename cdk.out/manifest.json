@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/b8a49de95f94fabef329eeccd19064e4a3a88c9bb59099c7e4bf9b21d840e22b.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/c82049b39e95a9c01f10c454c3730ecd618ff5eb34b6336e73cab1dabbc06804.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -134,28 +134,40 @@
             "data": "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691"
           }
         ],
-        "/RekognitionPocBasicStack/DocumentsBucketName": [
+        "/RekognitionPocBasicStack/DocumentsBucketNameBasic": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DocumentsBucketName"
+            "data": "DocumentsBucketNameBasic"
           }
         ],
-        "/RekognitionPocBasicStack/UserPhotosBucketName": [
+        "/RekognitionPocBasicStack/UserPhotosBucketNameBasic": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "UserPhotosBucketName"
+            "data": "UserPhotosBucketNameBasic"
           }
         ],
-        "/RekognitionPocBasicStack/IndexedDocumentsTableName": [
+        "/RekognitionPocBasicStack/IndexedDocumentsTableNameBasic": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "IndexedDocumentsTableName"
+            "data": "IndexedDocumentsTableNameBasic"
           }
         ],
-        "/RekognitionPocBasicStack/ComparisonResultsTableName": [
+        "/RekognitionPocBasicStack/ComparisonResultsTableNameBasic": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ComparisonResultsTableName"
+            "data": "ComparisonResultsTableNameBasic"
+          }
+        ],
+        "/RekognitionPocBasicStack/ValidationMode": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ValidationMode"
+          }
+        ],
+        "/RekognitionPocBasicStack/DirectCompareThreshold": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DirectCompareThreshold"
           }
         ],
         "/RekognitionPocBasicStack/CDKMetadata/Default": [
