@@ -170,6 +170,7 @@ def validate_direct_compare_by_image_key(user_image_key: str, document_image_key
                 status='DOCUMENT_IMAGE_NOT_FOUND',
                 validation_mode='DIRECT_COMPARE_BY_IMAGE_KEY',
                 document_image_key=document_image_key,
+                confidence_score=0,
                 error=f'Failed to download document image: {str(e)}'
             )
         
@@ -184,6 +185,7 @@ def validate_direct_compare_by_image_key(user_image_key: str, document_image_key
                 status='USER_IMAGE_PROCESSING_ERROR',
                 validation_mode='DIRECT_COMPARE_BY_IMAGE_KEY',
                 document_image_key=document_image_key,
+                confidence_score=0,
                 error=f'User image preprocessing failed: {error}'
             )
         
@@ -195,6 +197,7 @@ def validate_direct_compare_by_image_key(user_image_key: str, document_image_key
                 status='NO_FACE_IN_USER_IMAGE',
                 validation_mode='DIRECT_COMPARE_BY_IMAGE_KEY',
                 document_image_key=document_image_key,
+                confidence_score=0,
                 error='No faces detected in user photo'
             )
         
@@ -213,27 +216,25 @@ def validate_direct_compare_by_image_key(user_image_key: str, document_image_key
                 status='COMPARISON_ERROR',
                 validation_mode='DIRECT_COMPARE_BY_IMAGE_KEY',
                 document_image_key=document_image_key,
+                confidence_score=0,
                 error=f'CompareFaces failed: {comparison_result["error"]}'
             )
         
-        # STEP 7: Evaluar resultado
-        if comparison_result['match_found']:
-            confidence = comparison_result['similarity']
-            
-            if confidence >= 95:
-                status = 'DIRECT_MATCH_HIGH_CONFIDENCE'
-            elif confidence >= 85:
-                status = 'DIRECT_MATCH_CONFIRMED'
-            elif confidence >= 75:
-                status = 'DIRECT_MATCH_MODERATE'
-            else:
-                status = 'DIRECT_MATCH_LOW_CONFIDENCE'
-                
-            logger.info(f"Direct comparison successful: {confidence:.1f}% similarity")
+        # 🔧 STEP 7: Evaluar resultado CORREGIDO
+        # SIEMPRE obtener similarity real, sin importar match_found
+        similarity = comparison_result.get('similarity', 0)
+
+        if similarity >= 95:
+            status = 'DIRECT_MATCH_HIGH_CONFIDENCE'
+        elif similarity >= 90:  
+            status = 'DIRECT_MATCH_CONFIRMED'
+        elif similarity >= 80:  # ← Agregado: rango moderado
+            status = 'POSIBLE_MATCH'
         else:
             status = 'DIRECT_NO_MATCH'
-            confidence = 0
-            logger.info(f"Direct comparison: No match found")
+
+        confidence = similarity  # ← NUNCA forzar a 0
+        logger.info(f"Direct comparison: {confidence:.1f}% similarity → {status}")
         
         # STEP 8: Almacenar resultado
         return store_validation_result(
@@ -256,6 +257,7 @@ def validate_direct_compare_by_image_key(user_image_key: str, document_image_key
             status='ERROR',
             validation_mode='DIRECT_COMPARE_BY_IMAGE_KEY',
             document_image_key=document_image_key,
+            confidence_score=0,
             error=str(e)
         )
 
@@ -282,6 +284,7 @@ def validate_direct_compare_by_document_id(user_image_key: str, target_document_
                 status='TARGET_DOCUMENT_NOT_FOUND',
                 validation_mode='DIRECT_COMPARE_BY_DOCUMENT_ID',
                 target_document_id=target_document_id,
+                confidence_score=0,
                 error=f'Document not found: {target_document_id}'
             )
         
@@ -299,6 +302,7 @@ def validate_direct_compare_by_document_id(user_image_key: str, target_document_
                 status='TARGET_DOCUMENT_ACCESS_ERROR',
                 validation_mode='DIRECT_COMPARE_BY_DOCUMENT_ID',
                 target_document_id=target_document_id,
+                confidence_score=0,
                 error=f'Failed to download target document: {str(e)}'
             )
         
@@ -310,6 +314,7 @@ def validate_direct_compare_by_document_id(user_image_key: str, target_document_
                 status='USER_IMAGE_PROCESSING_ERROR',
                 validation_mode='DIRECT_COMPARE_BY_DOCUMENT_ID',
                 target_document_id=target_document_id,
+                confidence_score=0,
                 error=f'User image preprocessing failed: {error}'
             )
         
@@ -321,6 +326,7 @@ def validate_direct_compare_by_document_id(user_image_key: str, target_document_
                 status='NO_FACE_IN_USER_IMAGE',
                 validation_mode='DIRECT_COMPARE_BY_DOCUMENT_ID',
                 target_document_id=target_document_id,
+                confidence_score=0,
                 error='No faces detected in user photo'
             )
         
@@ -339,27 +345,25 @@ def validate_direct_compare_by_document_id(user_image_key: str, target_document_
                 status='COMPARISON_ERROR',
                 validation_mode='DIRECT_COMPARE_BY_DOCUMENT_ID',
                 target_document_id=target_document_id,
+                confidence_score=0,
                 error=f'CompareFaces failed: {comparison_result["error"]}'
             )
         
-        # STEP 7: Evaluar resultado
-        if comparison_result['match_found']:
-            confidence = comparison_result['similarity']
-            
-            if confidence >= 95:
-                status = 'DIRECT_MATCH_HIGH_CONFIDENCE'
-            elif confidence >= 85:
-                status = 'DIRECT_MATCH_CONFIRMED'
-            elif confidence >= 75:
-                status = 'DIRECT_MATCH_MODERATE'
-            else:
-                status = 'DIRECT_MATCH_LOW_CONFIDENCE'
-                
-            logger.info(f"Direct comparison successful: {confidence:.1f}% similarity")
+        # 🔧 STEP 7: Evaluar resultado CORREGIDO
+        # SIEMPRE obtener similarity real, sin importar match_found
+        similarity = comparison_result.get('similarity', 0)
+
+        if similarity >= 95:
+            status = 'DIRECT_MATCH_HIGH_CONFIDENCE'
+        elif similarity >= 90: 
+            status = 'DIRECT_MATCH_CONFIRMED'
+        elif similarity >= 80:  
+            status = 'POSIBLE MATCH'
         else:
             status = 'DIRECT_NO_MATCH'
-            confidence = 0
-            logger.info(f"Direct comparison: No match found")
+
+        confidence = similarity  # ← Valor real siempre
+        logger.info(f"Direct comparison: {confidence:.1f}% similarity → {status}")
         
         # STEP 8: Almacenar resultado
         return store_validation_result(
@@ -382,6 +386,7 @@ def validate_direct_compare_by_document_id(user_image_key: str, target_document_
             status='ERROR',
             validation_mode='DIRECT_COMPARE_BY_DOCUMENT_ID',
             target_document_id=target_document_id,
+            confidence_score=0,
             error=str(e)
         )
 
@@ -407,6 +412,7 @@ def validate_hybrid_mode(s3_key: str, start_time: float) -> dict:
                 comparison_id, s3_key, start_time,
                 status='PROCESSING_ERROR',
                 validation_mode='HYBRID',
+                confidence_score=0,
                 error=f'Preprocessing failed: {error}'
             )
         
@@ -417,6 +423,7 @@ def validate_hybrid_mode(s3_key: str, start_time: float) -> dict:
                 comparison_id, s3_key, start_time,
                 status='NO_FACE_DETECTED',
                 validation_mode='HYBRID',
+                confidence_score=0,
                 error=f'Face detection failed: {face_detection["error"]}'
             )
         
@@ -425,6 +432,7 @@ def validate_hybrid_mode(s3_key: str, start_time: float) -> dict:
                 comparison_id, s3_key, start_time,
                 status='NO_FACE_DETECTED',
                 validation_mode='HYBRID',
+                confidence_score=0,
                 error='No faces detected in user photo'
             )
         
@@ -440,6 +448,7 @@ def validate_hybrid_mode(s3_key: str, start_time: float) -> dict:
                 comparison_id, s3_key, start_time,
                 status='SEARCH_ERROR',
                 validation_mode='HYBRID',
+                confidence_score=0,
                 error=f'Search failed: {search_result["error"]}'
             )
         
@@ -482,7 +491,7 @@ def validate_hybrid_mode(s3_key: str, start_time: float) -> dict:
             comparison = rekognition_client.compare_faces(
                 processed_bytes,
                 document_image_bytes,
-                threshold=80
+                #threshold=80
             )
             
             if comparison['success'] and comparison['match_found']:
@@ -529,6 +538,7 @@ def validate_hybrid_mode(s3_key: str, start_time: float) -> dict:
             comparison_id, s3_key, start_time,
             status='ERROR',
             validation_mode='HYBRID',
+            confidence_score=0,
             error=str(e)
         )
 

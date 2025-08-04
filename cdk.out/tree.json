@@ -416,7 +416,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "8265c6709726f5c67017b75ba2ab54b4f5e738445317f58859b524b7622ac7ec.zip"
+                      "s3Key": "d7506998e3d1c895df169d4b1261e599f02e47131ecaf720fed0d26a4e279e88.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
                     "layerName": "rekognition-basic-shared-layer"
@@ -855,7 +855,7 @@
                       "s3Bucket": {
                         "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
                       },
-                      "s3Key": "cb2f7195e86a6e6867b4196153ac6ea4c96a7bda5f9dee744ddc83d668692672.zip"
+                      "s3Key": "1aed6bd14f0423ce81c16a78b571bac54f6b6674550f3418a7b34274984e9a67.zip"
                     },
                     "environment": {
                       "variables": {
