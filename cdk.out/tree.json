@@ -549,7 +549,7 @@
                     ],
                     "content": {
                       "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423.zip"
+                      "s3Key": "2881e5231ccba684e02975d14e2546912a454b19253dc36259f2e9a2ad5974eb.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
                     "layerName": "rekognition-poc-shared-layer"

@@ -477,14 +477,14 @@
     ],
     "Content": {
      "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-     "S3Key": "e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423.zip"
+     "S3Key": "2881e5231ccba684e02975d14e2546912a454b19253dc36259f2e9a2ad5974eb.zip"
     },
     "Description": "Shared utilities with auto-compiled dependencies",
     "LayerName": "rekognition-poc-shared-layer"
    },
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/SharedLayer/Resource",
-    "aws:asset:path": "asset.e800acf767409813cd2a675ea3bddd15f7344c74bbdbbd9a01d11d6ac16f6423",
+    "aws:asset:path": "asset.2881e5231ccba684e02975d14e2546912a454b19253dc36259f2e9a2ad5974eb",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Content"
    }
@@ -2312,7 +2312,7 @@
      "cdk-hnb659fds-assets-442431377530-us-east-1"
     ],
     "SourceObjectKeys": [
-     "d45196c8154215c6e925bd5d5f18ed0c5ebcab1866b4860612ec0dd4ac6172fd.zip"
+     "ce6685cc939e182ebc7f33ac07b610091bc360d269e30fea60611e4c8a3ce577.zip"
     ],
     "DestinationBucketName": {
      "Ref": "FrontendBucketEFE2E19C"
