@@ -201,14 +201,18 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- FIXED AWS LIBRARIES FOR FACE LIVENESS -->
+    <!-- CORRECTED AWS LIBRARIES FOR AMPLIFY V6 -->
     <!-- ============================================ -->
     
     <!-- React 18 (Required for Amplify UI) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/aws-amplify@6.5.0/dist/aws-amplify.umd.min.js"></script>
-    <script src="https://unpkg.com/@aws-amplify/ui-react@6.1.0/dist/index.umd.js"></script>
+    
+    <!-- AWS Amplify v6 -->
+    <script src="https://unpkg.com/aws-amplify@6/dist/aws-amplify.umd.min.js"></script>
+    
+    <!-- AWS Amplify UI React v6 with Face Liveness -->
+    <script src="https://unpkg.com/@aws-amplify/ui-react@6/dist/index.umd.js"></script>
     
     <!-- Configuration -->
     <script src="config.js"></script>
@@ -221,14 +225,27 @@
         console.log('📚 AWS Face Liveness Libraries Check:');
         console.log('   React:', typeof React !== 'undefined' ? '✅' : '❌');
         console.log('   ReactDOM:', typeof ReactDOM !== 'undefined' ? '✅' : '❌');
-        console.log('   AWS Amplify:', typeof window.Amplify !== 'undefined' ? '✅' : '❌');
-        console.log('   Amplify UI Components:', typeof window.AmplifyUIComponents !== 'undefined' ? '✅' : '❌');
+        console.log('   AWS Amplify:', typeof window.aws_amplify !== 'undefined' ? '✅' : '❌');
+        console.log('   Amplify Core:', typeof window.aws_amplify?.Amplify !== 'undefined' ? '✅' : '❌');
+        console.log('   Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? '✅' : '❌');
         
         // Check for Face Liveness components
-        if (typeof window.AmplifyUIComponents !== 'undefined') {
-            console.log('   Face Liveness Available:', '✅ Available');
+        if (typeof window.AmplifyUIReact !== 'undefined') {
+            console.log('   FaceLivenessDetector:', typeof window.AmplifyUIReact.FaceLivenessDetector !== 'undefined' ? '✅ Available' : '❌ Not found');
+            console.log('   Available components:', Object.keys(window.AmplifyUIReact));
         } else {
-            console.log('   Face Liveness Available:', '❌ Not found');
+            console.log('   FaceLivenessDetector:', '❌ AmplifyUIReact not available');
+        }
+        
+        // Check Identity Pool configuration
+        console.log('   Identity Pool ID:', window.LIVENESS_IDENTITY_POOL_ID || 'Not configured');
+        
+        if (window.LIVENESS_IDENTITY_POOL_ID && 
+            window.LIVENESS_IDENTITY_POOL_ID !== 'us-east-1:YOUR_IDENTITY_POOL_ID_FROM_CDK' &&
+            window.LIVENESS_IDENTITY_POOL_ID !== 'us-east-1:REPLACE_WITH_YOUR_ACTUAL_IDENTITY_POOL_ID') {
+            console.log('   Configuration Status: ✅ Ready for Face Liveness');
+        } else {
+            console.warn('   Configuration Status: ❌ Identity Pool ID needs to be configured');
         }
     </script>
 </body>

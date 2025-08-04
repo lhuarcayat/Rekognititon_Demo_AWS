@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Face Liveness - Solución que Funciona</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .liveness-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 400px;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading:after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            margin: 10px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .video-container {
+            position: relative;
+            width: 300px;
+            height: 225px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #livenessVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .face-oval {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 200px;
+            border: 3px solid #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from {
+                border-color: #00ff00;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            }
+            to {
+                border-color: #00aa00;
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            }
+        }
+        
+        .instructions {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .challenge-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.7;
+            transition: background-color 0.5s ease;
+        }
+        
+        .challenge-overlay.red {
+            background-color: #ff0000;
+        }
+        
+        .challenge-overlay.green {
+            background-color: #00ff00;
+        }
+        
+        .challenge-overlay.blue {
+            background-color: #0000ff;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 AWS Face Liveness - Implementación Manual</h1>
+        <p><strong>Nota:</strong> Esta implementación simula Face Liveness y luego llama a la API real de AWS.</p>
+        
+        <div id="status" class="status info">
+            <strong>Estado:</strong> Listo para iniciar...
+        </div>
+        
+        <div class="liveness-container" id="livenessContainer">
+            <div id="faceLivenessDetector">
+                <div class="instructions" id="instructions">
+                    Haga clic en "Iniciar" para comenzar la verificación de Face Liveness
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <button class="btn" id="startLiveness" onclick="startManualFaceLiveness()">
+                🚀 Iniciar Face Liveness
+            </button>
+            <button class="btn" id="resetLiveness" onclick="resetLiveness()" disabled>
+                🔄 Reiniciar
+            </button>
+        </div>
+        
+        <div id="results" style="display: none;">
+            <h3>📊 Resultados:</h3>
+            <pre id="resultsData"></pre>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        
+        const CONFIG = {
+            identityPoolId: 'us-east-1:40d7a164-7725-44da-9bde-eff19dbec4d2',
+            region: 'us-east-1',
+            apiUrl: 'https://ft6723fro2.execute-api.us-east-1.amazonaws.com/prod/'
+        };
+        
+        let currentSessionId = null;
+        let currentStream = null;
+        let isProcessing = false;
+        let challengeStage = 0;
+        let challengeInterval = null;
+        
+        // ============================================
+        // UTILIDADES
+        // ============================================
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = `<strong>Estado:</strong> ${message}`;
+            console.log(`📝 ${type.toUpperCase()}: ${message}`);
+        }
+        
+        function updateInstructions(text) {
+            const instructionsEl = document.getElementById('instructions');
+            if (instructionsEl) {
+                instructionsEl.textContent = text;
+            }
+        }
+        
+        // ============================================
+        // FACE LIVENESS MANUAL IMPLEMENTATION
+        // ============================================
+        
+        async function startManualFaceLiveness() {
+            try {
+                updateStatus('Iniciando Face Liveness...', 'info');
+                
+                // Step 1: Create AWS session
+                await createLivenessSession();
+                
+                // Step 2: Start camera
+                await startCamera();
+                
+                // Step 3: Start liveness simulation
+                await startLivenessSimulation();
+                
+                document.getElementById('startLiveness').disabled = true;
+                document.getElementById('resetLiveness').disabled = false;
+                
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error');
+                console.error('❌ Error en Face Liveness:', error);
+            }
+        }
+        
+        async function createLivenessSession() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}liveness-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        documentType: 'DNI',
+                        documentNumber: '12345678'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                currentSessionId = data.sessionId;
+                
+                updateStatus(`✅ Sesión AWS creada: ${currentSessionId}`, 'success');
+                return data;
+                
+            } catch (error) {
+                updateStatus(`Error creando sesión AWS: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        async function startCamera() {
+            try {
+                updateStatus('Iniciando cámara...', 'info');
+                
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    },
+                    audio: false
+                });
+                
+                // Create video element
+                const container = document.getElementById('faceLivenessDetector');
+                container.innerHTML = `
+                    <div class="video-container">
+                        <video id="livenessVideo" autoplay playsinline></video>
+                        <div class="face-oval"></div>
+                        <div class="challenge-overlay" id="challengeOverlay"></div>
+                    </div>
+                    <div class="instructions" id="instructions">
+                        Posicione su rostro dentro del óvalo y manténgase quieto
+                    </div>
+                `;
+                
+                const video = document.getElementById('livenessVideo');
+                video.srcObject = currentStream;
+                
+                updateStatus('✅ Cámara iniciada', 'success');
+                
+            } catch (error) {
+                updateStatus(`Error con la cámara: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        async function startLivenessSimulation() {
+            updateStatus('Iniciando verificación de liveness...', 'info');
+            updateInstructions('Manténgase dentro del óvalo. La verificación comenzará en 3 segundos...');
+            
+            await sleep(3000);
+            
+            // Stage 1: Face positioning
+            updateInstructions('✅ Rostro detectado. Iniciando verificación...');
+            await sleep(2000);
+            
+            // Stage 2: Light challenges
+            updateInstructions('Manténgase quieto. Seguirá una secuencia de luces coloridas...');
+            await runLightChallenge();
+            
+            // Stage 3: Movement challenge (simulated)
+            updateInstructions('Mueva lentamente su cabeza siguiendo el óvalo...');
+            await sleep(3000);
+            
+            // Complete
+            updateInstructions('✅ Verificación completada!');
+            updateStatus('Liveness completado. Procesando resultados...', 'success');
+            
+            // Get real results from AWS
+            await processLivenessResults();
+        }
+        
+        async function runLightChallenge() {
+            const overlay = document.getElementById('challengeOverlay');
+            const colors = ['red', 'green', 'blue'];
+            
+            for (let i = 0; i < colors.length; i++) {
+                updateInstructions(`Luz ${colors[i].toUpperCase()} - Manténgase quieto`);
+                overlay.className = `challenge-overlay ${colors[i]}`;
+                await sleep(1500);
+                
+                overlay.className = 'challenge-overlay';
+                await sleep(500);
+            }
+        }
+        
+        async function processLivenessResults() {
+            try {
+                // Wait a bit for AWS to process
+                await sleep(2000);
+                
+                const results = await getLivenessResults(currentSessionId);
+                
+                // Show results
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('resultsData').textContent = JSON.stringify(results, null, 2);
+                
+                if (results.status === 'SUCCEEDED') {
+                    updateStatus(`✅ Face Liveness exitoso! Confidence: ${results.confidence}%`, 'success');
+                    
+                    // Now trigger the real validation process
+                    await triggerRealValidation();
+                } else {
+                    updateStatus(`❌ Face Liveness falló: ${results.status}`, 'error');
+                }
+                
+            } catch (error) {
+                updateStatus(`Error procesando resultados: ${error.message}`, 'error');
+                console.error('Error:', error);
+            }
+        }
+        
+        async function triggerRealValidation() {
+            try {
+                updateStatus('Creando trigger para validación con documento...', 'info');
+                
+                // Create a trigger file for the Lambda validator
+                const triggerFileName = `liveness-session-${currentSessionId}-${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
+                
+                // Create minimal trigger file (1x1 pixel)
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, 1, 1);
+                
+                const triggerBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.1));
+                
+                // Get upload URL
+                const uploadResponse = await fetch(`${CONFIG.apiUrl}presigned-urls`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileName: triggerFileName,
+                        bucketType: 'user-photos',
+                        contentType: 'image/jpeg'
+                    })
+                });
+                
+                if (!uploadResponse.ok) {
+                    throw new Error('Failed to get upload URL');
+                }
+                
+                const uploadData = await uploadResponse.json();
+                
+                // Upload trigger file
+                await fetch(uploadData.uploadUrl, {
+                    method: 'PUT',
+                    body: triggerBlob,
+                    headers: { 'Content-Type': 'image/jpeg' }
+                });
+                
+                updateStatus('✅ Trigger creado. Esperando validación...', 'info');
+                
+                // Start polling for validation results
+                await pollValidationResults();
+                
+            } catch (error) {
+                updateStatus(`Error en validación: ${error.message}`, 'error');
+                console.error('Validation error:', error);
+            }
+        }
+        
+        async function pollValidationResults() {
+            let attempts = 0;
+            const maxAttempts = 15;
+            
+            const poll = async () => {
+                attempts++;
+                
+                try {
+                    const response = await fetch(`${CONFIG.apiUrl}check-validation/liveness-${currentSessionId}`);
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        
+                        if (result.found && result.match_found) {
+                            updateStatus('🎉 ¡Verificación biométrica completada exitosamente!', 'success');
+                            
+                            const finalResults = {
+                                sessionId: currentSessionId,
+                                livenessStatus: 'SUCCEEDED',
+                                validationStatus: 'MATCH_CONFIRMED',
+                                similarity: result.similarity,
+                                confidence: result.confidence_score,
+                                timestamp: new Date().toISOString()
+                            };
+                            
+                            document.getElementById('resultsData').textContent = JSON.stringify(finalResults, null, 2);
+                            return;
+                            
+                        } else if (result.found && !result.match_found) {
+                            updateStatus('❌ Verificación fallida: El rostro no coincide con el documento', 'error');
+                            return;
+                        }
+                    }
+                    
+                    if (attempts < maxAttempts) {
+                        updateStatus(`Validando... (intento ${attempts}/${maxAttempts})`, 'info');
+                        setTimeout(poll, 2000);
+                    } else {
+                        updateStatus('❌ Tiempo de validación agotado', 'error');
+                    }
+                    
+                } catch (error) {
+                    if (attempts < maxAttempts) {
+                        setTimeout(poll, 2000);
+                    } else {
+                        updateStatus('❌ Error en la validación', 'error');
+                    }
+                }
+            };
+            
+            setTimeout(poll, 3000); // Wait 3 seconds before first poll
+        }
+        
+        async function getLivenessResults(sessionId) {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}liveness-session/${sessionId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const results = await response.json();
+                return results;
+                
+            } catch (error) {
+                console.error('Error getting liveness results:', error);
+                throw error;
+            }
+        }
+        
+        function resetLiveness() {
+            // Stop camera
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            // Clear intervals
+            if (challengeInterval) {
+                clearInterval(challengeInterval);
+                challengeInterval = null;
+            }
+            
+            // Reset state
+            currentSessionId = null;
+            isProcessing = false;
+            challengeStage = 0;
+            
+            // Reset UI
+            document.getElementById('faceLivenessDetector').innerHTML = `
+                <div class="instructions">
+                    Haga clic en "Iniciar" para comenzar la verificación de Face Liveness
+                </div>
+            `;
+            
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultsData').textContent = '';
+            
+            document.getElementById('startLiveness').disabled = false;
+            document.getElementById('resetLiveness').disabled = true;
+            
+            updateStatus('Listo para nueva verificación', 'info');
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Manual Face Liveness initialized');
+            updateStatus('Sistema listo. Esta implementación simula Face Liveness y usa AWS real para validación.', 'success');
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

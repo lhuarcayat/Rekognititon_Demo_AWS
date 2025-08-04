@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script corregido para deployment del frontend con AWS Face Liveness real
+Script corregido para deployment del frontend con AWS Face Liveness v6
 """
 
 import os
@@ -190,18 +190,132 @@ def get_stack_outputs(stack_name):
     except Exception as e:
         raise Exception(f"Error accessing CloudFormation: {e}")
 
+def verify_amplify_configuration():
+    """Verify that the Amplify configuration is correct"""
+    print("🔍 Verifying Amplify v6 configuration...")
+    
+    # Check if config.js exists and has the right structure
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file_path = os.path.join(script_dir, '..', 'frontend', 'dist', 'config.js')
+    
+    if not os.path.exists(config_file_path):
+        print("❌ config.js not found")
+        return False
+    
+    try:
+        with open(config_file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Check for Amplify v6 configuration patterns
+        required_patterns = [
+            'window.AMPLIFY_CONFIG',
+            'Auth:',
+            'Cognito:',
+            'identityPoolId:',
+            'allowGuestAccess: true'
+        ]
+        
+        missing_patterns = []
+        for pattern in required_patterns:
+            if pattern not in content:
+                missing_patterns.append(pattern)
+        
+        if missing_patterns:
+            print(f"❌ Missing Amplify v6 configuration patterns: {missing_patterns}")
+            return False
+        
+        print("✅ Amplify v6 configuration structure verified")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error verifying configuration: {str(e)}")
+        return False
+
+def check_iam_permissions():
+    """Check if the current AWS credentials have necessary permissions"""
+    try:
+        print("🔐 Checking AWS credentials and permissions...")
+        
+        # Check basic AWS access
+        sts = boto3.client('sts')
+        identity = sts.get_caller_identity()
+        
+        print(f"✅ AWS Identity: {identity.get('Arn', 'Unknown')}")
+        
+        # Check CloudFormation access
+        cloudformation = boto3.client('cloudformation')
+        cloudformation.list_stacks(MaxResults=1)
+        print("✅ CloudFormation access confirmed")
+        
+        # Check S3 access
+        s3 = boto3.client('s3')
+        s3.list_buckets()
+        print("✅ S3 access confirmed")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ AWS permissions check failed: {str(e)}")
+        print("💡 Ensure your AWS credentials have the necessary permissions")
+        return False
+
+def validate_identity_pool_permissions(identity_pool_id):
+    """Validate that the Identity Pool has correct permissions for Face Liveness"""
+    try:
+        print(f"🔍 Validating Identity Pool permissions: {identity_pool_id}")
+        
+        cognito_identity = boto3.client('cognito-identity')
+        
+        # Get identity pool details
+        pool_details = cognito_identity.describe_identity_pool(
+            IdentityPoolId=identity_pool_id
+        )
+        
+        print(f"✅ Identity Pool found: {pool_details.get('IdentityPoolName', 'Unknown')}")
+        print(f"   - Allow unauthenticated: {pool_details.get('AllowUnauthenticatedIdentities', False)}")
+        
+        # Get identity pool roles
+        try:
+            roles = cognito_identity.get_identity_pool_roles(
+                IdentityPoolId=identity_pool_id
+            )
+            
+            unauth_role = roles.get('Roles', {}).get('unauthenticated')
+            if unauth_role:
+                print(f"✅ Unauthenticated role found: {unauth_role}")
+            else:
+                print("⚠️  No unauthenticated role configured")
+                
+        except Exception as role_error:
+            print(f"⚠️  Could not check roles: {str(role_error)}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Identity Pool validation failed: {str(e)}")
+        return False
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python update_frontend_config.py <stack-name>")
-        print("Example: python update_frontend_config.py RekognitionPocStack")
+        print("Example: python update_frontend_config.py LivenessRekognitionPocStack")
         sys.exit(1)
     
     stack_name = sys.argv[1]
     
-    print("🚀 Real AWS Face Liveness Frontend Deployment")
+    print("🚀 AWS Face Liveness v6 Frontend Deployment")
     print("=" * 60)
     
     try:
+        # Check AWS permissions first
+        if not check_iam_permissions():
+            print("❌ AWS permissions check failed. Please configure your AWS credentials.")
+            sys.exit(1)
+        
+        # Verify Amplify configuration structure
+        if not verify_amplify_configuration():
+            print("⚠️  Configuration verification failed, but continuing...")
+        
         # Get stack outputs
         print("📋 Getting stack information...")
         outputs = get_stack_outputs(stack_name)
@@ -212,16 +326,31 @@ def main():
         frontend_url = outputs.get('LivenessFrontendUrl')
         identity_pool_id = outputs.get('LivenessIdentityPoolId')
         
+        # Validation
         if not bucket_name:
             raise Exception("LivenessFrontendBucketName not found in stack outputs")
         
         if not identity_pool_id:
             raise Exception("LivenessIdentityPoolId not found in stack outputs - required for Face Liveness")
         
+        if not api_gateway_url:
+            raise Exception("LivenessApiGatewayUrl not found in stack outputs")
+        
         print(f"🪣 Frontend Bucket: {bucket_name}")
         print(f"🌐 Distribution ID: {distribution_id}")
         print(f"📡 API Gateway: {api_gateway_url}")
         print(f"🔐 Identity Pool ID: {identity_pool_id}")
+        
+        # Validate Identity Pool ID format
+        identity_pool_pattern = r'^us-east-1:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        if not re.match(identity_pool_pattern, identity_pool_id):
+            print(f"⚠️  Warning: Identity Pool ID format might be incorrect: {identity_pool_id}")
+            print(f"⚠️  Expected format: us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+        else:
+            print("✅ Identity Pool ID format is correct")
+        
+        # Validate Identity Pool permissions
+        validate_identity_pool_permissions(identity_pool_id)
         
         # Update config.js with real values
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -240,34 +369,55 @@ def main():
         
         # Print success
         print("\n" + "=" * 70)
-        print("🎉 REAL AWS FACE LIVENESS DEPLOYMENT SUCCESSFUL!")
+        print("🎉 AWS FACE LIVENESS V6 DEPLOYMENT SUCCESSFUL!")
         print("=" * 70)
         print(f"🌐 Frontend URL: {frontend_url}")
         print(f"📡 API Gateway: {api_gateway_url}")
         print(f"🔐 Identity Pool: {identity_pool_id}")
         print(f"🪣 S3 Bucket: {bucket_name}")
         print("=" * 70)
-        print("\n✅ Your application now uses REAL AWS Face Liveness!")
-        print("📝 No more simulations - this is the production AWS service")
+        print("\n✅ Your application now uses REAL AWS Face Liveness v6!")
+        print("📝 This uses the official AWS Amplify v6 with React 18")
         
         if distribution_id:
             print("⏰ Note: Changes may take 5-15 minutes to appear due to CloudFront caching")
         
         print("\n🔧 Next steps:")
-        print("1. Test the Face Liveness functionality")
-        print("2. Verify that the AWS Identity Pool has correct permissions")
-        print("3. Check browser console for any configuration errors")
+        print("1. Open your browser and navigate to the Frontend URL")
+        print("2. Open browser console (F12) to check for any errors")
+        print("3. Test the Face Liveness functionality")
+        print("4. Verify that all library checks show ✅ in the console")
         
-        print(f"\n🔍 To manually get Identity Pool ID:")
-        print(f"aws cloudformation describe-stacks --stack-name {stack_name} --query \"Stacks[0].Outputs[?OutputKey=='LivenessIdentityPoolId'].OutputValue\" --output text")
+        print(f"\n🔍 Debugging commands:")
+        print(f"# Check stack outputs:")
+        print(f"aws cloudformation describe-stacks --stack-name {stack_name} --query \"Stacks[0].Outputs\"")
+        print(f"\n# Check Identity Pool:")
+        print(f"aws cognito-identity describe-identity-pool --identity-pool-id {identity_pool_id}")
+        print(f"\n# Check Identity Pool roles:")
+        print(f"aws cognito-identity get-identity-pool-roles --identity-pool-id {identity_pool_id}")
+        
+        print(f"\n📚 Documentation:")
+        print("- AWS Amplify v6: https://docs.amplify.aws/")
+        print("- Face Liveness: https://docs.amplify.aws/react/connected-components/liveness/")
+        print("- Rekognition: https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html")
+        
+        print(f"\n🐛 Troubleshooting:")
+        print("- If Face Liveness doesn't load: Check Identity Pool permissions")
+        print("- If 'Access Denied' errors: Verify IAM roles have Rekognition permissions")
+        print("- If library errors: Check browser console for missing dependencies")
+        print("- If CORS errors: Verify API Gateway CORS configuration")
         
     except Exception as e:
         print(f"\n❌ Deployment failed: {e}")
         print("\n🔧 Troubleshooting tips:")
-        print("1. Ensure your CDK stack deployed successfully")
-        print("2. Check that LivenessIdentityPoolId is in stack outputs")
-        print("3. Verify AWS credentials are configured correctly")
-        print("4. Try running: cdk deploy")
+        print("1. Ensure your CDK stack deployed successfully:")
+        print(f"   cdk deploy {stack_name}")
+        print("2. Check that all required outputs exist in CloudFormation")
+        print("3. Verify AWS credentials are configured correctly:")
+        print("   aws sts get-caller-identity")
+        print("4. Check that the Identity Pool exists:")
+        print(f"   aws cognito-identity describe-identity-pool --identity-pool-id <pool-id>")
+        print("5. Verify S3 bucket permissions for upload")
         sys.exit(1)
 
 if __name__ == "__main__":

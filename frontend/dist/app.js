@@ -1,5 +1,5 @@
 // ============================================
-// CORRECTED AWS FACE LIVENESS WITH WEB COMPONENTS
+// CORRECTED AWS FACE LIVENESS WITH AMPLIFY V6
 // ============================================
 
 // Global variables
@@ -15,24 +15,28 @@ let formData = {
 
 // AWS Face Liveness variables
 let livenessSessionId = null;
-let awsAmplifyConfigured = false;
+let amplifyConfigured = false;
 
 // ============================================
-// CORRECTED AWS AMPLIFY CONFIGURATION FOR V5
+// CORRECTED AWS AMPLIFY V6 CONFIGURATION
 // ============================================
 
-// ✅ Configuración correcta para Amplify v6
 function configureAmplify() {
     try {
-        window.aws_amplify.Amplify.configure({
+        // ✅ Configuración correcta para Amplify v6
+        const amplifyConfig = {
             Auth: {
                 Cognito: {
                     identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
-                    region: 'us-east-1'
+                    region: 'us-east-1',
+                    allowGuestAccess: true
                 }
             }
-        });
-        console.log('✅ AWS Amplify v6 configurado correctamente');
+        };
+
+        window.aws_amplify.Amplify.configure(amplifyConfig);
+        amplifyConfigured = true;
+        console.log('✅ AWS Amplify v6 configurado correctamente:', amplifyConfig);
         return true;
     } catch (error) {
         console.error('❌ Error configurando Amplify:', error);
@@ -50,8 +54,12 @@ async function startRealFaceLiveness() {
         
         showStatus('livenessStatus', 'Iniciando AWS Face Liveness...', 'info');
         
-        // Step 1: Configure Amplify
-        configureAmplify();
+        // Step 1: Configure Amplify if not done
+        if (!amplifyConfigured) {
+            if (!configureAmplify()) {
+                throw new Error('Failed to configure Amplify');
+            }
+        }
         
         // Step 2: Create liveness session
         const sessionData = await createLivenessSession();
@@ -98,33 +106,6 @@ async function createLivenessSession() {
 
 async function mountRealFaceLivenessComponent() {
     try {
-        const { FaceLivenessDetector } = window.AmplifyUIReact;
-        
-        if (!FaceLivenessDetector) {
-            throw new Error('FaceLivenessDetector no disponible');
-        }
-        
-        const container = document.getElementById('faceLivenessMount');
-        
-        const livenessElement = React.createElement(FaceLivenessDetector, {
-            sessionId: livenessSessionId,
-            region: 'us-east-1',
-            onAnalysisComplete: handleLivenessComplete,
-            onError: handleLivenessError
-        });
-        
-        const root = ReactDOM.createRoot(container);
-        root.render(livenessElement);
-        
-    } catch (error) {
-        console.error('❌ Error montando Face Liveness:', error);
-        throw error;
-    }
-}
-
-
-/* async function mountRealFaceLivenessComponent() {
-    try {
         const mountPoint = document.getElementById('faceLivenessMount');
         if (!mountPoint) {
             throw new Error('Mount point not found');
@@ -133,49 +114,75 @@ async function mountRealFaceLivenessComponent() {
         // Clear loading placeholder
         mountPoint.innerHTML = '';
         
-        console.log('🎯 Mounting REAL AWS Face Liveness Web Component...');
+        console.log('🎯 Mounting REAL AWS Face Liveness Component...');
         
-        // ✅ CORRECT: Create Web Component for Face Liveness
-        const livenessDetector = document.createElement('amplify-face-liveness-detector');
+        // ✅ CORRECTED: Use React to create FaceLivenessDetector
+        const { FaceLivenessDetector } = window.AmplifyUIReact;
         
-        // Set component attributes
-        livenessDetector.setAttribute('session-id', livenessSessionId);
-        livenessDetector.setAttribute('region', 'us-east-1');
+        if (!FaceLivenessDetector) {
+            throw new Error('FaceLivenessDetector component not available');
+        }
         
-        // Add event listeners for Web Component
-        livenessDetector.addEventListener('amplifyFaceLivenessAnalysisComplete', handleLivenessComplete);
-        livenessDetector.addEventListener('amplifyFaceLivenessError', handleLivenessError);
+        // Create component with proper props
+        const livenessElement = React.createElement(FaceLivenessDetector, {
+            sessionId: livenessSessionId,
+            region: 'us-east-1',
+            onAnalysisComplete: handleLivenessComplete,
+            onError: handleLivenessError,
+            // Optional configuration
+            config: {
+                faceDistanceThreshold: 0.3,
+                faceDistanceThresholdMax: 0.8,
+            },
+            // Spanish text
+            displayText: {
+                hintCenterFaceText: "Centra tu rostro en el óvalo",
+                hintFaceDetectedText: "Rostro detectado",
+                hintCanNotIdentifyText: "Muévete para que podamos verte mejor",
+                hintTooManyFacesText: "Asegúrate de que solo tu rostro sea visible",
+                hintFaceDetectedText: "Perfecto, mantente así",
+                hintTooCloseText: "Aléjate un poco de la cámara",
+                hintTooFarText: "Acércate más a la cámara",
+                hintConnectingText: "Conectando...",
+                hintVerifyingText: "Verificando...",
+                hintIlluminationTooBrightText: "Muévete a un lugar con menos luz",
+                hintIlluminationTooDarkText: "Muévete a un lugar con más luz",
+                hintIlluminationNormalText: "Iluminación perfecta",
+                hintHoldFaceForFreshnessText: "Mantén tu rostro en posición",
+                photosensitivityWarningText: "Esta verificación mostrará luces de colores",
+                goodFitCaptionText: "Buen encuadre",
+                tooFarCaptionText: "Muy lejos",
+                instructionHeaderText: "Posiciona tu rostro",
+                startScreenBeginCheckText: "Comenzar verificación"
+            }
+        });
         
-        // Mount the component
-        mountPoint.appendChild(livenessDetector);
+        // Mount using ReactDOM
+        const root = ReactDOM.createRoot(mountPoint);
+        root.render(livenessElement);
         
-        console.log('✅ REAL AWS Face Liveness Web Component mounted successfully');
+        console.log('✅ REAL AWS Face Liveness Component mounted successfully');
         showStatus('livenessStatus', '🎯 AWS Face Liveness iniciado - Siga las instrucciones', 'success');
         
     } catch (error) {
         console.error('❌ Error mounting Face Liveness component:', error);
-        
-        // Enhanced error information
-        console.log('Debug info:');
-        console.log('  Amplify available:', typeof window.Amplify !== 'undefined');
-        console.log('  AmplifyUIComponents available:', typeof window.AmplifyUIComponents !== 'undefined');
-        
         throw error;
     }
-} */
+}
 
-function handleLivenessComplete(event) {
+function handleLivenessComplete(livenessResult) {
     try {
         console.log('✅ REAL AWS Face Liveness completed');
-        console.log('Analysis result:', event.detail);
+        console.log('Liveness result:', livenessResult);
         
         showStatus('livenessStatus', '✅ Liveness verificado. Procesando resultados...', 'success');
         
         processingInProgress = true;
         
-        // Get liveness results from AWS
+        // Process liveness results
         setTimeout(async () => {
             try {
+                // Get liveness session results from AWS
                 const results = await getLivenessResults(livenessSessionId);
                 
                 console.log('REAL Liveness results:', results);
@@ -210,15 +217,24 @@ function handleLivenessComplete(event) {
     }
 }
 
-function handleLivenessError(event) {
-    console.error('❌ REAL Face Liveness error:', event.detail);
+function handleLivenessError(error) {
+    console.error('❌ REAL Face Liveness error:', error);
     
     let errorMessage = 'Error en Face Liveness';
     
-    if (event.detail && event.detail.message) {
-        errorMessage = event.detail.message;
-    } else if (typeof event.detail === 'string') {
-        errorMessage = event.detail;
+    if (error && error.message) {
+        errorMessage = error.message;
+    } else if (typeof error === 'string') {
+        errorMessage = error;
+    }
+    
+    // Handle specific error types
+    if (errorMessage.includes('No credentials')) {
+        errorMessage = 'Error de configuración de AWS. Verifique la configuración de Identity Pool.';
+    } else if (errorMessage.includes('Access denied')) {
+        errorMessage = 'Permisos insuficientes para AWS Rekognition. Verifique los roles IAM.';
+    } else if (errorMessage.includes('Timeout')) {
+        errorMessage = 'Tiempo de espera agotado. Verifique su conexión a internet.';
     }
     
     showStatus('livenessStatus', `❌ ${errorMessage}`, 'error');
@@ -425,7 +441,7 @@ function showSuccessScreen(validationResult) {
 }
 
 // ============================================
-// UTILITY FUNCTIONS (SAME AS BEFORE)
+// UTILITY FUNCTIONS
 // ============================================
 
 function showInterface(interfaceId) {
@@ -503,6 +519,7 @@ function showRetryButton() {
 function retryLivenessProcess() {
     livenessSessionId = null;
     processingInProgress = false;
+    amplifyConfigured = false;
     
     const retryButton = document.getElementById('retryLiveness');
     if (retryButton) {
@@ -514,116 +531,22 @@ function retryLivenessProcess() {
         statusElement.classList.add('hidden');
     }
     
+    // Clear the mount point
+    const mountPoint = document.getElementById('faceLivenessMount');
+    if (mountPoint) {
+        mountPoint.innerHTML = `
+            <div class="loading-placeholder">
+                <div class="loading-spinner"></div>
+                <p>Iniciando AWS Face Liveness...</p>
+            </div>
+        `;
+    }
+    
     startRealFaceLiveness();
 }
 
 // ============================================
-// CAMERA FUNCTIONS (SAME AS BEFORE)
-// ============================================
-
-function checkCameraSupport() {
-    const isSecureContext = window.isSecureContext || 
-                           location.protocol === 'https:' || 
-                           location.hostname === 'localhost' ||
-                           location.hostname === '127.0.0.1';
-    
-    const hasGetUserMedia = navigator.mediaDevices && 
-                           navigator.mediaDevices.getUserMedia;
-    
-    return {
-        isSecureContext,
-        hasGetUserMedia,
-        isSupported: isSecureContext && hasGetUserMedia
-    };
-}
-
-async function startCamera(videoId) {
-    try {
-        const video = document.getElementById(videoId);
-        if (!video) {
-            throw new Error(`Video element ${videoId} not found`);
-        }
-        
-        const cameraSupport = checkCameraSupport();
-        
-        if (!cameraSupport.isSupported) {
-            let errorMessage = 'No se puede acceder a la cámara. ';
-            
-            if (!cameraSupport.isSecureContext) {
-                errorMessage += 'Este sitio requiere HTTPS para acceder a la cámara.';
-            } else if (!cameraSupport.hasGetUserMedia) {
-                errorMessage += 'Tu navegador no soporta acceso a cámara web.';
-            }
-            
-            throw new Error(errorMessage);
-        }
-        
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
-        
-        currentStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: 'user'
-            },
-            audio: false
-        });
-        
-        video.srcObject = currentStream;
-        return true;
-        
-    } catch (error) {
-        console.error('Camera error:', error);
-        
-        let errorMessage = 'No se pudo acceder a la cámara. ';
-        
-        if (error.name === 'NotAllowedError') {
-            errorMessage += 'Permisos denegados. Permite el acceso y recarga la página.';
-        } else if (error.name === 'NotFoundError') {
-            errorMessage += 'No se encontró cámara en el dispositivo.';
-        } else if (error.name === 'NotReadableError') {
-            errorMessage += 'La cámara está siendo usada por otra aplicación.';
-        } else {
-            errorMessage += 'Error técnico: ' + (error.message || 'Error desconocido');
-        }
-        
-        showError(errorMessage);
-        return false;
-    }
-}
-
-function stopCamera() {
-    if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-        currentStream = null;
-    }
-}
-
-function capturePhoto(videoId, canvasId) {
-    const video = document.getElementById(videoId);
-    const canvas = document.getElementById(canvasId);
-    
-    if (!video || !canvas) {
-        console.error('Video or canvas element not found');
-        return null;
-    }
-    
-    const context = canvas.getContext('2d');
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    return new Promise(resolve => {
-        canvas.toBlob(resolve, 'image/jpeg', 0.8);
-    });
-}
-
-// ============================================
-// API FUNCTIONS (SAME AS BEFORE)
+// API FUNCTIONS (existing ones kept the same)
 // ============================================
 
 async function checkDocumentExists(tipoDocumento, numeroDocumento) {
@@ -730,7 +653,112 @@ async function indexDocument(s3Key) {
 }
 
 // ============================================
-// DOCUMENT PROCESSING
+// CAMERA FUNCTIONS (kept the same)
+// ============================================
+
+function checkCameraSupport() {
+    const isSecureContext = window.isSecureContext || 
+                           location.protocol === 'https:' || 
+                           location.hostname === 'localhost' ||
+                           location.hostname === '127.0.0.1';
+    
+    const hasGetUserMedia = navigator.mediaDevices && 
+                           navigator.mediaDevices.getUserMedia;
+    
+    return {
+        isSecureContext,
+        hasGetUserMedia,
+        isSupported: isSecureContext && hasGetUserMedia
+    };
+}
+
+async function startCamera(videoId) {
+    try {
+        const video = document.getElementById(videoId);
+        if (!video) {
+            throw new Error(`Video element ${videoId} not found`);
+        }
+        
+        const cameraSupport = checkCameraSupport();
+        
+        if (!cameraSupport.isSupported) {
+            let errorMessage = 'No se puede acceder a la cámara. ';
+            
+            if (!cameraSupport.isSecureContext) {
+                errorMessage += 'Este sitio requiere HTTPS para acceder a la cámara.';
+            } else if (!cameraSupport.hasGetUserMedia) {
+                errorMessage += 'Tu navegador no soporta acceso a cámara web.';
+            }
+            
+            throw new Error(errorMessage);
+        }
+        
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+        
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: 'user'
+            },
+            audio: false
+        });
+        
+        video.srcObject = currentStream;
+        return true;
+        
+    } catch (error) {
+        console.error('Camera error:', error);
+        
+        let errorMessage = 'No se pudo acceder a la cámara. ';
+        
+        if (error.name === 'NotAllowedError') {
+            errorMessage += 'Permisos denegados. Permite el acceso y recarga la página.';
+        } else if (error.name === 'NotFoundError') {
+            errorMessage += 'No se encontró cámara en el dispositivo.';
+        } else if (error.name === 'NotReadableError') {
+            errorMessage += 'La cámara está siendo usada por otra aplicación.';
+        } else {
+            errorMessage += 'Error técnico: ' + (error.message || 'Error desconocido');
+        }
+        
+        showError(errorMessage);
+        return false;
+    }
+}
+
+function stopCamera() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+    }
+}
+
+function capturePhoto(videoId, canvasId) {
+    const video = document.getElementById(videoId);
+    const canvas = document.getElementById(canvasId);
+    
+    if (!video || !canvas) {
+        console.error('Video or canvas element not found');
+        return null;
+    }
+    
+    const context = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    return new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/jpeg', 0.8);
+    });
+}
+
+// ============================================
+// DOCUMENT PROCESSING (kept the same)
 // ============================================
 
 async function processDocumentPhoto() {
@@ -787,7 +815,7 @@ async function processDocumentPhoto() {
 }
 
 // ============================================
-// EVENT LISTENERS
+// EVENT LISTENERS (kept mostly the same)
 // ============================================
 
 function setupEventListeners() {
@@ -919,6 +947,7 @@ function setupEventListeners() {
             }
             
             processingInProgress = false;
+            amplifyConfigured = false;
             
             if (formData.documentExists) {
                 showInterface('interfacePermission');
@@ -1003,6 +1032,7 @@ function resetToInitialState() {
     };
     
     processingInProgress = false;
+    amplifyConfigured = false;
     
     // Reset liveness state
     livenessSessionId = null;
@@ -1024,6 +1054,17 @@ function resetToInitialState() {
     const statusElement = document.getElementById('livenessStatus');
     if (statusElement) {
         statusElement.classList.add('hidden');
+    }
+    
+    // Clear mount point
+    const mountPoint = document.getElementById('faceLivenessMount');
+    if (mountPoint) {
+        mountPoint.innerHTML = `
+            <div class="loading-placeholder">
+                <div class="loading-spinner"></div>
+                <p>Iniciando AWS Face Liveness...</p>
+            </div>
+        `;
     }
     
     // Show initial interface
@@ -1074,14 +1115,14 @@ function initializeApp() {
     }
     
     // ✅ CORRECTED: Check for required libraries for REAL Face Liveness
-    if (typeof window.Amplify === 'undefined') {
+    if (typeof window.aws_amplify === 'undefined' || typeof window.aws_amplify.Amplify === 'undefined') {
         console.error('❌ AWS Amplify not loaded');
         showError('Error: AWS Amplify no está disponible. Verifique la conexión a internet.');
         return;
     }
     
-    if (typeof window.AmplifyUIComponents === 'undefined') {
-        console.error('❌ AWS Amplify UI Components not loaded');
+    if (typeof window.AmplifyUIReact === 'undefined' || typeof window.AmplifyUIReact.FaceLivenessDetector === 'undefined') {
+        console.error('❌ AWS Amplify UI React FaceLivenessDetector not loaded');
         showError('Error: Componente AWS Face Liveness no está disponible.');
         return;
     }
@@ -1089,6 +1130,15 @@ function initializeApp() {
     if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
         console.error('❌ React not loaded');
         showError('Error: React no está disponible.');
+        return;
+    }
+    
+    // Check Identity Pool configuration
+    if (!window.LIVENESS_IDENTITY_POOL_ID || 
+        window.LIVENESS_IDENTITY_POOL_ID === 'us-east-1:YOUR_IDENTITY_POOL_ID_FROM_CDK' ||
+        window.LIVENESS_IDENTITY_POOL_ID === 'us-east-1:REPLACE_WITH_YOUR_ACTUAL_IDENTITY_POOL_ID') {
+        console.error('❌ Identity Pool ID not configured');
+        showError('Error: Identity Pool ID no está configurado correctamente.');
         return;
     }
     
@@ -1107,9 +1157,11 @@ function initializeApp() {
     console.log('   - Host:', location.host);
     console.log('   - Secure Context:', window.isSecureContext);
     console.log('   - Camera Support:', checkCameraSupport().isSupported);
-    console.log('   - AWS Amplify:', typeof window.Amplify !== 'undefined' ? 'Available' : 'Missing');
-    console.log('   - Amplify UI Components:', typeof window.AmplifyUIComponents !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - AWS Amplify:', typeof window.aws_amplify !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - FaceLivenessDetector:', typeof window.AmplifyUIReact?.FaceLivenessDetector !== 'undefined' ? 'Available' : 'Missing');
     console.log('   - React:', typeof React !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - Identity Pool ID:', window.LIVENESS_IDENTITY_POOL_ID);
     
     console.log('✅ Rekognition POC Frontend initialized with REAL AWS Face Liveness');
 }

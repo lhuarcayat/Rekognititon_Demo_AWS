@@ -1257,7 +1257,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-     "S3Key": "2454fdc347c6e9050f305aa623e54f896f5ecb7fa5acc2394d64413aee64ae2b.zip"
+     "S3Key": "264130e99a20cac619a330c5e77134c05dbe02330fcd6b95d9153f109467d7f7.zip"
     },
     "Environment": {
      "Variables": {
@@ -1283,7 +1283,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "LivenessRekognitionPocStack/FaceLivenessSession/Resource",
-    "aws:asset:path": "asset.2454fdc347c6e9050f305aa623e54f896f5ecb7fa5acc2394d64413aee64ae2b",
+    "aws:asset:path": "asset.264130e99a20cac619a330c5e77134c05dbe02330fcd6b95d9153f109467d7f7",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
