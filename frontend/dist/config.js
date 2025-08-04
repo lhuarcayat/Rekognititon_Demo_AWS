@@ -5,11 +5,11 @@
 // This file is automatically updated with the actual API Gateway URL
 // Generated at deployment time
 
-window.API_GATEWAY_URL = 'https://nuyq1a9chc.execute-api.us-east-1.amazonaws.com/prod/';
+window.API_GATEWAY_URL = 'https://ft6723fro2.execute-api.us-east-1.amazonaws.com/prod/';
 
 // ✅ CRITICAL: Identity Pool ID for AWS Face Liveness
 // Replace this with your actual Identity Pool ID from CloudFormation output
-window.LIVENESS_IDENTITY_POOL_ID = 'us-east-1:d7a627ef-1d9b-421e-abfb-d5db9ad275dc';
+window.LIVENESS_IDENTITY_POOL_ID = 'us-east-1:40d7a164-7725-44da-9bde-eff19dbec4d2';
 
 // AWS Region configuration
 window.AWS_REGION = 'us-east-1';

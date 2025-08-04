@@ -21,25 +21,22 @@ let awsAmplifyConfigured = false;
 // CORRECTED AWS AMPLIFY CONFIGURATION FOR V5
 // ============================================
 
+// ✅ Configuración correcta para Amplify v6
 function configureAmplify() {
-    if (awsAmplifyConfigured) return;
-    
     try {
-        // ✅ CORRECT: Amplify v5 configuration
-        window.Amplify.configure({
+        window.aws_amplify.Amplify.configure({
             Auth: {
-                identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
-                region: 'us-east-1'
+                Cognito: {
+                    identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
+                    region: 'us-east-1'
+                }
             }
         });
-        
-        awsAmplifyConfigured = true;
-        console.log('✅ AWS Amplify v5 configured for Face Liveness');
-        console.log('   Identity Pool:', window.LIVENESS_IDENTITY_POOL_ID);
-        
+        console.log('✅ AWS Amplify v6 configurado correctamente');
+        return true;
     } catch (error) {
-        console.error('❌ Error configuring Amplify:', error);
-        throw new Error('Failed to configure AWS Amplify v5');
+        console.error('❌ Error configurando Amplify:', error);
+        return false;
     }
 }
 
@@ -101,6 +98,33 @@ async function createLivenessSession() {
 
 async function mountRealFaceLivenessComponent() {
     try {
+        const { FaceLivenessDetector } = window.AmplifyUIReact;
+        
+        if (!FaceLivenessDetector) {
+            throw new Error('FaceLivenessDetector no disponible');
+        }
+        
+        const container = document.getElementById('faceLivenessMount');
+        
+        const livenessElement = React.createElement(FaceLivenessDetector, {
+            sessionId: livenessSessionId,
+            region: 'us-east-1',
+            onAnalysisComplete: handleLivenessComplete,
+            onError: handleLivenessError
+        });
+        
+        const root = ReactDOM.createRoot(container);
+        root.render(livenessElement);
+        
+    } catch (error) {
+        console.error('❌ Error montando Face Liveness:', error);
+        throw error;
+    }
+}
+
+
+/* async function mountRealFaceLivenessComponent() {
+    try {
         const mountPoint = document.getElementById('faceLivenessMount');
         if (!mountPoint) {
             throw new Error('Mount point not found');
@@ -138,7 +162,7 @@ async function mountRealFaceLivenessComponent() {
         
         throw error;
     }
-}
+} */
 
 function handleLivenessComplete(event) {
     try {
