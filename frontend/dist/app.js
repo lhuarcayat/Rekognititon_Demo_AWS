@@ -1,5 +1,5 @@
 // ============================================
-// CORRECTED AWS FACE LIVENESS IMPLEMENTATION
+// CORRECTED AWS FACE LIVENESS WITH WEB COMPONENTS
 // ============================================
 
 // Global variables
@@ -18,33 +18,28 @@ let livenessSessionId = null;
 let awsAmplifyConfigured = false;
 
 // ============================================
-// CORRECTED AWS AMPLIFY CONFIGURATION FOR V6
+// CORRECTED AWS AMPLIFY CONFIGURATION FOR V5
 // ============================================
 
 function configureAmplify() {
     if (awsAmplifyConfigured) return;
     
     try {
-        // ✅ CORRECT: Amplify v6 configuration
-        const { Amplify } = window.Amplify;
-        
-        Amplify.configure({
+        // ✅ CORRECT: Amplify v5 configuration
+        window.Amplify.configure({
             Auth: {
-                Cognito: {
-                    identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
-                    region: 'us-east-1',
-                    allowGuestAccess: true
-                }
+                identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
+                region: 'us-east-1'
             }
         });
         
         awsAmplifyConfigured = true;
-        console.log('✅ AWS Amplify v6 configured for Face Liveness');
+        console.log('✅ AWS Amplify v5 configured for Face Liveness');
         console.log('   Identity Pool:', window.LIVENESS_IDENTITY_POOL_ID);
         
     } catch (error) {
         console.error('❌ Error configuring Amplify:', error);
-        throw new Error('Failed to configure AWS Amplify v6');
+        throw new Error('Failed to configure AWS Amplify v5');
     }
 }
 
@@ -114,38 +109,23 @@ async function mountRealFaceLivenessComponent() {
         // Clear loading placeholder
         mountPoint.innerHTML = '';
         
-        console.log('🎯 Mounting REAL AWS FaceLivenessDetector component...');
+        console.log('🎯 Mounting REAL AWS Face Liveness Web Component...');
         
-        // ✅ CORRECT: Get FaceLivenessDetector from Amplify UI React
-        const { FaceLivenessDetector } = window.AmplifyUIReact;
+        // ✅ CORRECT: Create Web Component for Face Liveness
+        const livenessDetector = document.createElement('amplify-face-liveness-detector');
         
-        if (!FaceLivenessDetector) {
-            throw new Error('FaceLivenessDetector component not found in AmplifyUIReact');
-        }
+        // Set component attributes
+        livenessDetector.setAttribute('session-id', livenessSessionId);
+        livenessDetector.setAttribute('region', 'us-east-1');
         
-        console.log('✅ FaceLivenessDetector component found');
+        // Add event listeners for Web Component
+        livenessDetector.addEventListener('amplifyFaceLivenessAnalysisComplete', handleLivenessComplete);
+        livenessDetector.addEventListener('amplifyFaceLivenessError', handleLivenessError);
         
-        // ✅ CORRECT: React component props for REAL Face Liveness
-        const livenessProps = {
-            sessionId: livenessSessionId,
-            region: 'us-east-1',
-            onAnalysisComplete: handleLivenessComplete,
-            onError: handleLivenessError,
-            // Additional configuration
-            config: {
-                faceMovementChallenge: 'FaceMovementAndLightChallenge'
-            }
-        };
+        // Mount the component
+        mountPoint.appendChild(livenessDetector);
         
-        // ✅ CORRECT: Create and render REAL React component
-        const livenessElement = React.createElement(FaceLivenessDetector, livenessProps);
-        
-        // ✅ CORRECT: Render using ReactDOM
-        const { createRoot } = ReactDOM;
-        const root = createRoot(mountPoint);
-        root.render(livenessElement);
-        
-        console.log('✅ REAL AWS FaceLivenessDetector mounted successfully');
+        console.log('✅ REAL AWS Face Liveness Web Component mounted successfully');
         showStatus('livenessStatus', '🎯 AWS Face Liveness iniciado - Siga las instrucciones', 'success');
         
     } catch (error) {
@@ -153,19 +133,17 @@ async function mountRealFaceLivenessComponent() {
         
         // Enhanced error information
         console.log('Debug info:');
-        console.log('  AmplifyUIReact available:', typeof window.AmplifyUIReact !== 'undefined');
-        console.log('  FaceLivenessDetector available:', 
-                   typeof window.AmplifyUIReact !== 'undefined' && 
-                   typeof window.AmplifyUIReact.FaceLivenessDetector !== 'undefined');
+        console.log('  Amplify available:', typeof window.Amplify !== 'undefined');
+        console.log('  AmplifyUIComponents available:', typeof window.AmplifyUIComponents !== 'undefined');
         
         throw error;
     }
 }
 
-function handleLivenessComplete(analysisResult) {
+function handleLivenessComplete(event) {
     try {
         console.log('✅ REAL AWS Face Liveness completed');
-        console.log('Analysis result:', analysisResult);
+        console.log('Analysis result:', event.detail);
         
         showStatus('livenessStatus', '✅ Liveness verificado. Procesando resultados...', 'success');
         
@@ -208,17 +186,15 @@ function handleLivenessComplete(analysisResult) {
     }
 }
 
-function handleLivenessError(error) {
-    console.error('❌ REAL Face Liveness error:', error);
+function handleLivenessError(event) {
+    console.error('❌ REAL Face Liveness error:', event.detail);
     
     let errorMessage = 'Error en Face Liveness';
     
-    if (error && error.message) {
-        errorMessage = error.message;
-    } else if (typeof error === 'string') {
-        errorMessage = error;
-    } else if (error && error.error) {
-        errorMessage = error.error;
+    if (event.detail && event.detail.message) {
+        errorMessage = event.detail.message;
+    } else if (typeof event.detail === 'string') {
+        errorMessage = event.detail;
     }
     
     showStatus('livenessStatus', `❌ ${errorMessage}`, 'error');
@@ -1080,15 +1056,9 @@ function initializeApp() {
         return;
     }
     
-    if (typeof window.AmplifyUIReact === 'undefined') {
-        console.error('❌ AWS Amplify UI React not loaded');
+    if (typeof window.AmplifyUIComponents === 'undefined') {
+        console.error('❌ AWS Amplify UI Components not loaded');
         showError('Error: Componente AWS Face Liveness no está disponible.');
-        return;
-    }
-    
-    if (typeof window.AmplifyUIReact.FaceLivenessDetector === 'undefined') {
-        console.error('❌ FaceLivenessDetector component not found');
-        showError('Error: FaceLivenessDetector no está disponible.');
         return;
     }
     
@@ -1114,8 +1084,7 @@ function initializeApp() {
     console.log('   - Secure Context:', window.isSecureContext);
     console.log('   - Camera Support:', checkCameraSupport().isSupported);
     console.log('   - AWS Amplify:', typeof window.Amplify !== 'undefined' ? 'Available' : 'Missing');
-    console.log('   - Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? 'Available' : 'Missing');
-    console.log('   - FaceLivenessDetector:', typeof window.AmplifyUIReact?.FaceLivenessDetector !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - Amplify UI Components:', typeof window.AmplifyUIComponents !== 'undefined' ? 'Available' : 'Missing');
     console.log('   - React:', typeof React !== 'undefined' ? 'Available' : 'Missing');
     
     console.log('✅ Rekognition POC Frontend initialized with REAL AWS Face Liveness');

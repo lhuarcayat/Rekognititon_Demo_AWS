@@ -4,17 +4,17 @@
     "id": "App",
     "path": "",
     "children": {
-      "RekognitionPocStack": {
-        "id": "RekognitionPocStack",
-        "path": "RekognitionPocStack",
+      "LivenessRekognitionPocStack": {
+        "id": "LivenessRekognitionPocStack",
+        "path": "LivenessRekognitionPocStack",
         "children": {
-          "DocumentsBucket": {
-            "id": "DocumentsBucket",
-            "path": "RekognitionPocStack/DocumentsBucket",
+          "LivenessDocumentsBucket": {
+            "id": "LivenessDocumentsBucket",
+            "path": "LivenessRekognitionPocStack/LivenessDocumentsBucket",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/DocumentsBucket/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessDocumentsBucket/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
@@ -27,7 +27,7 @@
                         }
                       ]
                     },
-                    "bucketName": "rekognition-poc-documents-442431377530-us-east-1",
+                    "bucketName": "liveness-poc-documents-442431377530-us-east-1",
                     "corsConfiguration": {
                       "corsRules": [
                         {
@@ -68,13 +68,13 @@
               "version": "2.140.0"
             }
           },
-          "UserPhotosBucket": {
-            "id": "UserPhotosBucket",
-            "path": "RekognitionPocStack/UserPhotosBucket",
+          "LivenessUserPhotosBucket": {
+            "id": "LivenessUserPhotosBucket",
+            "path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/UserPhotosBucket/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
@@ -87,7 +87,7 @@
                         }
                       ]
                     },
-                    "bucketName": "rekognition-poc-user-photos-442431377530-us-east-1",
+                    "bucketName": "liveness-poc-user-photos-442431377530-us-east-1",
                     "corsConfiguration": {
                       "corsRules": [
                         {
@@ -136,11 +136,11 @@
               },
               "Notifications": {
                 "id": "Notifications",
-                "path": "RekognitionPocStack/UserPhotosBucket/Notifications",
+                "path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/Notifications",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/UserPhotosBucket/Notifications/Resource",
+                    "path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/Notifications/Resource",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.CfnResource",
                       "version": "2.140.0"
@@ -152,16 +152,16 @@
                   "version": "10.4.2"
                 }
               },
-              "AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0": {
-                "id": "AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0",
-                "path": "RekognitionPocStack/UserPhotosBucket/AllowBucketNotificationsToRekognitionPocStackUserValidator857841D0",
+              "AllowBucketNotificationsToLivenessRekognitionPocStackLivenessUserValidatorC21394F8": {
+                "id": "AllowBucketNotificationsToLivenessRekognitionPocStackLivenessUserValidatorC21394F8",
+                "path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/AllowBucketNotificationsToLivenessRekognitionPocStackLivenessUserValidatorC21394F8",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                   "aws:cdk:cloudformation:props": {
                     "action": "lambda:InvokeFunction",
                     "functionName": {
                       "Fn::GetAtt": [
-                        "UserValidatorF49AEC8F",
+                        "LivenessUserValidator8F8CF26A",
                         "Arn"
                       ]
                     },
@@ -169,7 +169,7 @@
                     "sourceAccount": "442431377530",
                     "sourceArn": {
                       "Fn::GetAtt": [
-                        "UserPhotosBucket4D5DE39B",
+                        "LivenessUserPhotosBucket5B0502F1",
                         "Arn"
                       ]
                     }
@@ -186,13 +186,13 @@
               "version": "2.140.0"
             }
           },
-          "FrontendBucket": {
-            "id": "FrontendBucket",
-            "path": "RekognitionPocStack/FrontendBucket",
+          "LivenessFrontendBucket": {
+            "id": "LivenessFrontendBucket",
+            "path": "LivenessRekognitionPocStack/LivenessFrontendBucket",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/FrontendBucket/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessFrontendBucket/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
@@ -205,7 +205,7 @@
                         }
                       ]
                     },
-                    "bucketName": "rekognition-poc-frontend-442431377530-us-east-1",
+                    "bucketName": "liveness-poc-frontend-442431377530-us-east-1",
                     "publicAccessBlockConfiguration": {
                       "blockPublicAcls": true,
                       "blockPublicPolicy": true,
@@ -221,16 +221,16 @@
               },
               "Policy": {
                 "id": "Policy",
-                "path": "RekognitionPocStack/FrontendBucket/Policy",
+                "path": "LivenessRekognitionPocStack/LivenessFrontendBucket/Policy",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/FrontendBucket/Policy/Resource",
+                    "path": "LivenessRekognitionPocStack/LivenessFrontendBucket/Policy/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::S3::BucketPolicy",
                       "aws:cdk:cloudformation:props": {
                         "bucket": {
-                          "Ref": "FrontendBucketEFE2E19C"
+                          "Ref": "LivenessFrontendBucket3D47E1CB"
                         },
                         "policyDocument": {
                           "Statement": [
@@ -244,7 +244,7 @@
                               "Principal": {
                                 "CanonicalUser": {
                                   "Fn::GetAtt": [
-                                    "FrontendOAIF4D25B13",
+                                    "LivenessFrontendOAI1CCC691A",
                                     "S3CanonicalUserId"
                                   ]
                                 }
@@ -252,7 +252,7 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "FrontendBucketEFE2E19C",
+                                    "LivenessFrontendBucket3D47E1CB",
                                     "Arn"
                                   ]
                                 },
@@ -262,7 +262,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "FrontendBucketEFE2E19C",
+                                          "LivenessFrontendBucket3D47E1CB",
                                           "Arn"
                                         ]
                                       },
@@ -278,7 +278,7 @@
                               "Principal": {
                                 "CanonicalUser": {
                                   "Fn::GetAtt": [
-                                    "FrontendOAIF4D25B13",
+                                    "LivenessFrontendOAI1CCC691A",
                                     "S3CanonicalUserId"
                                   ]
                                 }
@@ -289,7 +289,7 @@
                                   [
                                     {
                                       "Fn::GetAtt": [
-                                        "FrontendBucketEFE2E19C",
+                                        "LivenessFrontendBucket3D47E1CB",
                                         "Arn"
                                       ]
                                     },
@@ -320,13 +320,13 @@
               "version": "2.140.0"
             }
           },
-          "IndexedDocumentsTable": {
-            "id": "IndexedDocumentsTable",
-            "path": "RekognitionPocStack/IndexedDocumentsTable",
+          "LivenessIndexedDocumentsTable": {
+            "id": "LivenessIndexedDocumentsTable",
+            "path": "LivenessRekognitionPocStack/LivenessIndexedDocumentsTable",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/IndexedDocumentsTable/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessIndexedDocumentsTable/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
                   "aws:cdk:cloudformation:props": {
@@ -377,7 +377,7 @@
                         "keyType": "HASH"
                       }
                     ],
-                    "tableName": "rekognition-indexed-documents"
+                    "tableName": "liveness-indexed-documents"
                   }
                 },
                 "constructInfo": {
@@ -387,7 +387,7 @@
               },
               "ScalingRole": {
                 "id": "ScalingRole",
-                "path": "RekognitionPocStack/IndexedDocumentsTable/ScalingRole",
+                "path": "LivenessRekognitionPocStack/LivenessIndexedDocumentsTable/ScalingRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -399,13 +399,13 @@
               "version": "2.140.0"
             }
           },
-          "ComparisonResultsTable": {
-            "id": "ComparisonResultsTable",
-            "path": "RekognitionPocStack/ComparisonResultsTable",
+          "LivenessComparisonResultsTable": {
+            "id": "LivenessComparisonResultsTable",
+            "path": "LivenessRekognitionPocStack/LivenessComparisonResultsTable",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/ComparisonResultsTable/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessComparisonResultsTable/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
                   "aws:cdk:cloudformation:props": {
@@ -476,7 +476,7 @@
                         "keyType": "RANGE"
                       }
                     ],
-                    "tableName": "rekognition-comparison-results",
+                    "tableName": "liveness-comparison-results",
                     "timeToLiveSpecification": {
                       "attributeName": "ttl",
                       "enabled": true
@@ -490,7 +490,7 @@
               },
               "ScalingRole": {
                 "id": "ScalingRole",
-                "path": "RekognitionPocStack/ComparisonResultsTable/ScalingRole",
+                "path": "LivenessRekognitionPocStack/LivenessComparisonResultsTable/ScalingRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -502,17 +502,17 @@
               "version": "2.140.0"
             }
           },
-          "SharedLayer": {
-            "id": "SharedLayer",
-            "path": "RekognitionPocStack/SharedLayer",
+          "LivenessSharedLayer": {
+            "id": "LivenessSharedLayer",
+            "path": "LivenessRekognitionPocStack/LivenessSharedLayer",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/SharedLayer/Code",
+                "path": "LivenessRekognitionPocStack/LivenessSharedLayer/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/SharedLayer/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessSharedLayer/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -520,7 +520,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/SharedLayer/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessSharedLayer/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -534,7 +534,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/SharedLayer/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessSharedLayer/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::LayerVersion",
                   "aws:cdk:cloudformation:props": {
@@ -543,10 +543,10 @@
                     ],
                     "content": {
                       "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "c7994d6dad73c46b6f918a0ab2a339d3fe468c1204715bbd8d94c8fabff0f184.zip"
+                      "s3Key": "69c2058bdf73dcb437d0609ccfcdfc33fd4bf63f311c0d785107852049c7eebd.zip"
                     },
                     "description": "Shared utilities with auto-compiled dependencies",
-                    "layerName": "rekognition-poc-shared-layer"
+                    "layerName": "liveness-poc-shared-layer"
                   }
                 },
                 "constructInfo": {
@@ -560,13 +560,13 @@
               "version": "2.140.0"
             }
           },
-          "IndexerLambdaRole": {
-            "id": "IndexerLambdaRole",
-            "path": "RekognitionPocStack/IndexerLambdaRole",
+          "LivenessIndexerLambdaRole": {
+            "id": "LivenessIndexerLambdaRole",
+            "path": "LivenessRekognitionPocStack/LivenessIndexerLambdaRole",
             "children": {
-              "ImportIndexerLambdaRole": {
-                "id": "ImportIndexerLambdaRole",
-                "path": "RekognitionPocStack/IndexerLambdaRole/ImportIndexerLambdaRole",
+              "ImportLivenessIndexerLambdaRole": {
+                "id": "ImportLivenessIndexerLambdaRole",
+                "path": "LivenessRekognitionPocStack/LivenessIndexerLambdaRole/ImportLivenessIndexerLambdaRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -574,7 +574,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/IndexerLambdaRole/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessIndexerLambdaRole/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -625,7 +625,7 @@
                               "Effect": "Allow",
                               "Resource": {
                                 "Fn::GetAtt": [
-                                  "DocumentsBucket9EC9DEB9",
+                                  "LivenessDocumentsBucketFF425AE5",
                                   "Arn"
                                 ]
                               }
@@ -642,7 +642,7 @@
                                   [
                                     {
                                       "Fn::GetAtt": [
-                                        "DocumentsBucket9EC9DEB9",
+                                        "LivenessDocumentsBucketFF425AE5",
                                         "Arn"
                                       ]
                                     },
@@ -661,7 +661,7 @@
                               "Effect": "Allow",
                               "Resource": {
                                 "Fn::GetAtt": [
-                                  "IndexedDocumentsTable2C59B6EB",
+                                  "LivenessIndexedDocumentsTableB1B52D9A",
                                   "Arn"
                                 ]
                               }
@@ -684,13 +684,13 @@
               "version": "2.140.0"
             }
           },
-          "ValidatorLambdaRole": {
-            "id": "ValidatorLambdaRole",
-            "path": "RekognitionPocStack/ValidatorLambdaRole",
+          "LivenessValidatorLambdaRole": {
+            "id": "LivenessValidatorLambdaRole",
+            "path": "LivenessRekognitionPocStack/LivenessValidatorLambdaRole",
             "children": {
-              "ImportValidatorLambdaRole": {
-                "id": "ImportValidatorLambdaRole",
-                "path": "RekognitionPocStack/ValidatorLambdaRole/ImportValidatorLambdaRole",
+              "ImportLivenessValidatorLambdaRole": {
+                "id": "ImportLivenessValidatorLambdaRole",
+                "path": "LivenessRekognitionPocStack/LivenessValidatorLambdaRole/ImportLivenessValidatorLambdaRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -698,7 +698,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/ValidatorLambdaRole/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessValidatorLambdaRole/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -749,13 +749,13 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "DocumentsBucket9EC9DEB9",
+                                    "LivenessDocumentsBucketFF425AE5",
                                     "Arn"
                                   ]
                                 },
                                 {
                                   "Fn::GetAtt": [
-                                    "UserPhotosBucket4D5DE39B",
+                                    "LivenessUserPhotosBucket5B0502F1",
                                     "Arn"
                                   ]
                                 }
@@ -774,7 +774,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "DocumentsBucket9EC9DEB9",
+                                          "LivenessDocumentsBucketFF425AE5",
                                           "Arn"
                                         ]
                                       },
@@ -788,7 +788,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "UserPhotosBucket4D5DE39B",
+                                          "LivenessUserPhotosBucket5B0502F1",
                                           "Arn"
                                         ]
                                       },
@@ -809,13 +809,13 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "ComparisonResultsTable188C61C4",
+                                    "LivenessComparisonResultsTable58D19E2A",
                                     "Arn"
                                   ]
                                 },
                                 {
                                   "Fn::GetAtt": [
-                                    "IndexedDocumentsTable2C59B6EB",
+                                    "LivenessIndexedDocumentsTableB1B52D9A",
                                     "Arn"
                                   ]
                                 },
@@ -825,7 +825,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "ComparisonResultsTable188C61C4",
+                                          "LivenessComparisonResultsTable58D19E2A",
                                           "Arn"
                                         ]
                                       },
@@ -839,7 +839,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "IndexedDocumentsTable2C59B6EB",
+                                          "LivenessIndexedDocumentsTableB1B52D9A",
                                           "Arn"
                                         ]
                                       },
@@ -852,7 +852,7 @@
                             {
                               "Action": "lambda:InvokeFunction",
                               "Effect": "Allow",
-                              "Resource": "arn:aws:lambda:us-east-1:442431377530:function:rekognition-poc-document-indexer"
+                              "Resource": "arn:aws:lambda:us-east-1:442431377530:function:liveness-poc-document-indexer"
                             }
                           ],
                           "Version": "2012-10-17"
@@ -872,13 +872,13 @@
               "version": "2.140.0"
             }
           },
-          "ApiLambdaRole": {
-            "id": "ApiLambdaRole",
-            "path": "RekognitionPocStack/ApiLambdaRole",
+          "LivenessApiLambdaRole": {
+            "id": "LivenessApiLambdaRole",
+            "path": "LivenessRekognitionPocStack/LivenessApiLambdaRole",
             "children": {
-              "ImportApiLambdaRole": {
-                "id": "ImportApiLambdaRole",
-                "path": "RekognitionPocStack/ApiLambdaRole/ImportApiLambdaRole",
+              "ImportLivenessApiLambdaRole": {
+                "id": "ImportLivenessApiLambdaRole",
+                "path": "LivenessRekognitionPocStack/LivenessApiLambdaRole/ImportLivenessApiLambdaRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -886,7 +886,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/ApiLambdaRole/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessApiLambdaRole/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -936,7 +936,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "DocumentsBucket9EC9DEB9",
+                                          "LivenessDocumentsBucketFF425AE5",
                                           "Arn"
                                         ]
                                       },
@@ -950,7 +950,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "UserPhotosBucket4D5DE39B",
+                                          "LivenessUserPhotosBucket5B0502F1",
                                           "Arn"
                                         ]
                                       },
@@ -965,7 +965,7 @@
                               "Effect": "Allow",
                               "Resource": {
                                 "Fn::GetAtt": [
-                                  "DocumentsBucket9EC9DEB9",
+                                  "LivenessDocumentsBucketFF425AE5",
                                   "Arn"
                                 ]
                               }
@@ -979,7 +979,7 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "ComparisonResultsTable188C61C4",
+                                    "LivenessComparisonResultsTable58D19E2A",
                                     "Arn"
                                   ]
                                 },
@@ -989,7 +989,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "ComparisonResultsTable188C61C4",
+                                          "LivenessComparisonResultsTable58D19E2A",
                                           "Arn"
                                         ]
                                       },
@@ -1002,7 +1002,7 @@
                             {
                               "Action": "lambda:InvokeFunction",
                               "Effect": "Allow",
-                              "Resource": "arn:aws:lambda:us-east-1:442431377530:function:rekognition-poc-document-indexer"
+                              "Resource": "arn:aws:lambda:us-east-1:442431377530:function:liveness-poc-document-indexer"
                             },
                             {
                               "Action": [
@@ -1036,13 +1036,13 @@
           },
           "LivenessIdentityPool": {
             "id": "LivenessIdentityPool",
-            "path": "RekognitionPocStack/LivenessIdentityPool",
+            "path": "LivenessRekognitionPocStack/LivenessIdentityPool",
             "attributes": {
               "aws:cdk:cloudformation:type": "AWS::Cognito::IdentityPool",
               "aws:cdk:cloudformation:props": {
                 "allowUnauthenticatedIdentities": true,
                 "cognitoIdentityProviders": [],
-                "identityPoolName": "rekognition-poc-liveness-pool"
+                "identityPoolName": "liveness-poc-pool"
               }
             },
             "constructInfo": {
@@ -1052,11 +1052,11 @@
           },
           "LivenessUnauthRole": {
             "id": "LivenessUnauthRole",
-            "path": "RekognitionPocStack/LivenessUnauthRole",
+            "path": "LivenessRekognitionPocStack/LivenessUnauthRole",
             "children": {
               "ImportLivenessUnauthRole": {
                 "id": "ImportLivenessUnauthRole",
-                "path": "RekognitionPocStack/LivenessUnauthRole/ImportLivenessUnauthRole",
+                "path": "LivenessRekognitionPocStack/LivenessUnauthRole/ImportLivenessUnauthRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.140.0"
@@ -1064,7 +1064,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/LivenessUnauthRole/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessUnauthRole/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -1120,7 +1120,7 @@
           },
           "LivenessIdentityPoolRoleAttachment": {
             "id": "LivenessIdentityPoolRoleAttachment",
-            "path": "RekognitionPocStack/LivenessIdentityPoolRoleAttachment",
+            "path": "LivenessRekognitionPocStack/LivenessIdentityPoolRoleAttachment",
             "attributes": {
               "aws:cdk:cloudformation:type": "AWS::Cognito::IdentityPoolRoleAttachment",
               "aws:cdk:cloudformation:props": {
@@ -1142,17 +1142,17 @@
               "version": "2.140.0"
             }
           },
-          "DocumentIndexer": {
-            "id": "DocumentIndexer",
-            "path": "RekognitionPocStack/DocumentIndexer",
+          "LivenessDocumentIndexer": {
+            "id": "LivenessDocumentIndexer",
+            "path": "LivenessRekognitionPocStack/LivenessDocumentIndexer",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/DocumentIndexer/Code",
+                "path": "LivenessRekognitionPocStack/LivenessDocumentIndexer/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/DocumentIndexer/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessDocumentIndexer/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1160,7 +1160,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/DocumentIndexer/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessDocumentIndexer/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1174,7 +1174,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/DocumentIndexer/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessDocumentIndexer/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -1184,26 +1184,26 @@
                     },
                     "environment": {
                       "variables": {
-                        "COLLECTION_ID": "document-faces-collection",
+                        "COLLECTION_ID": "liveness-document-faces-collection",
                         "INDEXED_DOCUMENTS_TABLE": {
-                          "Ref": "IndexedDocumentsTable2C59B6EB"
+                          "Ref": "LivenessIndexedDocumentsTableB1B52D9A"
                         },
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "LivenessDocumentsBucketFF425AE5"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-document-indexer",
+                    "functionName": "liveness-poc-document-indexer",
                     "handler": "handler.lambda_handler",
                     "layers": [
                       {
-                        "Ref": "SharedLayer27DFABF0"
+                        "Ref": "LivenessSharedLayer83F7D387"
                       }
                     ],
                     "memorySize": 1024,
                     "role": {
                       "Fn::GetAtt": [
-                        "IndexerLambdaRole34F05CC2",
+                        "LivenessIndexerLambdaRole4C682B62",
                         "Arn"
                       ]
                     },
@@ -1222,17 +1222,17 @@
               "version": "2.140.0"
             }
           },
-          "UserValidator": {
-            "id": "UserValidator",
-            "path": "RekognitionPocStack/UserValidator",
+          "LivenessUserValidator": {
+            "id": "LivenessUserValidator",
+            "path": "LivenessRekognitionPocStack/LivenessUserValidator",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/UserValidator/Code",
+                "path": "LivenessRekognitionPocStack/LivenessUserValidator/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/UserValidator/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessUserValidator/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1240,7 +1240,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/UserValidator/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessUserValidator/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1254,43 +1254,43 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/UserValidator/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessUserValidator/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "552552de1889d64c0a9b1921c29a18d25fdd854c65f7dc470689de47a593b44c.zip"
+                      "s3Key": "d34cce567268aeb3fad39d2416d809ecef5c72fc11cb2807fbba6e1de65f51c9.zip"
                     },
                     "environment": {
                       "variables": {
-                        "COLLECTION_ID": "document-faces-collection",
+                        "COLLECTION_ID": "liveness-document-faces-collection",
                         "COMPARISON_RESULTS_TABLE": {
-                          "Ref": "ComparisonResultsTable188C61C4"
+                          "Ref": "LivenessComparisonResultsTable58D19E2A"
                         },
                         "INDEXED_DOCUMENTS_TABLE": {
-                          "Ref": "IndexedDocumentsTable2C59B6EB"
+                          "Ref": "LivenessIndexedDocumentsTableB1B52D9A"
                         },
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "LivenessDocumentsBucketFF425AE5"
                         },
                         "USER_PHOTOS_BUCKET": {
-                          "Ref": "UserPhotosBucket4D5DE39B"
+                          "Ref": "LivenessUserPhotosBucket5B0502F1"
                         },
-                        "DOCUMENT_INDEXER_FUNCTION": "rekognition-poc-document-indexer"
+                        "DOCUMENT_INDEXER_FUNCTION": "liveness-poc-document-indexer"
                       }
                     },
-                    "functionName": "rekognition-poc-user-validator",
+                    "functionName": "liveness-poc-user-validator",
                     "handler": "handler.lambda_handler",
                     "layers": [
                       {
-                        "Ref": "SharedLayer27DFABF0"
+                        "Ref": "LivenessSharedLayer83F7D387"
                       }
                     ],
                     "memorySize": 1024,
                     "role": {
                       "Fn::GetAtt": [
-                        "ValidatorLambdaRoleD4191E2F",
+                        "LivenessValidatorLambdaRole092534D6",
                         "Arn"
                       ]
                     },
@@ -1309,17 +1309,17 @@
               "version": "2.140.0"
             }
           },
-          "PresignedUrlsLambda": {
-            "id": "PresignedUrlsLambda",
-            "path": "RekognitionPocStack/PresignedUrlsLambda",
+          "LivenessPresignedUrlsLambda": {
+            "id": "LivenessPresignedUrlsLambda",
+            "path": "LivenessRekognitionPocStack/LivenessPresignedUrlsLambda",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/PresignedUrlsLambda/Code",
+                "path": "LivenessRekognitionPocStack/LivenessPresignedUrlsLambda/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/PresignedUrlsLambda/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessPresignedUrlsLambda/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1327,7 +1327,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/PresignedUrlsLambda/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessPresignedUrlsLambda/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1341,7 +1341,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/PresignedUrlsLambda/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessPresignedUrlsLambda/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -1352,19 +1352,19 @@
                     "environment": {
                       "variables": {
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "LivenessDocumentsBucketFF425AE5"
                         },
                         "USER_PHOTOS_BUCKET": {
-                          "Ref": "UserPhotosBucket4D5DE39B"
+                          "Ref": "LivenessUserPhotosBucket5B0502F1"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-presigned-urls",
+                    "functionName": "liveness-poc-presigned-urls",
                     "handler": "handler.lambda_handler",
                     "memorySize": 128,
                     "role": {
                       "Fn::GetAtt": [
-                        "ApiLambdaRole66D0B4CD",
+                        "LivenessApiLambdaRole3DB6BF75",
                         "Arn"
                       ]
                     },
@@ -1383,17 +1383,17 @@
               "version": "2.140.0"
             }
           },
-          "DocumentIndexerApi": {
-            "id": "DocumentIndexerApi",
-            "path": "RekognitionPocStack/DocumentIndexerApi",
+          "LivenessDocumentIndexerApi": {
+            "id": "LivenessDocumentIndexerApi",
+            "path": "LivenessRekognitionPocStack/LivenessDocumentIndexerApi",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/DocumentIndexerApi/Code",
+                "path": "LivenessRekognitionPocStack/LivenessDocumentIndexerApi/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/DocumentIndexerApi/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessDocumentIndexerApi/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1401,7 +1401,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/DocumentIndexerApi/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessDocumentIndexerApi/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1415,36 +1415,36 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/DocumentIndexerApi/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessDocumentIndexerApi/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
-                      "s3Key": "0dff9ce950014b4da7672fad727c1aae540ad0b5ba69c12e23b697e44acdffc6.zip"
+                      "s3Key": "868cb212211dc06d84c13edca93655de48eec2ee799d23685f89cd24dbb72da3.zip"
                     },
                     "environment": {
                       "variables": {
                         "DOCUMENT_INDEXER_FUNCTION": {
-                          "Ref": "DocumentIndexer7C68C1D7"
+                          "Ref": "LivenessDocumentIndexer27EBA1EC"
                         },
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "LivenessDocumentsBucketFF425AE5"
                         },
-                        "COLLECTION_ID": "document-faces-collection"
+                        "COLLECTION_ID": "liveness-document-faces-collection"
                       }
                     },
-                    "functionName": "rekognition-poc-document-indexer-api",
+                    "functionName": "liveness-poc-document-indexer-api",
                     "handler": "handler.lambda_handler",
                     "layers": [
                       {
-                        "Ref": "SharedLayer27DFABF0"
+                        "Ref": "LivenessSharedLayer83F7D387"
                       }
                     ],
                     "memorySize": 256,
                     "role": {
                       "Fn::GetAtt": [
-                        "ApiLambdaRole66D0B4CD",
+                        "LivenessApiLambdaRole3DB6BF75",
                         "Arn"
                       ]
                     },
@@ -1463,17 +1463,17 @@
               "version": "2.140.0"
             }
           },
-          "CheckValidationLambda": {
-            "id": "CheckValidationLambda",
-            "path": "RekognitionPocStack/CheckValidationLambda",
+          "LivenessCheckValidationLambda": {
+            "id": "LivenessCheckValidationLambda",
+            "path": "LivenessRekognitionPocStack/LivenessCheckValidationLambda",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/CheckValidationLambda/Code",
+                "path": "LivenessRekognitionPocStack/LivenessCheckValidationLambda/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/CheckValidationLambda/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessCheckValidationLambda/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1481,7 +1481,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/CheckValidationLambda/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessCheckValidationLambda/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1495,7 +1495,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/CheckValidationLambda/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessCheckValidationLambda/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -1506,16 +1506,16 @@
                     "environment": {
                       "variables": {
                         "COMPARISON_RESULTS_TABLE": {
-                          "Ref": "ComparisonResultsTable188C61C4"
+                          "Ref": "LivenessComparisonResultsTable58D19E2A"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-check-validation",
+                    "functionName": "liveness-poc-check-validation",
                     "handler": "handler.lambda_handler",
                     "memorySize": 128,
                     "role": {
                       "Fn::GetAtt": [
-                        "ApiLambdaRole66D0B4CD",
+                        "LivenessApiLambdaRole3DB6BF75",
                         "Arn"
                       ]
                     },
@@ -1534,17 +1534,17 @@
               "version": "2.140.0"
             }
           },
-          "CheckDocumentExistsLambda": {
-            "id": "CheckDocumentExistsLambda",
-            "path": "RekognitionPocStack/CheckDocumentExistsLambda",
+          "LivenessCheckDocumentExistsLambda": {
+            "id": "LivenessCheckDocumentExistsLambda",
+            "path": "LivenessRekognitionPocStack/LivenessCheckDocumentExistsLambda",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/CheckDocumentExistsLambda/Code",
+                "path": "LivenessRekognitionPocStack/LivenessCheckDocumentExistsLambda/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/CheckDocumentExistsLambda/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessCheckDocumentExistsLambda/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1552,7 +1552,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/CheckDocumentExistsLambda/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessCheckDocumentExistsLambda/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1566,7 +1566,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/CheckDocumentExistsLambda/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessCheckDocumentExistsLambda/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -1577,16 +1577,16 @@
                     "environment": {
                       "variables": {
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "LivenessDocumentsBucketFF425AE5"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-check-document-exists",
+                    "functionName": "liveness-poc-check-document-exists",
                     "handler": "handler.lambda_handler",
                     "memorySize": 128,
                     "role": {
                       "Fn::GetAtt": [
-                        "ApiLambdaRole66D0B4CD",
+                        "LivenessApiLambdaRole3DB6BF75",
                         "Arn"
                       ]
                     },
@@ -1605,17 +1605,17 @@
               "version": "2.140.0"
             }
           },
-          "CleanupDocumentLambda": {
-            "id": "CleanupDocumentLambda",
-            "path": "RekognitionPocStack/CleanupDocumentLambda",
+          "LivenessCleanupDocumentLambda": {
+            "id": "LivenessCleanupDocumentLambda",
+            "path": "LivenessRekognitionPocStack/LivenessCleanupDocumentLambda",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/CleanupDocumentLambda/Code",
+                "path": "LivenessRekognitionPocStack/LivenessCleanupDocumentLambda/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/CleanupDocumentLambda/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/LivenessCleanupDocumentLambda/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1623,7 +1623,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/CleanupDocumentLambda/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/LivenessCleanupDocumentLambda/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1637,7 +1637,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/CleanupDocumentLambda/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessCleanupDocumentLambda/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -1648,16 +1648,16 @@
                     "environment": {
                       "variables": {
                         "DOCUMENTS_BUCKET": {
-                          "Ref": "DocumentsBucket9EC9DEB9"
+                          "Ref": "LivenessDocumentsBucketFF425AE5"
                         }
                       }
                     },
-                    "functionName": "rekognition-poc-cleanup-document",
+                    "functionName": "liveness-poc-cleanup-document",
                     "handler": "handler.lambda_handler",
                     "memorySize": 128,
                     "role": {
                       "Fn::GetAtt": [
-                        "ApiLambdaRole66D0B4CD",
+                        "LivenessApiLambdaRole3DB6BF75",
                         "Arn"
                       ]
                     },
@@ -1678,15 +1678,15 @@
           },
           "FaceLivenessSession": {
             "id": "FaceLivenessSession",
-            "path": "RekognitionPocStack/FaceLivenessSession",
+            "path": "LivenessRekognitionPocStack/FaceLivenessSession",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "RekognitionPocStack/FaceLivenessSession/Code",
+                "path": "LivenessRekognitionPocStack/FaceLivenessSession/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "RekognitionPocStack/FaceLivenessSession/Code/Stage",
+                    "path": "LivenessRekognitionPocStack/FaceLivenessSession/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.140.0"
@@ -1694,7 +1694,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "RekognitionPocStack/FaceLivenessSession/Code/AssetBucket",
+                    "path": "LivenessRekognitionPocStack/FaceLivenessSession/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.140.0"
@@ -1708,7 +1708,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/FaceLivenessSession/Resource",
+                "path": "LivenessRekognitionPocStack/FaceLivenessSession/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -1719,7 +1719,7 @@
                     "environment": {
                       "variables": {
                         "USER_PHOTOS_BUCKET": {
-                          "Ref": "UserPhotosBucket4D5DE39B"
+                          "Ref": "LivenessUserPhotosBucket5B0502F1"
                         }
                       }
                     },
@@ -1728,7 +1728,7 @@
                     "memorySize": 256,
                     "role": {
                       "Fn::GetAtt": [
-                        "ApiLambdaRole66D0B4CD",
+                        "LivenessApiLambdaRole3DB6BF75",
                         "Arn"
                       ]
                     },
@@ -1747,18 +1747,18 @@
               "version": "2.140.0"
             }
           },
-          "FrontendOAI": {
-            "id": "FrontendOAI",
-            "path": "RekognitionPocStack/FrontendOAI",
+          "LivenessFrontendOAI": {
+            "id": "LivenessFrontendOAI",
+            "path": "LivenessRekognitionPocStack/LivenessFrontendOAI",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/FrontendOAI/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessFrontendOAI/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
                   "aws:cdk:cloudformation:props": {
                     "cloudFrontOriginAccessIdentityConfig": {
-                      "comment": "OAI for Rekognition POC Frontend"
+                      "comment": "OAI for Liveness Rekognition POC Frontend"
                     }
                   }
                 },
@@ -1773,13 +1773,13 @@
               "version": "2.140.0"
             }
           },
-          "FrontendDistribution": {
-            "id": "FrontendDistribution",
-            "path": "RekognitionPocStack/FrontendDistribution",
+          "LivenessFrontendDistribution": {
+            "id": "LivenessFrontendDistribution",
+            "path": "LivenessRekognitionPocStack/LivenessFrontendDistribution",
             "children": {
               "Origin1": {
                 "id": "Origin1",
-                "path": "RekognitionPocStack/FrontendDistribution/Origin1",
+                "path": "LivenessRekognitionPocStack/LivenessFrontendDistribution/Origin1",
                 "constructInfo": {
                   "fqn": "constructs.Construct",
                   "version": "10.4.2"
@@ -1787,7 +1787,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/FrontendDistribution/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessFrontendDistribution/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::Distribution",
                   "aws:cdk:cloudformation:props": {
@@ -1797,11 +1797,11 @@
                         {
                           "domainName": {
                             "Fn::GetAtt": [
-                              "FrontendBucketEFE2E19C",
+                              "LivenessFrontendBucket3D47E1CB",
                               "RegionalDomainName"
                             ]
                           },
-                          "id": "RekognitionPocStackFrontendDistributionOrigin129DD51F9",
+                          "id": "LivenessRekognitionPocStackLivenessFrontendDistributionOrigin168FEA891",
                           "s3OriginConfig": {
                             "originAccessIdentity": {
                               "Fn::Join": [
@@ -1809,7 +1809,7 @@
                                 [
                                   "origin-access-identity/cloudfront/",
                                   {
-                                    "Ref": "FrontendOAIF4D25B13"
+                                    "Ref": "LivenessFrontendOAI1CCC691A"
                                   }
                                 ]
                               ]
@@ -1819,7 +1819,7 @@
                       ],
                       "defaultCacheBehavior": {
                         "pathPattern": "*",
-                        "targetOriginId": "RekognitionPocStackFrontendDistributionOrigin129DD51F9",
+                        "targetOriginId": "LivenessRekognitionPocStackLivenessFrontendDistributionOrigin168FEA891",
                         "allowedMethods": [
                           "GET",
                           "HEAD"
@@ -1832,7 +1832,7 @@
                         "compress": true,
                         "viewerProtocolPolicy": "redirect-to-https"
                       },
-                      "comment": "Rekognition POC Frontend Distribution",
+                      "comment": "Liveness Rekognition POC Frontend Distribution",
                       "customErrorResponses": [
                         {
                           "errorCachingMinTtl": 300,
@@ -1865,18 +1865,18 @@
               "version": "2.140.0"
             }
           },
-          "RekognitionApi": {
-            "id": "RekognitionApi",
-            "path": "RekognitionPocStack/RekognitionApi",
+          "LivenessRekognitionApi": {
+            "id": "LivenessRekognitionApi",
+            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/RekognitionApi/Resource",
+                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::RestApi",
                   "aws:cdk:cloudformation:props": {
                     "description": "API for Rekognition POC Frontend",
-                    "name": "rekognition-poc-api"
+                    "name": "liveness-poc-api"
                   }
                 },
                 "constructInfo": {
@@ -1886,17 +1886,17 @@
               },
               "Deployment": {
                 "id": "Deployment",
-                "path": "RekognitionPocStack/RekognitionApi/Deployment",
+                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Deployment",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/RekognitionApi/Deployment/Resource",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Deployment/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Deployment",
                       "aws:cdk:cloudformation:props": {
                         "description": "API for Rekognition POC Frontend",
                         "restApiId": {
-                          "Ref": "RekognitionApiFBDE99C9"
+                          "Ref": "LivenessRekognitionApiD36C9B6A"
                         }
                       }
                     },
@@ -1913,19 +1913,19 @@
               },
               "DeploymentStage.prod": {
                 "id": "DeploymentStage.prod",
-                "path": "RekognitionPocStack/RekognitionApi/DeploymentStage.prod",
+                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/DeploymentStage.prod",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/RekognitionApi/DeploymentStage.prod/Resource",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/DeploymentStage.prod/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "RekognitionApiDeployment12E716F5f3a1e3e984758724a3897a610dad40f8"
+                          "Ref": "LivenessRekognitionApiDeployment6A23717C1b029c5fa0d292f1606159f7f165161b"
                         },
                         "restApiId": {
-                          "Ref": "RekognitionApiFBDE99C9"
+                          "Ref": "LivenessRekognitionApiD36C9B6A"
                         },
                         "stageName": "prod"
                       }
@@ -1943,7 +1943,7 @@
               },
               "Endpoint": {
                 "id": "Endpoint",
-                "path": "RekognitionPocStack/RekognitionApi/Endpoint",
+                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Endpoint",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnOutput",
                   "version": "2.140.0"
@@ -1951,15 +1951,15 @@
               },
               "Default": {
                 "id": "Default",
-                "path": "RekognitionPocStack/RekognitionApi/Default",
+                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default",
                 "children": {
                   "OPTIONS": {
                     "id": "OPTIONS",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/OPTIONS",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/OPTIONS",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/OPTIONS/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/OPTIONS/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                           "aws:cdk:cloudformation:props": {
@@ -1994,12 +1994,12 @@
                             ],
                             "resourceId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -2016,23 +2016,23 @@
                   },
                   "presigned-urls": {
                     "id": "presigned-urls",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
                             "parentId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "pathPart": "presigned-urls",
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -2043,11 +2043,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/OPTIONS",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/OPTIONS/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2081,10 +2081,10 @@
                                   }
                                 ],
                                 "resourceId": {
-                                  "Ref": "RekognitionApipresignedurls98C038BA"
+                                  "Ref": "LivenessRekognitionApipresignedurlsA14B43F5"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2101,18 +2101,18 @@
                       },
                       "POST": {
                         "id": "POST",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST",
                         "children": {
-                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls": {
-                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls",
+                          "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls": {
+                            "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "PresignedUrlsLambda4D3A70EC",
+                                    "LivenessPresignedUrlsLambdaB7CAAC0B",
                                     "Arn"
                                   ]
                                 },
@@ -2123,11 +2123,11 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/",
                                       {
-                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                       },
                                       "/POST/presigned-urls"
                                     ]
@@ -2140,16 +2140,16 @@
                               "version": "2.140.0"
                             }
                           },
-                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls": {
-                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..presigned-urls",
+                          "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls": {
+                            "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "PresignedUrlsLambda4D3A70EC",
+                                    "LivenessPresignedUrlsLambdaB7CAAC0B",
                                     "Arn"
                                   ]
                                 },
@@ -2160,7 +2160,7 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/test-invoke-stage/POST/presigned-urls"
                                     ]
@@ -2175,7 +2175,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/presigned-urls/POST/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2190,7 +2190,7 @@
                                         "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
-                                            "PresignedUrlsLambda4D3A70EC",
+                                            "LivenessPresignedUrlsLambdaB7CAAC0B",
                                             "Arn"
                                           ]
                                         },
@@ -2201,10 +2201,10 @@
                                   "integrationHttpMethod": "POST"
                                 },
                                 "resourceId": {
-                                  "Ref": "RekognitionApipresignedurls98C038BA"
+                                  "Ref": "LivenessRekognitionApipresignedurlsA14B43F5"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2227,23 +2227,23 @@
                   },
                   "index-document": {
                     "id": "index-document",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/index-document",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/index-document/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
                             "parentId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "pathPart": "index-document",
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -2254,11 +2254,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/index-document/OPTIONS",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/index-document/OPTIONS/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2292,10 +2292,10 @@
                                   }
                                 ],
                                 "resourceId": {
-                                  "Ref": "RekognitionApiindexdocumentC155D060"
+                                  "Ref": "LivenessRekognitionApiindexdocument81767007"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2312,18 +2312,18 @@
                       },
                       "POST": {
                         "id": "POST",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST",
                         "children": {
-                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..index-document": {
-                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..index-document",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..index-document",
+                          "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document": {
+                            "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "DocumentIndexerApiD0843226",
+                                    "LivenessDocumentIndexerApi878E1546",
                                     "Arn"
                                   ]
                                 },
@@ -2334,11 +2334,11 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/",
                                       {
-                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                       },
                                       "/POST/index-document"
                                     ]
@@ -2351,16 +2351,16 @@
                               "version": "2.140.0"
                             }
                           },
-                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..index-document": {
-                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..index-document",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..index-document",
+                          "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document": {
+                            "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "DocumentIndexerApiD0843226",
+                                    "LivenessDocumentIndexerApi878E1546",
                                     "Arn"
                                   ]
                                 },
@@ -2371,7 +2371,7 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/test-invoke-stage/POST/index-document"
                                     ]
@@ -2386,7 +2386,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/index-document/POST/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2401,7 +2401,7 @@
                                         "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
-                                            "DocumentIndexerApiD0843226",
+                                            "LivenessDocumentIndexerApi878E1546",
                                             "Arn"
                                           ]
                                         },
@@ -2412,10 +2412,10 @@
                                   "integrationHttpMethod": "POST"
                                 },
                                 "resourceId": {
-                                  "Ref": "RekognitionApiindexdocumentC155D060"
+                                  "Ref": "LivenessRekognitionApiindexdocument81767007"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2438,23 +2438,23 @@
                   },
                   "check-validation": {
                     "id": "check-validation",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/check-validation",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
                             "parentId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "pathPart": "check-validation",
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -2465,11 +2465,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/OPTIONS",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/OPTIONS/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2503,10 +2503,10 @@
                                   }
                                 ],
                                 "resourceId": {
-                                  "Ref": "RekognitionApicheckvalidationBF29CB94"
+                                  "Ref": "LivenessRekognitionApicheckvalidation61B49F3A"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2523,20 +2523,20 @@
                       },
                       "{numero_documento}": {
                         "id": "{numero_documento}",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
                                 "parentId": {
-                                  "Ref": "RekognitionApicheckvalidationBF29CB94"
+                                  "Ref": "LivenessRekognitionApicheckvalidation61B49F3A"
                                 },
                                 "pathPart": "{numero_documento}",
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2547,11 +2547,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/OPTIONS",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/OPTIONS/Resource",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -2585,10 +2585,10 @@
                                       }
                                     ],
                                     "resourceId": {
-                                      "Ref": "RekognitionApicheckvalidationnumerodocumento77E2D4EE"
+                                      "Ref": "LivenessRekognitionApicheckvalidationnumerodocumentoA304B441"
                                     },
                                     "restApiId": {
-                                      "Ref": "RekognitionApiFBDE99C9"
+                                      "Ref": "LivenessRekognitionApiD36C9B6A"
                                     }
                                   }
                                 },
@@ -2605,18 +2605,18 @@
                           },
                           "GET": {
                             "id": "GET",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET",
                             "children": {
-                              "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}": {
-                                "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}",
+                              "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}": {
+                                "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
                                     "action": "lambda:InvokeFunction",
                                     "functionName": {
                                       "Fn::GetAtt": [
-                                        "CheckValidationLambda112BA848",
+                                        "LivenessCheckValidationLambdaD7F99622",
                                         "Arn"
                                       ]
                                     },
@@ -2627,11 +2627,11 @@
                                         [
                                           "arn:aws:execute-api:us-east-1:442431377530:",
                                           {
-                                            "Ref": "RekognitionApiFBDE99C9"
+                                            "Ref": "LivenessRekognitionApiD36C9B6A"
                                           },
                                           "/",
                                           {
-                                            "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                            "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                           },
                                           "/GET/check-validation/*"
                                         ]
@@ -2644,16 +2644,16 @@
                                   "version": "2.140.0"
                                 }
                               },
-                              "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}": {
-                                "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..check-validation.{numero_documento}",
+                              "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}": {
+                                "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
                                     "action": "lambda:InvokeFunction",
                                     "functionName": {
                                       "Fn::GetAtt": [
-                                        "CheckValidationLambda112BA848",
+                                        "LivenessCheckValidationLambdaD7F99622",
                                         "Arn"
                                       ]
                                     },
@@ -2664,7 +2664,7 @@
                                         [
                                           "arn:aws:execute-api:us-east-1:442431377530:",
                                           {
-                                            "Ref": "RekognitionApiFBDE99C9"
+                                            "Ref": "LivenessRekognitionApiD36C9B6A"
                                           },
                                           "/test-invoke-stage/GET/check-validation/*"
                                         ]
@@ -2679,7 +2679,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/check-validation/{numero_documento}/GET/Resource",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -2694,7 +2694,7 @@
                                             "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                             {
                                               "Fn::GetAtt": [
-                                                "CheckValidationLambda112BA848",
+                                                "LivenessCheckValidationLambdaD7F99622",
                                                 "Arn"
                                               ]
                                             },
@@ -2705,10 +2705,10 @@
                                       "integrationHttpMethod": "POST"
                                     },
                                     "resourceId": {
-                                      "Ref": "RekognitionApicheckvalidationnumerodocumento77E2D4EE"
+                                      "Ref": "LivenessRekognitionApicheckvalidationnumerodocumentoA304B441"
                                     },
                                     "restApiId": {
-                                      "Ref": "RekognitionApiFBDE99C9"
+                                      "Ref": "LivenessRekognitionApiD36C9B6A"
                                     }
                                   }
                                 },
@@ -2737,23 +2737,23 @@
                   },
                   "check-document": {
                     "id": "check-document",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/check-document",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/check-document/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
                             "parentId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "pathPart": "check-document",
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -2764,11 +2764,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/check-document/OPTIONS",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/OPTIONS/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2802,10 +2802,10 @@
                                   }
                                 ],
                                 "resourceId": {
-                                  "Ref": "RekognitionApicheckdocumentEDA2D3AD"
+                                  "Ref": "LivenessRekognitionApicheckdocumentBCE5F162"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2822,18 +2822,18 @@
                       },
                       "POST": {
                         "id": "POST",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST",
                         "children": {
-                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document": {
-                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
+                          "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document": {
+                            "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "CheckDocumentExistsLambda69AABDCF",
+                                    "LivenessCheckDocumentExistsLambdaE7461D66",
                                     "Arn"
                                   ]
                                 },
@@ -2844,11 +2844,11 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/",
                                       {
-                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                       },
                                       "/POST/check-document"
                                     ]
@@ -2861,16 +2861,16 @@
                               "version": "2.140.0"
                             }
                           },
-                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document": {
-                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..check-document",
+                          "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document": {
+                            "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "CheckDocumentExistsLambda69AABDCF",
+                                    "LivenessCheckDocumentExistsLambdaE7461D66",
                                     "Arn"
                                   ]
                                 },
@@ -2881,7 +2881,7 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/test-invoke-stage/POST/check-document"
                                     ]
@@ -2896,7 +2896,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/check-document/POST/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2911,7 +2911,7 @@
                                         "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
-                                            "CheckDocumentExistsLambda69AABDCF",
+                                            "LivenessCheckDocumentExistsLambdaE7461D66",
                                             "Arn"
                                           ]
                                         },
@@ -2922,10 +2922,10 @@
                                   "integrationHttpMethod": "POST"
                                 },
                                 "resourceId": {
-                                  "Ref": "RekognitionApicheckdocumentEDA2D3AD"
+                                  "Ref": "LivenessRekognitionApicheckdocumentBCE5F162"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -2948,23 +2948,23 @@
                   },
                   "cleanup-document": {
                     "id": "cleanup-document",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
                             "parentId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "pathPart": "cleanup-document",
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -2975,11 +2975,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/OPTIONS",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/OPTIONS/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -3013,10 +3013,10 @@
                                   }
                                 ],
                                 "resourceId": {
-                                  "Ref": "RekognitionApicleanupdocument845FA77A"
+                                  "Ref": "LivenessRekognitionApicleanupdocument15A232E5"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -3033,18 +3033,18 @@
                       },
                       "POST": {
                         "id": "POST",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST",
                         "children": {
-                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document": {
-                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
+                          "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document": {
+                            "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "CleanupDocumentLambdaC43685DF",
+                                    "LivenessCleanupDocumentLambdaDD96BA73",
                                     "Arn"
                                   ]
                                 },
@@ -3055,11 +3055,11 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/",
                                       {
-                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                       },
                                       "/POST/cleanup-document"
                                     ]
@@ -3072,16 +3072,16 @@
                               "version": "2.140.0"
                             }
                           },
-                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document": {
-                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..cleanup-document",
+                          "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document": {
+                            "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
                                 "action": "lambda:InvokeFunction",
                                 "functionName": {
                                   "Fn::GetAtt": [
-                                    "CleanupDocumentLambdaC43685DF",
+                                    "LivenessCleanupDocumentLambdaDD96BA73",
                                     "Arn"
                                   ]
                                 },
@@ -3092,7 +3092,7 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/test-invoke-stage/POST/cleanup-document"
                                     ]
@@ -3107,7 +3107,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/cleanup-document/POST/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -3122,7 +3122,7 @@
                                         "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                                         {
                                           "Fn::GetAtt": [
-                                            "CleanupDocumentLambdaC43685DF",
+                                            "LivenessCleanupDocumentLambdaDD96BA73",
                                             "Arn"
                                           ]
                                         },
@@ -3133,10 +3133,10 @@
                                   "integrationHttpMethod": "POST"
                                 },
                                 "resourceId": {
-                                  "Ref": "RekognitionApicleanupdocument845FA77A"
+                                  "Ref": "LivenessRekognitionApicleanupdocument15A232E5"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -3159,23 +3159,23 @@
                   },
                   "liveness-session": {
                     "id": "liveness-session",
-                    "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session",
+                    "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/Resource",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
                             "parentId": {
                               "Fn::GetAtt": [
-                                "RekognitionApiFBDE99C9",
+                                "LivenessRekognitionApiD36C9B6A",
                                 "RootResourceId"
                               ]
                             },
                             "pathPart": "liveness-session",
                             "restApiId": {
-                              "Ref": "RekognitionApiFBDE99C9"
+                              "Ref": "LivenessRekognitionApiD36C9B6A"
                             }
                           }
                         },
@@ -3186,11 +3186,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/OPTIONS",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/OPTIONS/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -3224,10 +3224,10 @@
                                   }
                                 ],
                                 "resourceId": {
-                                  "Ref": "RekognitionApilivenesssession2A46B0F7"
+                                  "Ref": "LivenessRekognitionApilivenesssessionA0D91336"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -3244,11 +3244,11 @@
                       },
                       "POST": {
                         "id": "POST",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST",
                         "children": {
-                          "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session": {
-                            "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
+                          "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session": {
+                            "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
@@ -3266,11 +3266,11 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/",
                                       {
-                                        "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                       },
                                       "/POST/liveness-session"
                                     ]
@@ -3283,9 +3283,9 @@
                               "version": "2.140.0"
                             }
                           },
-                          "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session": {
-                            "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.POST..liveness-session",
+                          "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session": {
+                            "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
@@ -3303,7 +3303,7 @@
                                     [
                                       "arn:aws:execute-api:us-east-1:442431377530:",
                                       {
-                                        "Ref": "RekognitionApiFBDE99C9"
+                                        "Ref": "LivenessRekognitionApiD36C9B6A"
                                       },
                                       "/test-invoke-stage/POST/liveness-session"
                                     ]
@@ -3318,7 +3318,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/POST/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -3344,10 +3344,10 @@
                                   "integrationHttpMethod": "POST"
                                 },
                                 "resourceId": {
-                                  "Ref": "RekognitionApilivenesssession2A46B0F7"
+                                  "Ref": "LivenessRekognitionApilivenesssessionA0D91336"
                                 },
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -3364,20 +3364,20 @@
                       },
                       "{sessionId}": {
                         "id": "{sessionId}",
-                        "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}",
+                        "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/Resource",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
                                 "parentId": {
-                                  "Ref": "RekognitionApilivenesssession2A46B0F7"
+                                  "Ref": "LivenessRekognitionApilivenesssessionA0D91336"
                                 },
                                 "pathPart": "{sessionId}",
                                 "restApiId": {
-                                  "Ref": "RekognitionApiFBDE99C9"
+                                  "Ref": "LivenessRekognitionApiD36C9B6A"
                                 }
                               }
                             },
@@ -3388,11 +3388,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/OPTIONS",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/OPTIONS/Resource",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -3426,10 +3426,10 @@
                                       }
                                     ],
                                     "resourceId": {
-                                      "Ref": "RekognitionApilivenesssessionsessionIdFA42192F"
+                                      "Ref": "LivenessRekognitionApilivenesssessionsessionIdB516AB66"
                                     },
                                     "restApiId": {
-                                      "Ref": "RekognitionApiFBDE99C9"
+                                      "Ref": "LivenessRekognitionApiD36C9B6A"
                                     }
                                   }
                                 },
@@ -3446,11 +3446,11 @@
                           },
                           "GET": {
                             "id": "GET",
-                            "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET",
+                            "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET",
                             "children": {
-                              "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}": {
-                                "id": "ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
+                              "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}": {
+                                "id": "ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3468,11 +3468,11 @@
                                         [
                                           "arn:aws:execute-api:us-east-1:442431377530:",
                                           {
-                                            "Ref": "RekognitionApiFBDE99C9"
+                                            "Ref": "LivenessRekognitionApiD36C9B6A"
                                           },
                                           "/",
                                           {
-                                            "Ref": "RekognitionApiDeploymentStageprodFC9D95C2"
+                                            "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
                                           },
                                           "/GET/liveness-session/*"
                                         ]
@@ -3485,9 +3485,9 @@
                                   "version": "2.140.0"
                                 }
                               },
-                              "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}": {
-                                "id": "ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.Test.RekognitionPocStackRekognitionApiF810B10B.GET..liveness-session.{sessionId}",
+                              "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}": {
+                                "id": "ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3505,7 +3505,7 @@
                                         [
                                           "arn:aws:execute-api:us-east-1:442431377530:",
                                           {
-                                            "Ref": "RekognitionApiFBDE99C9"
+                                            "Ref": "LivenessRekognitionApiD36C9B6A"
                                           },
                                           "/test-invoke-stage/GET/liveness-session/*"
                                         ]
@@ -3520,7 +3520,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "RekognitionPocStack/RekognitionApi/Default/liveness-session/{sessionId}/GET/Resource",
+                                "path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -3546,10 +3546,10 @@
                                       "integrationHttpMethod": "POST"
                                     },
                                     "resourceId": {
-                                      "Ref": "RekognitionApilivenesssessionsessionIdFA42192F"
+                                      "Ref": "LivenessRekognitionApilivenesssessionsessionIdB516AB66"
                                     },
                                     "restApiId": {
-                                      "Ref": "RekognitionApiFBDE99C9"
+                                      "Ref": "LivenessRekognitionApiD36C9B6A"
                                     }
                                   }
                                 },
@@ -3590,15 +3590,15 @@
           },
           "BucketNotificationsHandler050a0587b7544547bf325f094a3db834": {
             "id": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834",
-            "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834",
+            "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834",
             "children": {
               "Role": {
                 "id": "Role",
-                "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role",
+                "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role",
                 "children": {
                   "ImportRole": {
                     "id": "ImportRole",
-                    "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/ImportRole",
+                    "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/ImportRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.140.0"
@@ -3606,7 +3606,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource",
+                    "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -3645,11 +3645,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy",
+                    "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource",
+                        "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -3690,7 +3690,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "RekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource",
+                "path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.140.0"
@@ -3702,65 +3702,65 @@
               "version": "10.4.2"
             }
           },
-          "DocumentsBucketName": {
-            "id": "DocumentsBucketName",
-            "path": "RekognitionPocStack/DocumentsBucketName",
+          "LivenessDocumentsBucketName": {
+            "id": "LivenessDocumentsBucketName",
+            "path": "LivenessRekognitionPocStack/LivenessDocumentsBucketName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "UserPhotosBucketName": {
-            "id": "UserPhotosBucketName",
-            "path": "RekognitionPocStack/UserPhotosBucketName",
+          "LivenessUserPhotosBucketName": {
+            "id": "LivenessUserPhotosBucketName",
+            "path": "LivenessRekognitionPocStack/LivenessUserPhotosBucketName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "FrontendBucketName": {
-            "id": "FrontendBucketName",
-            "path": "RekognitionPocStack/FrontendBucketName",
+          "LivenessFrontendBucketName": {
+            "id": "LivenessFrontendBucketName",
+            "path": "LivenessRekognitionPocStack/LivenessFrontendBucketName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "FrontendUrl": {
-            "id": "FrontendUrl",
-            "path": "RekognitionPocStack/FrontendUrl",
+          "LivenessFrontendUrl": {
+            "id": "LivenessFrontendUrl",
+            "path": "LivenessRekognitionPocStack/LivenessFrontendUrl",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "CloudFrontDistributionId": {
-            "id": "CloudFrontDistributionId",
-            "path": "RekognitionPocStack/CloudFrontDistributionId",
+          "LivenessCloudFrontDistributionId": {
+            "id": "LivenessCloudFrontDistributionId",
+            "path": "LivenessRekognitionPocStack/LivenessCloudFrontDistributionId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "ApiGatewayUrl": {
-            "id": "ApiGatewayUrl",
-            "path": "RekognitionPocStack/ApiGatewayUrl",
+          "LivenessApiGatewayUrl": {
+            "id": "LivenessApiGatewayUrl",
+            "path": "LivenessRekognitionPocStack/LivenessApiGatewayUrl",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "IndexedDocumentsTableName": {
-            "id": "IndexedDocumentsTableName",
-            "path": "RekognitionPocStack/IndexedDocumentsTableName",
+          "LivenessIndexedDocumentsTableName": {
+            "id": "LivenessIndexedDocumentsTableName",
+            "path": "LivenessRekognitionPocStack/LivenessIndexedDocumentsTableName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
             }
           },
-          "ComparisonResultsTableName": {
-            "id": "ComparisonResultsTableName",
-            "path": "RekognitionPocStack/ComparisonResultsTableName",
+          "LivenessComparisonResultsTableName": {
+            "id": "LivenessComparisonResultsTableName",
+            "path": "LivenessRekognitionPocStack/LivenessComparisonResultsTableName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
@@ -3768,7 +3768,7 @@
           },
           "LivenessIdentityPoolId": {
             "id": "LivenessIdentityPoolId",
-            "path": "RekognitionPocStack/LivenessIdentityPoolId",
+            "path": "LivenessRekognitionPocStack/LivenessIdentityPoolId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.140.0"
@@ -3776,11 +3776,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "RekognitionPocStack/CDKMetadata",
+            "path": "LivenessRekognitionPocStack/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "RekognitionPocStack/CDKMetadata/Default",
+                "path": "LivenessRekognitionPocStack/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.140.0"
@@ -3794,7 +3794,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "RekognitionPocStack/BootstrapVersion",
+            "path": "LivenessRekognitionPocStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.140.0"
@@ -3802,7 +3802,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "RekognitionPocStack/CheckBootstrapVersion",
+            "path": "LivenessRekognitionPocStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.140.0"

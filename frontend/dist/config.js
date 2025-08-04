@@ -1,15 +1,15 @@
 // ============================================
-// CORRECTED CONFIGURATION FOR AWS AMPLIFY V6
+// CORRECTED CONFIGURATION FOR AWS AMPLIFY V5
 // ============================================
 
 // This file is automatically updated with the actual API Gateway URL
 // Generated at deployment time
 
-window.API_GATEWAY_URL = 'https://iopj8x9dl3.execute-api.us-east-1.amazonaws.com/prod/';
+window.API_GATEWAY_URL = 'https://nuyq1a9chc.execute-api.us-east-1.amazonaws.com/prod/';
 
 // ✅ CRITICAL: Identity Pool ID for AWS Face Liveness
 // Replace this with your actual Identity Pool ID from CloudFormation output
-window.LIVENESS_IDENTITY_POOL_ID = 'us-east-1:bea64bf1-d598-4391-85f0-4206c257c2ce';
+window.LIVENESS_IDENTITY_POOL_ID = 'us-east-1:d7a627ef-1d9b-421e-abfb-d5db9ad275dc';
 
 // AWS Region configuration
 window.AWS_REGION = 'us-east-1';
@@ -17,14 +17,11 @@ window.AWS_REGION = 'us-east-1';
 console.log('🔧 Config loaded - API Gateway URL:', window.API_GATEWAY_URL);
 console.log('🔧 Config loaded - Identity Pool ID:', window.LIVENESS_IDENTITY_POOL_ID);
 
-// ✅ CORRECTED: Amplify v6 configuration object
+// ✅ CORRECTED: Amplify v5 configuration object
 window.AMPLIFY_CONFIG = {
     Auth: {
-        Cognito: {
-            identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
-            region: window.AWS_REGION,
-            allowGuestAccess: true
-        }
+        identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
+        region: window.AWS_REGION
     }
 };
 
@@ -34,5 +31,5 @@ if (window.LIVENESS_IDENTITY_POOL_ID &&
     console.log('✅ Amplify Config ready for Face Liveness');
 } else {
     console.warn('⚠️  Identity Pool ID not configured - Face Liveness may not work');
-    console.warn('⚠️  Run: aws cloudformation describe-stacks --stack-name RekognitionPocStack --query "Stacks[0].Outputs[?OutputKey==\`LivenessIdentityPoolId\`].OutputValue" --output text');
+    console.warn('⚠️  Run: aws cloudformation describe-stacks --stack-name LivenessRekognitionPocStack --query "Stacks[0].Outputs[?OutputKey==\`LivenessIdentityPoolId\`].OutputValue" --output text');
 }

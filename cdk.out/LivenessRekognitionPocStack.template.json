@@ -1,0 +1,2859 @@
+{
+ "Resources": {
+  "LivenessDocumentsBucketFF425AE5": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "liveness-poc-documents-442431377530-us-east-1",
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "PUT",
+        "POST",
+        "GET"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3000
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessDocumentsBucket/Resource"
+   }
+  },
+  "LivenessUserPhotosBucket5B0502F1": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "liveness-poc-user-photos-442431377530-us-east-1",
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "POST",
+        "PUT",
+        "GET"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3000
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 120,
+       "Id": "user_photos_cleanup",
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "GLACIER_IR",
+         "TransitionInDays": 30
+        }
+       ]
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/Resource"
+   }
+  },
+  "LivenessUserPhotosBucketNotifications575CCB6C": {
+   "Type": "Custom::S3BucketNotifications",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "LivenessUserPhotosBucket5B0502F1"
+    },
+    "NotificationConfiguration": {
+     "LambdaFunctionConfigurations": [
+      {
+       "Events": [
+        "s3:ObjectCreated:*"
+       ],
+       "Filter": {
+        "Key": {
+         "FilterRules": [
+          {
+           "Name": "suffix",
+           "Value": ".jpg"
+          }
+         ]
+        }
+       },
+       "LambdaFunctionArn": {
+        "Fn::GetAtt": [
+         "LivenessUserValidator8F8CF26A",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Events": [
+        "s3:ObjectCreated:*"
+       ],
+       "Filter": {
+        "Key": {
+         "FilterRules": [
+          {
+           "Name": "suffix",
+           "Value": ".jpeg"
+          }
+         ]
+        }
+       },
+       "LambdaFunctionArn": {
+        "Fn::GetAtt": [
+         "LivenessUserValidator8F8CF26A",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Events": [
+        "s3:ObjectCreated:*"
+       ],
+       "Filter": {
+        "Key": {
+         "FilterRules": [
+          {
+           "Name": "suffix",
+           "Value": ".png"
+          }
+         ]
+        }
+       },
+       "LambdaFunctionArn": {
+        "Fn::GetAtt": [
+         "LivenessUserValidator8F8CF26A",
+         "Arn"
+        ]
+       }
+      }
+     ]
+    },
+    "Managed": true
+   },
+   "DependsOn": [
+    "LivenessUserPhotosBucketAllowBucketNotificationsToLivenessRekognitionPocStackLivenessUserValidatorC21394F87C6D7B3B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/Notifications/Resource"
+   }
+  },
+  "LivenessUserPhotosBucketAllowBucketNotificationsToLivenessRekognitionPocStackLivenessUserValidatorC21394F87C6D7B3B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessUserValidator8F8CF26A",
+      "Arn"
+     ]
+    },
+    "Principal": "s3.amazonaws.com",
+    "SourceAccount": "442431377530",
+    "SourceArn": {
+     "Fn::GetAtt": [
+      "LivenessUserPhotosBucket5B0502F1",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessUserPhotosBucket/AllowBucketNotificationsToLivenessRekognitionPocStackLivenessUserValidatorC21394F8"
+   }
+  },
+  "LivenessFrontendBucket3D47E1CB": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "liveness-poc-frontend-442431377530-us-east-1",
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessFrontendBucket/Resource"
+   }
+  },
+  "LivenessFrontendBucketPolicy39E13492": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "LivenessFrontendBucket3D47E1CB"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "LivenessFrontendOAI1CCC691A",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "LivenessFrontendBucket3D47E1CB",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "LivenessFrontendBucket3D47E1CB",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "LivenessFrontendOAI1CCC691A",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "LivenessFrontendBucket3D47E1CB",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessFrontendBucket/Policy/Resource"
+   }
+  },
+  "LivenessIndexedDocumentsTableB1B52D9A": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "document_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "face_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "person_name",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "face-id-index",
+      "KeySchema": [
+       {
+        "AttributeName": "face_id",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "person-name-index",
+      "KeySchema": [
+       {
+        "AttributeName": "person_name",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "document_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "TableName": "liveness-indexed-documents"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessIndexedDocumentsTable/Resource"
+   }
+  },
+  "LivenessComparisonResultsTable58D19E2A": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "comparison_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "user_image_key",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "matched_face_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "confidence_score",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "user-image-index",
+      "KeySchema": [
+       {
+        "AttributeName": "user_image_key",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "timestamp",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "face-id-index",
+      "KeySchema": [
+       {
+        "AttributeName": "matched_face_id",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "confidence_score",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "comparison_id",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "timestamp",
+      "KeyType": "RANGE"
+     }
+    ],
+    "TableName": "liveness-comparison-results",
+    "TimeToLiveSpecification": {
+     "AttributeName": "ttl",
+     "Enabled": true
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessComparisonResultsTable/Resource"
+   }
+  },
+  "LivenessSharedLayer83F7D387": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "CompatibleRuntimes": [
+     "python3.11"
+    ],
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "69c2058bdf73dcb437d0609ccfcdfc33fd4bf63f311c0d785107852049c7eebd.zip"
+    },
+    "Description": "Shared utilities with auto-compiled dependencies",
+    "LayerName": "liveness-poc-shared-layer"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessSharedLayer/Resource",
+    "aws:asset:path": "asset.69c2058bdf73dcb437d0609ccfcdfc33fd4bf63f311c0d785107852049c7eebd",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Content"
+   }
+  },
+  "LivenessIndexerLambdaRole4C682B62": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "rekognition:CreateCollection",
+          "rekognition:DeleteFaces",
+          "rekognition:DescribeCollection",
+          "rekognition:DetectFaces",
+          "rekognition:IndexFaces"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        },
+        {
+         "Action": "s3:ListBucket",
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::GetAtt": [
+           "LivenessDocumentsBucketFF425AE5",
+           "Arn"
+          ]
+         }
+        },
+        {
+         "Action": [
+          "s3:DeleteObject",
+          "s3:GetObject"
+         ],
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::Join": [
+           "",
+           [
+            {
+             "Fn::GetAtt": [
+              "LivenessDocumentsBucketFF425AE5",
+              "Arn"
+             ]
+            },
+            "/*"
+           ]
+          ]
+         }
+        },
+        {
+         "Action": [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem"
+         ],
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::GetAtt": [
+           "LivenessIndexedDocumentsTableB1B52D9A",
+           "Arn"
+          ]
+         }
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "RekognitionIndexerPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessIndexerLambdaRole/Resource"
+   }
+  },
+  "LivenessValidatorLambdaRole092534D6": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "rekognition:CompareFaces",
+          "rekognition:DetectFaces",
+          "rekognition:GetFaceLivenessSessionResults",
+          "rekognition:SearchFacesByImage"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        },
+        {
+         "Action": "s3:ListBucket",
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "LivenessDocumentsBucketFF425AE5",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::GetAtt": [
+            "LivenessUserPhotosBucket5B0502F1",
+            "Arn"
+           ]
+          }
+         ]
+        },
+        {
+         "Action": [
+          "s3:DeleteObject",
+          "s3:GetObject"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessDocumentsBucketFF425AE5",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessUserPhotosBucket5B0502F1",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
+           ]
+          }
+         ]
+        },
+        {
+         "Action": [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "LivenessComparisonResultsTable58D19E2A",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::GetAtt": [
+            "LivenessIndexedDocumentsTableB1B52D9A",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessComparisonResultsTable58D19E2A",
+               "Arn"
+              ]
+             },
+             "/index/*"
+            ]
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessIndexedDocumentsTableB1B52D9A",
+               "Arn"
+              ]
+             },
+             "/index/*"
+            ]
+           ]
+          }
+         ]
+        },
+        {
+         "Action": "lambda:InvokeFunction",
+         "Effect": "Allow",
+         "Resource": "arn:aws:lambda:us-east-1:442431377530:function:liveness-poc-document-indexer"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "RekognitionValidatorPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessValidatorLambdaRole/Resource"
+   }
+  },
+  "LivenessApiLambdaRole3DB6BF75": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:HeadObject",
+          "s3:PutObject"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessDocumentsBucketFF425AE5",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessUserPhotosBucket5B0502F1",
+               "Arn"
+              ]
+             },
+             "/*"
+            ]
+           ]
+          }
+         ]
+        },
+        {
+         "Action": "s3:ListBucket",
+         "Effect": "Allow",
+         "Resource": {
+          "Fn::GetAtt": [
+           "LivenessDocumentsBucketFF425AE5",
+           "Arn"
+          ]
+         }
+        },
+        {
+         "Action": [
+          "dynamodb:Query",
+          "dynamodb:Scan"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "LivenessComparisonResultsTable58D19E2A",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::Join": [
+            "",
+            [
+             {
+              "Fn::GetAtt": [
+               "LivenessComparisonResultsTable58D19E2A",
+               "Arn"
+              ]
+             },
+             "/index/*"
+            ]
+           ]
+          }
+         ]
+        },
+        {
+         "Action": "lambda:InvokeFunction",
+         "Effect": "Allow",
+         "Resource": "arn:aws:lambda:us-east-1:442431377530:function:liveness-poc-document-indexer"
+        },
+        {
+         "Action": [
+          "rekognition:CreateCollection",
+          "rekognition:CreateFaceLivenessSession",
+          "rekognition:DescribeCollection",
+          "rekognition:DetectFaces",
+          "rekognition:GetFaceLivenessSessionResults",
+          "textract:AnalyzeDocument"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "ApiLambdaPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessApiLambdaRole/Resource"
+   }
+  },
+  "LivenessIdentityPool": {
+   "Type": "AWS::Cognito::IdentityPool",
+   "Properties": {
+    "AllowUnauthenticatedIdentities": true,
+    "CognitoIdentityProviders": [],
+    "IdentityPoolName": "liveness-poc-pool"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessIdentityPool"
+   }
+  },
+  "LivenessUnauthRoleD5DBE369": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+        "StringEquals": {
+         "cognito-identity.amazonaws.com:aud": {
+          "Ref": "LivenessIdentityPool"
+         }
+        },
+        "ForAnyValue:StringLike": {
+         "cognito-identity.amazonaws.com:amr": "unauthenticated"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": "rekognition:StartFaceLivenessSession",
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "LivenessPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessUnauthRole/Resource"
+   }
+  },
+  "LivenessIdentityPoolRoleAttachment": {
+   "Type": "AWS::Cognito::IdentityPoolRoleAttachment",
+   "Properties": {
+    "IdentityPoolId": {
+     "Ref": "LivenessIdentityPool"
+    },
+    "Roles": {
+     "unauthenticated": {
+      "Fn::GetAtt": [
+       "LivenessUnauthRoleD5DBE369",
+       "Arn"
+      ]
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessIdentityPoolRoleAttachment"
+   }
+  },
+  "LivenessDocumentIndexer27EBA1EC": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "7e2b95cebcebb895d641fb2c97f3afb02cae4518223a0998d1759954c8e64c12.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "COLLECTION_ID": "liveness-document-faces-collection",
+      "INDEXED_DOCUMENTS_TABLE": {
+       "Ref": "LivenessIndexedDocumentsTableB1B52D9A"
+      },
+      "DOCUMENTS_BUCKET": {
+       "Ref": "LivenessDocumentsBucketFF425AE5"
+      }
+     }
+    },
+    "FunctionName": "liveness-poc-document-indexer",
+    "Handler": "handler.lambda_handler",
+    "Layers": [
+     {
+      "Ref": "LivenessSharedLayer83F7D387"
+     }
+    ],
+    "MemorySize": 1024,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessIndexerLambdaRole4C682B62",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 300
+   },
+   "DependsOn": [
+    "LivenessIndexerLambdaRole4C682B62"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessDocumentIndexer/Resource",
+    "aws:asset:path": "asset.7e2b95cebcebb895d641fb2c97f3afb02cae4518223a0998d1759954c8e64c12",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessUserValidator8F8CF26A": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "d34cce567268aeb3fad39d2416d809ecef5c72fc11cb2807fbba6e1de65f51c9.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "COLLECTION_ID": "liveness-document-faces-collection",
+      "COMPARISON_RESULTS_TABLE": {
+       "Ref": "LivenessComparisonResultsTable58D19E2A"
+      },
+      "INDEXED_DOCUMENTS_TABLE": {
+       "Ref": "LivenessIndexedDocumentsTableB1B52D9A"
+      },
+      "DOCUMENTS_BUCKET": {
+       "Ref": "LivenessDocumentsBucketFF425AE5"
+      },
+      "USER_PHOTOS_BUCKET": {
+       "Ref": "LivenessUserPhotosBucket5B0502F1"
+      },
+      "DOCUMENT_INDEXER_FUNCTION": "liveness-poc-document-indexer"
+     }
+    },
+    "FunctionName": "liveness-poc-user-validator",
+    "Handler": "handler.lambda_handler",
+    "Layers": [
+     {
+      "Ref": "LivenessSharedLayer83F7D387"
+     }
+    ],
+    "MemorySize": 1024,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessValidatorLambdaRole092534D6",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "LivenessValidatorLambdaRole092534D6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessUserValidator/Resource",
+    "aws:asset:path": "asset.d34cce567268aeb3fad39d2416d809ecef5c72fc11cb2807fbba6e1de65f51c9",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessPresignedUrlsLambdaB7CAAC0B": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "8bc3a639dfa35557e0996b0029448deb662b8ff09e2dd08dbada4b5c0f34d21c.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DOCUMENTS_BUCKET": {
+       "Ref": "LivenessDocumentsBucketFF425AE5"
+      },
+      "USER_PHOTOS_BUCKET": {
+       "Ref": "LivenessUserPhotosBucket5B0502F1"
+      }
+     }
+    },
+    "FunctionName": "liveness-poc-presigned-urls",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessApiLambdaRole3DB6BF75",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "LivenessApiLambdaRole3DB6BF75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessPresignedUrlsLambda/Resource",
+    "aws:asset:path": "asset.8bc3a639dfa35557e0996b0029448deb662b8ff09e2dd08dbada4b5c0f34d21c",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessDocumentIndexerApi878E1546": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "868cb212211dc06d84c13edca93655de48eec2ee799d23685f89cd24dbb72da3.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DOCUMENT_INDEXER_FUNCTION": {
+       "Ref": "LivenessDocumentIndexer27EBA1EC"
+      },
+      "DOCUMENTS_BUCKET": {
+       "Ref": "LivenessDocumentsBucketFF425AE5"
+      },
+      "COLLECTION_ID": "liveness-document-faces-collection"
+     }
+    },
+    "FunctionName": "liveness-poc-document-indexer-api",
+    "Handler": "handler.lambda_handler",
+    "Layers": [
+     {
+      "Ref": "LivenessSharedLayer83F7D387"
+     }
+    ],
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessApiLambdaRole3DB6BF75",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "LivenessApiLambdaRole3DB6BF75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessDocumentIndexerApi/Resource",
+    "aws:asset:path": "asset.868cb212211dc06d84c13edca93655de48eec2ee799d23685f89cd24dbb72da3",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessCheckValidationLambdaD7F99622": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "baadf662b7b1114c6966d26ec14ea0ac369f0e256e639e3006b414ba099f8dad.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "COMPARISON_RESULTS_TABLE": {
+       "Ref": "LivenessComparisonResultsTable58D19E2A"
+      }
+     }
+    },
+    "FunctionName": "liveness-poc-check-validation",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessApiLambdaRole3DB6BF75",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "LivenessApiLambdaRole3DB6BF75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessCheckValidationLambda/Resource",
+    "aws:asset:path": "asset.baadf662b7b1114c6966d26ec14ea0ac369f0e256e639e3006b414ba099f8dad",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessCheckDocumentExistsLambdaE7461D66": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "07a6ad1d0232ef3623be7ebe556c56bc84e00802576a4f13ef149af4972cfe42.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DOCUMENTS_BUCKET": {
+       "Ref": "LivenessDocumentsBucketFF425AE5"
+      }
+     }
+    },
+    "FunctionName": "liveness-poc-check-document-exists",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessApiLambdaRole3DB6BF75",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "LivenessApiLambdaRole3DB6BF75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessCheckDocumentExistsLambda/Resource",
+    "aws:asset:path": "asset.07a6ad1d0232ef3623be7ebe556c56bc84e00802576a4f13ef149af4972cfe42",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessCleanupDocumentLambdaDD96BA73": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "4f72309455bdb81617a0d0a660ad19d935f03681d1acd56c428b5a7c22bb0fdf.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DOCUMENTS_BUCKET": {
+       "Ref": "LivenessDocumentsBucketFF425AE5"
+      }
+     }
+    },
+    "FunctionName": "liveness-poc-cleanup-document",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessApiLambdaRole3DB6BF75",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "LivenessApiLambdaRole3DB6BF75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessCleanupDocumentLambda/Resource",
+    "aws:asset:path": "asset.4f72309455bdb81617a0d0a660ad19d935f03681d1acd56c428b5a7c22bb0fdf",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "FaceLivenessSession9FDE33E4": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "2454fdc347c6e9050f305aa623e54f896f5ecb7fa5acc2394d64413aee64ae2b.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "USER_PHOTOS_BUCKET": {
+       "Ref": "LivenessUserPhotosBucket5B0502F1"
+      }
+     }
+    },
+    "FunctionName": "rekognition-poc-face-liveness-session",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 256,
+    "Role": {
+     "Fn::GetAtt": [
+      "LivenessApiLambdaRole3DB6BF75",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "LivenessApiLambdaRole3DB6BF75"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/FaceLivenessSession/Resource",
+    "aws:asset:path": "asset.2454fdc347c6e9050f305aa623e54f896f5ecb7fa5acc2394d64413aee64ae2b",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LivenessFrontendOAI1CCC691A": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "OAI for Liveness Rekognition POC Frontend"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessFrontendOAI/Resource"
+   }
+  },
+  "LivenessFrontendDistribution8CBE76ED": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Comment": "Liveness Rekognition POC Frontend Distribution",
+     "CustomErrorResponses": [
+      {
+       "ErrorCachingMinTTL": 300,
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCachingMinTTL": 300,
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "CachedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "Compress": true,
+      "TargetOriginId": "LivenessRekognitionPocStackLivenessFrontendDistributionOrigin168FEA891",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "LivenessFrontendBucket3D47E1CB",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "LivenessRekognitionPocStackLivenessFrontendDistributionOrigin168FEA891",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "LivenessFrontendOAI1CCC691A"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ],
+     "PriceClass": "PriceClass_100"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessFrontendDistribution/Resource"
+   }
+  },
+  "LivenessRekognitionApiD36C9B6A": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "API for Rekognition POC Frontend",
+    "Name": "liveness-poc-api"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Resource"
+   }
+  },
+  "LivenessRekognitionApiDeployment6A23717C1b029c5fa0d292f1606159f7f165161b": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "API for Rekognition POC Frontend",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "DependsOn": [
+    "LivenessRekognitionApicheckdocumentOPTIONS67748760",
+    "LivenessRekognitionApicheckdocumentPOST475FAB7A",
+    "LivenessRekognitionApicheckdocumentBCE5F162",
+    "LivenessRekognitionApicheckvalidationnumerodocumentoGET7A1F482E",
+    "LivenessRekognitionApicheckvalidationnumerodocumentoOPTIONS8AC2A736",
+    "LivenessRekognitionApicheckvalidationnumerodocumentoA304B441",
+    "LivenessRekognitionApicheckvalidationOPTIONS5AF21D58",
+    "LivenessRekognitionApicheckvalidation61B49F3A",
+    "LivenessRekognitionApicleanupdocumentOPTIONSA35A7737",
+    "LivenessRekognitionApicleanupdocumentPOSTA4347B81",
+    "LivenessRekognitionApicleanupdocument15A232E5",
+    "LivenessRekognitionApiindexdocumentOPTIONS6DDDF657",
+    "LivenessRekognitionApiindexdocumentPOST8765D350",
+    "LivenessRekognitionApiindexdocument81767007",
+    "LivenessRekognitionApilivenesssessionsessionIdGETA846C165",
+    "LivenessRekognitionApilivenesssessionsessionIdOPTIONS42D4C5B1",
+    "LivenessRekognitionApilivenesssessionsessionIdB516AB66",
+    "LivenessRekognitionApilivenesssessionOPTIONS90FDFA6C",
+    "LivenessRekognitionApilivenesssessionPOSTD49B6968",
+    "LivenessRekognitionApilivenesssessionA0D91336",
+    "LivenessRekognitionApiOPTIONSEF58576F",
+    "LivenessRekognitionApipresignedurlsOPTIONS80DEE37C",
+    "LivenessRekognitionApipresignedurlsPOST86383D14",
+    "LivenessRekognitionApipresignedurlsA14B43F5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Deployment/Resource"
+   }
+  },
+  "LivenessRekognitionApiDeploymentStageprodC65FD873": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "LivenessRekognitionApiDeployment6A23717C1b029c5fa0d292f1606159f7f165161b"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    },
+    "StageName": "prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "LivenessRekognitionApiOPTIONSEF58576F": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApipresignedurlsA14B43F5": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "presigned-urls",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/Resource"
+   }
+  },
+  "LivenessRekognitionApipresignedurlsOPTIONS80DEE37C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApipresignedurlsA14B43F5"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApipresignedurlsPOSTApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTpresignedurls64D78C90": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessPresignedUrlsLambdaB7CAAC0B",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/POST/presigned-urls"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls"
+   }
+  },
+  "LivenessRekognitionApipresignedurlsPOSTApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTpresignedurlsE0C75474": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessPresignedUrlsLambdaB7CAAC0B",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/POST/presigned-urls"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..presigned-urls"
+   }
+  },
+  "LivenessRekognitionApipresignedurlsPOST86383D14": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LivenessPresignedUrlsLambdaB7CAAC0B",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApipresignedurlsA14B43F5"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/presigned-urls/POST/Resource"
+   }
+  },
+  "LivenessRekognitionApiindexdocument81767007": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "index-document",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/Resource"
+   }
+  },
+  "LivenessRekognitionApiindexdocumentOPTIONS6DDDF657": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApiindexdocument81767007"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApiindexdocumentPOSTApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTindexdocument69A34EA7": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessDocumentIndexerApi878E1546",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/POST/index-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document"
+   }
+  },
+  "LivenessRekognitionApiindexdocumentPOSTApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTindexdocumentA9EDE42B": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessDocumentIndexerApi878E1546",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/POST/index-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..index-document"
+   }
+  },
+  "LivenessRekognitionApiindexdocumentPOST8765D350": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LivenessDocumentIndexerApi878E1546",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApiindexdocument81767007"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/index-document/POST/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckvalidation61B49F3A": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "check-validation",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckvalidationOPTIONS5AF21D58": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicheckvalidation61B49F3A"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckvalidationnumerodocumentoA304B441": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "LivenessRekognitionApicheckvalidation61B49F3A"
+    },
+    "PathPart": "{numero_documento}",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckvalidationnumerodocumentoOPTIONS8AC2A736": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicheckvalidationnumerodocumentoA304B441"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckvalidationnumerodocumentoGETApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7GETcheckvalidationnumerodocumento23A3FAAA": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessCheckValidationLambdaD7F99622",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/GET/check-validation/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}"
+   }
+  },
+  "LivenessRekognitionApicheckvalidationnumerodocumentoGETApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7GETcheckvalidationnumerodocumento533F94C0": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessCheckValidationLambdaD7F99622",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/GET/check-validation/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..check-validation.{numero_documento}"
+   }
+  },
+  "LivenessRekognitionApicheckvalidationnumerodocumentoGET7A1F482E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LivenessCheckValidationLambdaD7F99622",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicheckvalidationnumerodocumentoA304B441"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-validation/{numero_documento}/GET/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckdocumentBCE5F162": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "check-document",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckdocumentOPTIONS67748760": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicheckdocumentBCE5F162"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApicheckdocumentPOSTApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTcheckdocumentDD83C5E6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessCheckDocumentExistsLambdaE7461D66",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/POST/check-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document"
+   }
+  },
+  "LivenessRekognitionApicheckdocumentPOSTApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTcheckdocumentCA5CB858": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessCheckDocumentExistsLambdaE7461D66",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/POST/check-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..check-document"
+   }
+  },
+  "LivenessRekognitionApicheckdocumentPOST475FAB7A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LivenessCheckDocumentExistsLambdaE7461D66",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicheckdocumentBCE5F162"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/check-document/POST/Resource"
+   }
+  },
+  "LivenessRekognitionApicleanupdocument15A232E5": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "cleanup-document",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/Resource"
+   }
+  },
+  "LivenessRekognitionApicleanupdocumentOPTIONSA35A7737": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicleanupdocument15A232E5"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApicleanupdocumentPOSTApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTcleanupdocumentF96CC5CB": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessCleanupDocumentLambdaDD96BA73",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/POST/cleanup-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document"
+   }
+  },
+  "LivenessRekognitionApicleanupdocumentPOSTApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTcleanupdocument62E004A2": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LivenessCleanupDocumentLambdaDD96BA73",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/POST/cleanup-document"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..cleanup-document"
+   }
+  },
+  "LivenessRekognitionApicleanupdocumentPOSTA4347B81": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LivenessCleanupDocumentLambdaDD96BA73",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApicleanupdocument15A232E5"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/cleanup-document/POST/Resource"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionA0D91336": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "LivenessRekognitionApiD36C9B6A",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "liveness-session",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/Resource"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionOPTIONS90FDFA6C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApilivenesssessionA0D91336"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionPOSTApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTlivenesssession15D8976C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FaceLivenessSession9FDE33E4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/POST/liveness-session"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionPOSTApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7POSTlivenesssession73DDFA75": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FaceLivenessSession9FDE33E4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/POST/liveness-session"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.POST..liveness-session"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionPOSTD49B6968": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "FaceLivenessSession9FDE33E4",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApilivenesssessionA0D91336"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/POST/Resource"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionsessionIdB516AB66": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "LivenessRekognitionApilivenesssessionA0D91336"
+    },
+    "PathPart": "{sessionId}",
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/Resource"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionsessionIdOPTIONS42D4C5B1": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApilivenesssessionsessionIdB516AB66"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/OPTIONS/Resource"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionsessionIdGETApiPermissionLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7GETlivenesssessionsessionId18BDF5EC": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FaceLivenessSession9FDE33E4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/",
+       {
+        "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+       },
+       "/GET/liveness-session/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionsessionIdGETApiPermissionTestLivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7GETlivenesssessionsessionIdD5A68CCA": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "FaceLivenessSession9FDE33E4",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:442431377530:",
+       {
+        "Ref": "LivenessRekognitionApiD36C9B6A"
+       },
+       "/test-invoke-stage/GET/liveness-session/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET/ApiPermission.Test.LivenessRekognitionPocStackLivenessRekognitionApiF1AB37F7.GET..liveness-session.{sessionId}"
+   }
+  },
+  "LivenessRekognitionApilivenesssessionsessionIdGETA846C165": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "FaceLivenessSession9FDE33E4",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "LivenessRekognitionApilivenesssessionsessionIdB516AB66"
+    },
+    "RestApiId": {
+     "Ref": "LivenessRekognitionApiD36C9B6A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/LivenessRekognitionApi/Default/liveness-session/{sessionId}/GET/Resource"
+   }
+  },
+  "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource"
+   }
+  },
+  "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:PutBucketNotification",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+    "Roles": [
+     {
+      "Ref": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/DefaultPolicy/Resource"
+   }
+  },
+  "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Description": "AWS CloudFormation handler for \"Custom::S3BucketNotifications\" resources (@aws-cdk/aws-s3)",
+    "Code": {
+     "ZipFile": "import boto3  # type: ignore\nimport json\nimport logging\nimport urllib.request\n\ns3 = boto3.client(\"s3\")\n\nEVENTBRIDGE_CONFIGURATION = 'EventBridgeConfiguration'\nCONFIGURATION_TYPES = [\"TopicConfigurations\", \"QueueConfigurations\", \"LambdaFunctionConfigurations\"]\n\ndef handler(event: dict, context):\n  response_status = \"SUCCESS\"\n  error_message = \"\"\n  try:\n    props = event[\"ResourceProperties\"]\n    notification_configuration = props[\"NotificationConfiguration\"]\n    managed = props.get('Managed', 'true').lower() == 'true'\n    stack_id = event['StackId']\n    old = event.get(\"OldResourceProperties\", {}).get(\"NotificationConfiguration\", {})\n    if managed:\n      config = handle_managed(event[\"RequestType\"], notification_configuration)\n    else:\n      config = handle_unmanaged(props[\"BucketName\"], stack_id, event[\"RequestType\"], notification_configuration, old)\n    s3.put_bucket_notification_configuration(Bucket=props[\"BucketName\"], NotificationConfiguration=config)\n  except Exception as e:\n    logging.exception(\"Failed to put bucket notification configuration\")\n    response_status = \"FAILED\"\n    error_message = f\"Error: {str(e)}. \"\n  finally:\n    submit_response(event, context, response_status, error_message)\n\ndef handle_managed(request_type, notification_configuration):\n  if request_type == 'Delete':\n    return {}\n  return notification_configuration\n\ndef handle_unmanaged(bucket, stack_id, request_type, notification_configuration, old):\n  def with_id(n):\n    n['Id'] = f\"{stack_id}-{hash(json.dumps(n, sort_keys=True))}\"\n    return n\n\n  external_notifications = {}\n  existing_notifications = s3.get_bucket_notification_configuration(Bucket=bucket)\n  for t in CONFIGURATION_TYPES:\n    if request_type == 'Update':\n        ids = [with_id(n) for n in old.get(t, [])]\n        old_incoming_ids = [n['Id'] for n in ids]\n        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in old_incoming_ids]\n    elif request_type == 'Delete':\n        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f\"{stack_id}-\")]\n    elif request_type == 'Create':\n        external_notifications[t] = [n for n in existing_notifications.get(t, [])]\n  if EVENTBRIDGE_CONFIGURATION in existing_notifications:\n    external_notifications[EVENTBRIDGE_CONFIGURATION] = existing_notifications[EVENTBRIDGE_CONFIGURATION]\n\n  if request_type == 'Delete':\n    return external_notifications\n\n  notifications = {}\n  for t in CONFIGURATION_TYPES:\n    external = external_notifications.get(t, [])\n    incoming = [with_id(n) for n in notification_configuration.get(t, [])]\n    notifications[t] = external + incoming\n\n  if EVENTBRIDGE_CONFIGURATION in notification_configuration:\n    notifications[EVENTBRIDGE_CONFIGURATION] = notification_configuration[EVENTBRIDGE_CONFIGURATION]\n  elif EVENTBRIDGE_CONFIGURATION in external_notifications:\n    notifications[EVENTBRIDGE_CONFIGURATION] = external_notifications[EVENTBRIDGE_CONFIGURATION]\n\n  return notifications\n\ndef submit_response(event: dict, context, response_status: str, error_message: str):\n  response_body = json.dumps(\n    {\n      \"Status\": response_status,\n      \"Reason\": f\"{error_message}See the details in CloudWatch Log Stream: {context.log_stream_name}\",\n      \"PhysicalResourceId\": event.get(\"PhysicalResourceId\") or event[\"LogicalResourceId\"],\n      \"StackId\": event[\"StackId\"],\n      \"RequestId\": event[\"RequestId\"],\n      \"LogicalResourceId\": event[\"LogicalResourceId\"],\n      \"NoEcho\": False,\n    }\n  ).encode(\"utf-8\")\n  headers = {\"content-type\": \"\", \"content-length\": str(len(response_body))}\n  try:\n    req = urllib.request.Request(url=event[\"ResponseURL\"], headers=headers, data=response_body, method=\"PUT\")\n    with urllib.request.urlopen(req) as response:\n      print(response.read().decode(\"utf-8\"))\n    print(\"Status code: \" + response.reason)\n  except Exception as e:\n      print(\"send(..) failed executing request.urlopen(..): \" + str(e))\n"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 300
+   },
+   "DependsOn": [
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21RQWrDMBB8S+6KGif9gOMQKLTEOKXXIMsbZxtbMtKKYIz+XiTbOC09zYxmRuxKW568bvhmJR52Lav7usGSD2cS8s7Ew14Gu+PD3sk7EMuuamIj5LpB2S/Hkx7FXljwrBFtWQk+ZFeVg2nRWtSKvYsezBeYKLKr+qWPTkmajJl7VvVKtLoq+fApygaCGYlndncR1gJZngZgKFo+FHrMRFzmHJlnUtcKSce53ipQhNTnWjfsjw71lEjIWwuKPJONdtXVaEV8OBmsUaVSgrVzJ/SzkDmGzL+JA1oyWLp5xWftmeiwFgQP0fOhAEtph3GNiR6ga3QfZonVRZ1J1HHhkRRgtTMSwiewD6CbroI5sdmdbo7c+2e1ROKbhktR1SFxctQ58izv6abVy44nW54kq2+LuDZOEbbAixF/AFsTdgRaAgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "LivenessRekognitionPocStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "LivenessRekognitionApiEndpoint3235857C": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "LivenessRekognitionApiD36C9B6A"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "LivenessDocumentsBucketName": {
+   "Description": "Bucket for identity documents",
+   "Value": {
+    "Ref": "LivenessDocumentsBucketFF425AE5"
+   }
+  },
+  "LivenessUserPhotosBucketName": {
+   "Description": "Bucket for user photos",
+   "Value": {
+    "Ref": "LivenessUserPhotosBucket5B0502F1"
+   }
+  },
+  "LivenessFrontendBucketName": {
+   "Description": "Bucket for frontend hosting",
+   "Value": {
+    "Ref": "LivenessFrontendBucket3D47E1CB"
+   }
+  },
+  "LivenessFrontendUrl": {
+   "Description": "Frontend website URL (HTTPS via CloudFront)",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "LivenessFrontendDistribution8CBE76ED",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "LivenessCloudFrontDistributionId": {
+   "Description": "CloudFront distribution ID",
+   "Value": {
+    "Ref": "LivenessFrontendDistribution8CBE76ED"
+   }
+  },
+  "LivenessApiGatewayUrl": {
+   "Description": "API Gateway endpoint URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "LivenessRekognitionApiD36C9B6A"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "LivenessRekognitionApiDeploymentStageprodC65FD873"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "LivenessIndexedDocumentsTableName": {
+   "Description": "DynamoDB table for indexed documents metadata",
+   "Value": {
+    "Ref": "LivenessIndexedDocumentsTableB1B52D9A"
+   }
+  },
+  "LivenessComparisonResultsTableName": {
+   "Description": "DynamoDB table for comparison results",
+   "Value": {
+    "Ref": "LivenessComparisonResultsTable58D19E2A"
+   }
+  },
+  "LivenessIdentityPoolId": {
+   "Description": "Cognito Identity Pool ID for Face Liveness",
+   "Value": {
+    "Ref": "LivenessIdentityPool"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

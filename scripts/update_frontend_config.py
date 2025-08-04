@@ -206,14 +206,14 @@ def main():
         print("📋 Getting stack information...")
         outputs = get_stack_outputs(stack_name)
         
-        bucket_name = outputs.get('FrontendBucketName')
-        distribution_id = outputs.get('CloudFrontDistributionId')
-        api_gateway_url = outputs.get('ApiGatewayUrl')
-        frontend_url = outputs.get('FrontendUrl')
+        bucket_name = outputs.get('LivenessFrontendBucketName')
+        distribution_id = outputs.get('LivenessCloudFrontDistributionId')
+        api_gateway_url = outputs.get('LivenessApiGatewayUrl')
+        frontend_url = outputs.get('LivenessFrontendUrl')
         identity_pool_id = outputs.get('LivenessIdentityPoolId')
         
         if not bucket_name:
-            raise Exception("FrontendBucketName not found in stack outputs")
+            raise Exception("LivenessFrontendBucketName not found in stack outputs")
         
         if not identity_pool_id:
             raise Exception("LivenessIdentityPoolId not found in stack outputs - required for Face Liveness")

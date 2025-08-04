@@ -73,7 +73,7 @@ class RekognitionStack(Stack):
         # FRONTEND BUCKET - Configured for CloudFront
         self.frontend_bucket = s3.Bucket(
             self, 'LivenessFrontendBucket',
-            bucket_name = f'Liveness-poc-frontend-{self.account}-{self.region}',
+            bucket_name = f'liveness-poc-frontend-{self.account}-{self.region}',
             encryption=s3.BucketEncryption.S3_MANAGED,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY
@@ -287,7 +287,7 @@ class RekognitionStack(Stack):
                             actions=[
                                 'lambda:InvokeFunction'
                             ],
-                            resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:rekognition-poc-document-indexer']
+                            resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:liveness-poc-document-indexer']
                         )
                     ]
                 )
@@ -342,7 +342,7 @@ class RekognitionStack(Stack):
                             actions=[
                                 'lambda:InvokeFunction'
                             ],
-                            resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:rekognition-poc-document-indexer']
+                            resources=[f'arn:aws:lambda:{self.region}:{self.account}:function:liveness-poc-document-indexer']
                         ),
                         # REKOGNITION PERMISSIONS FOR DOCUMENT INDEXER API
                         iam.PolicyStatement(
@@ -563,8 +563,8 @@ class RekognitionStack(Stack):
 # ======================================================================
         # Create Origin Access Identity for secure S3 access
         self.origin_access_identity = cloudfront.OriginAccessIdentity(
-            self, 'FrontendOAI',
-            comment='OAI for Rekognition POC Frontend'
+            self, 'LivenessFrontendOAI',
+            comment='OAI for Liveness Rekognition POC Frontend'
         )
         
         # Allow CloudFront to access the bucket
@@ -600,7 +600,7 @@ class RekognitionStack(Stack):
                 )
             ],
             price_class=cloudfront.PriceClass.PRICE_CLASS_100,
-            comment='Rekognition POC Frontend Distribution'
+            comment='Liveness Rekognition POC Frontend Distribution'
         )
 
 # ======================================================================
