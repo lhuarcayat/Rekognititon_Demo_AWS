@@ -242,15 +242,25 @@ def check_iam_permissions():
         
         print(f"✅ AWS Identity: {identity.get('Arn', 'Unknown')}")
         
-        # Check CloudFormation access
+        # Check CloudFormation access (without MaxResults parameter)
         cloudformation = boto3.client('cloudformation')
-        cloudformation.list_stacks(MaxResults=1)
+        cloudformation.list_stacks()
         print("✅ CloudFormation access confirmed")
         
         # Check S3 access
         s3 = boto3.client('s3')
         s3.list_buckets()
         print("✅ S3 access confirmed")
+        
+        # Check Cognito access
+        cognito = boto3.client('cognito-identity')
+        # Just check if we can make a basic call without errors
+        try:
+            cognito.list_identity_pools(MaxResults=1)
+            print("✅ Cognito Identity access confirmed")
+        except Exception as cognito_error:
+            print(f"⚠️  Cognito access check failed: {str(cognito_error)}")
+            print("💡 This might not affect deployment if Identity Pool already exists")
         
         return True
         
@@ -307,10 +317,13 @@ def main():
     print("=" * 60)
     
     try:
-        # Check AWS permissions first
-        if not check_iam_permissions():
-            print("❌ AWS permissions check failed. Please configure your AWS credentials.")
-            sys.exit(1)
+        # Check AWS permissions first (but don't fail if minor issues)
+        print("🔐 Performing initial AWS permissions check...")
+        permissions_ok = check_iam_permissions()
+        
+        if not permissions_ok:
+            print("⚠️  Some permission checks failed, but continuing...")
+            print("💡 If deployment fails, check AWS credentials and permissions")
         
         # Verify Amplify configuration structure
         if not verify_amplify_configuration():

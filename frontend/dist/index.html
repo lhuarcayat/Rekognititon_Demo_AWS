@@ -10,6 +10,60 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+    ">
+        <div>
+            <div class="loading-spinner" style="
+                width: 50px;
+                height: 50px;
+                border: 3px solid rgba(255,255,255,0.3);
+                border-top: 3px solid white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            "></div>
+            <h2>🔐 Sistema de Verificación de Identidad</h2>
+            <p id="loadingStatus">Inicializando librerías AWS...</p>
+            <div id="loadingProgress" style="
+                width: 300px;
+                height: 6px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 3px;
+                margin: 20px auto;
+                overflow: hidden;
+            ">
+                <div id="progressBar" style="
+                    width: 0%;
+                    height: 100%;
+                    background: white;
+                    border-radius: 3px;
+                    transition: width 0.3s ease;
+                "></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
     <!-- ============================================ -->
     <!-- INTERFACE 1: FORMULARIO INICIAL -->
     <!-- ============================================ -->
@@ -201,52 +255,224 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- CORRECTED AWS LIBRARIES FOR AMPLIFY V6 -->
+    <!-- CORS-FREE LIBRARY LOADING SYSTEM -->
     <!-- ============================================ -->
     
-    <!-- React 18 (Required for Amplify UI) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- AWS Amplify v6 -->
-    <script src="https://unpkg.com/aws-amplify@6/dist/aws-amplify.umd.min.js"></script>
-    
-    <!-- AWS Amplify UI React v6 with Face Liveness -->
-    <script src="https://unpkg.com/@aws-amplify/ui-react@6/dist/index.umd.js"></script>
-    
-    <!-- Configuration -->
-    <script src="config.js"></script>
-    
-    <!-- Main Application -->
-    <script src="app.js"></script>
-    
-    <!-- Debug verification -->
     <script>
-        console.log('📚 AWS Face Liveness Libraries Check:');
-        console.log('   React:', typeof React !== 'undefined' ? '✅' : '❌');
-        console.log('   ReactDOM:', typeof ReactDOM !== 'undefined' ? '✅' : '❌');
-        console.log('   AWS Amplify:', typeof window.aws_amplify !== 'undefined' ? '✅' : '❌');
-        console.log('   Amplify Core:', typeof window.aws_amplify?.Amplify !== 'undefined' ? '✅' : '❌');
-        console.log('   Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? '✅' : '❌');
-        
-        // Check for Face Liveness components
-        if (typeof window.AmplifyUIReact !== 'undefined') {
-            console.log('   FaceLivenessDetector:', typeof window.AmplifyUIReact.FaceLivenessDetector !== 'undefined' ? '✅ Available' : '❌ Not found');
-            console.log('   Available components:', Object.keys(window.AmplifyUIReact));
-        } else {
-            console.log('   FaceLivenessDetector:', '❌ AmplifyUIReact not available');
+        // CORS-free library loader with progressive enhancement
+        class LibraryLoader {
+            constructor() {
+                this.loadedLibraries = new Set();
+                this.progress = 0;
+                this.totalSteps = 6; // React, ReactDOM, Amplify, UI, Config, App
+                this.updateProgress('Iniciando sistema...', 0);
+            }
+            
+            updateProgress(message, step) {
+                const percentage = (step / this.totalSteps) * 100;
+                document.getElementById('loadingStatus').textContent = message;
+                document.getElementById('progressBar').style.width = percentage + '%';
+                this.progress = percentage;
+                
+                if (percentage >= 100) {
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                    }, 500);
+                }
+            }
+            
+            // Method to load library with fetch (avoids CORS preflight)
+            async loadLibraryWithFetch(url, libraryName) {
+                try {
+                    console.log(`🔄 Loading ${libraryName} via fetch...`);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        mode: 'no-cors', // This avoids CORS preflight
+                        cache: 'default'
+                    });
+                    
+                    // Since we're using no-cors, we can't read the response
+                    // So we'll try to load it as a script element without crossorigin
+                    return this.loadScriptElement(url, libraryName, false);
+                    
+                } catch (error) {
+                    console.warn(`⚠️  Fetch failed for ${libraryName}, trying script element:`, error);
+                    return this.loadScriptElement(url, libraryName, false);
+                }
+            }
+            
+            loadScriptElement(url, libraryName, useCrossorigin = false) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = url;
+                    
+                    // Don't use crossorigin to avoid CORS preflight
+                    if (useCrossorigin) {
+                        script.crossOrigin = 'anonymous';
+                    }
+                    
+                    script.onload = () => {
+                        console.log(`✅ ${libraryName} loaded successfully`);
+                        this.loadedLibraries.add(libraryName);
+                        resolve(true);
+                    };
+                    
+                    script.onerror = (error) => {
+                        console.warn(`❌ Failed to load ${libraryName} from ${url}`);
+                        reject(error);
+                    };
+                    
+                    document.head.appendChild(script);
+                });
+            }
+            
+            async loadWithFallbacks(libraryConfigs, libraryName, verifyFunction) {
+                for (let i = 0; i < libraryConfigs.length; i++) {
+                    const config = libraryConfigs[i];
+                    
+                    try {
+                        await this.loadLibraryWithFetch(config.url, libraryName);
+                        
+                        // Wait a bit for the library to initialize
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        if (verifyFunction()) {
+                            console.log(`✅ ${libraryName} verified successfully`);
+                            return true;
+                        } else {
+                            console.warn(`⚠️  ${libraryName} loaded but verification failed`);
+                            if (i < libraryConfigs.length - 1) {
+                                console.log(`🔄 Trying next source for ${libraryName}...`);
+                                continue;
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`❌ Error loading ${libraryName} from ${config.url}:`, error);
+                        if (i < libraryConfigs.length - 1) {
+                            console.log(`🔄 Trying next source for ${libraryName}...`);
+                            continue;
+                        }
+                    }
+                }
+                
+                throw new Error(`Failed to load ${libraryName} from all sources`);
+            }
+            
+            async init() {
+                try {
+                    // Step 1: Load React
+                    this.updateProgress('Cargando React...', 1);
+                    await this.loadWithFallbacks([
+                        { url: 'https://unpkg.com/react@18.2.0/umd/react.production.min.js' },
+                        { url: 'https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js' },
+                        { url: 'https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js' }
+                    ], 'React', () => typeof React !== 'undefined');
+                    
+                    // Step 2: Load ReactDOM
+                    this.updateProgress('Cargando ReactDOM...', 2);
+                    await this.loadWithFallbacks([
+                        { url: 'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js' },
+                        { url: 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js' },
+                        { url: 'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js' }
+                    ], 'ReactDOM', () => typeof ReactDOM !== 'undefined');
+                    
+                    // Step 3: Load AWS Amplify
+                    this.updateProgress('Cargando AWS Amplify...', 3);
+                    await this.loadWithFallbacks([
+                        { url: 'https://unpkg.com/aws-amplify@6.0.7/dist/aws-amplify.umd.min.js' },
+                        { url: 'https://cdn.jsdelivr.net/npm/aws-amplify@6.0.7/dist/aws-amplify.umd.min.js' }
+                    ], 'AWS Amplify', () => typeof window.aws_amplify !== 'undefined');
+                    
+                    // Step 4: Load Amplify UI React
+                    this.updateProgress('Cargando Amplify UI React...', 4);
+                    await this.loadWithFallbacks([
+                        { url: 'https://unpkg.com/@aws-amplify/ui-react@6.1.13/dist/index.umd.js' },
+                        { url: 'https://cdn.jsdelivr.net/npm/@aws-amplify/ui-react@6.1.13/dist/index.umd.js' }
+                    ], 'Amplify UI React', () => typeof window.AmplifyUIReact !== 'undefined');
+                    
+                    // Step 5: Load Config
+                    this.updateProgress('Cargando configuración...', 5);
+                    await this.loadScriptElement('config.js', 'Config');
+                    
+                    // Step 6: Load App
+                    this.updateProgress('Inicializando aplicación...', 6);
+                    await this.loadScriptElement('app.js', 'App');
+                    
+                    // Final verification
+                    this.runFinalVerification();
+                    
+                } catch (error) {
+                    console.error('❌ Library loading failed:', error);
+                    this.showError(error.message);
+                }
+            }
+            
+            runFinalVerification() {
+                console.log('📚 Final Library Verification:');
+                console.log('   React:', typeof React !== 'undefined' ? '✅' : '❌');
+                console.log('   ReactDOM:', typeof ReactDOM !== 'undefined' ? '✅' : '❌');
+                console.log('   AWS Amplify:', typeof window.aws_amplify !== 'undefined' ? '✅' : '❌');
+                console.log('   Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? '✅' : '❌');
+                
+                if (typeof window.AmplifyUIReact !== 'undefined') {
+                    console.log('   FaceLivenessDetector:', typeof window.AmplifyUIReact.FaceLivenessDetector !== 'undefined' ? '✅' : '❌');
+                    console.log('   Available components:', Object.keys(window.AmplifyUIReact));
+                }
+                
+                console.log('   Identity Pool:', window.LIVENESS_IDENTITY_POOL_ID || 'Not configured');
+                
+                const allLoaded = typeof React !== 'undefined' && 
+                                 typeof ReactDOM !== 'undefined' && 
+                                 typeof window.aws_amplify !== 'undefined' && 
+                                 typeof window.AmplifyUIReact !== 'undefined';
+                
+                if (allLoaded) {
+                    console.log('🎉 All libraries loaded successfully!');
+                    this.updateProgress('¡Sistema listo!', 6);
+                } else {
+                    console.error('❌ Some libraries failed to load');
+                    this.showError('No se pudieron cargar todas las librerías necesarias');
+                }
+            }
+            
+            showError(message) {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.innerHTML = `
+                    <div style="text-align: center; color: white; font-family: 'Inter', sans-serif;">
+                        <h2>⚠️ Error de Carga</h2>
+                        <p>${message}</p>
+                        <p>Posibles causas:</p>
+                        <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                            <li>Problemas de conectividad</li>
+                            <li>Firewall corporativo</li>
+                            <li>Bloqueo de contenido externo</li>
+                        </ul>
+                        <button onclick="location.reload()" style="
+                            background: white;
+                            color: #333;
+                            border: none;
+                            padding: 15px 30px;
+                            border-radius: 8px;
+                            font-weight: bold;
+                            margin-top: 20px;
+                            cursor: pointer;
+                        ">🔄 Reintentar</button>
+                        
+                        <div style="margin-top: 20px; font-size: 12px; opacity: 0.8;">
+                            <p>Si el problema persiste, contacte al administrador del sistema</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
         
-        // Check Identity Pool configuration
-        console.log('   Identity Pool ID:', window.LIVENESS_IDENTITY_POOL_ID || 'Not configured');
-        
-        if (window.LIVENESS_IDENTITY_POOL_ID && 
-            window.LIVENESS_IDENTITY_POOL_ID !== 'us-east-1:YOUR_IDENTITY_POOL_ID_FROM_CDK' &&
-            window.LIVENESS_IDENTITY_POOL_ID !== 'us-east-1:REPLACE_WITH_YOUR_ACTUAL_IDENTITY_POOL_ID') {
-            console.log('   Configuration Status: ✅ Ready for Face Liveness');
-        } else {
-            console.warn('   Configuration Status: ❌ Identity Pool ID needs to be configured');
-        }
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Starting CORS-free library loading system...');
+            const loader = new LibraryLoader();
+            loader.init();
+        });
     </script>
 </body>
 </html>
