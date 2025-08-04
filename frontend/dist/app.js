@@ -1,5 +1,5 @@
 // ============================================
-// REAL AWS FACE LIVENESS IMPLEMENTATION - COMPLETE
+// CORRECTED AWS FACE LIVENESS IMPLEMENTATION
 // ============================================
 
 // Global variables
@@ -15,22 +15,23 @@ let formData = {
 
 // AWS Face Liveness variables
 let livenessSessionId = null;
-let faceLivenessComponent = null;
 let awsAmplifyConfigured = false;
 
 // ============================================
-// AWS AMPLIFY CONFIGURATION
+// CORRECTED AWS AMPLIFY CONFIGURATION FOR V6
 // ============================================
 
 function configureAmplify() {
     if (awsAmplifyConfigured) return;
     
     try {
-        // Configure Amplify with Cognito Identity Pool from your CDK stack
-        window.Amplify.configure({
+        // ✅ CORRECT: Amplify v6 configuration
+        const { Amplify } = window.Amplify;
+        
+        Amplify.configure({
             Auth: {
                 Cognito: {
-                    identityPoolId: window.LIVENESS_IDENTITY_POOL_ID || 'us-east-1:your-identity-pool-id',
+                    identityPoolId: window.LIVENESS_IDENTITY_POOL_ID,
                     region: 'us-east-1',
                     allowGuestAccess: true
                 }
@@ -38,16 +39,17 @@ function configureAmplify() {
         });
         
         awsAmplifyConfigured = true;
-        console.log('✅ AWS Amplify configured for Face Liveness');
+        console.log('✅ AWS Amplify v6 configured for Face Liveness');
+        console.log('   Identity Pool:', window.LIVENESS_IDENTITY_POOL_ID);
         
     } catch (error) {
         console.error('❌ Error configuring Amplify:', error);
-        throw new Error('Failed to configure AWS Amplify');
+        throw new Error('Failed to configure AWS Amplify v6');
     }
 }
 
 // ============================================
-// REAL AWS FACE LIVENESS FUNCTIONS
+// CORRECTED AWS FACE LIVENESS FUNCTIONS
 // ============================================
 
 async function startRealFaceLiveness() {
@@ -65,7 +67,7 @@ async function startRealFaceLiveness() {
         
         console.log('✅ Liveness session created:', livenessSessionId);
         
-        // Step 3: Mount real Face Liveness component
+        // Step 3: Mount REAL Face Liveness component
         await mountRealFaceLivenessComponent();
         
     } catch (error) {
@@ -114,69 +116,94 @@ async function mountRealFaceLivenessComponent() {
         
         console.log('🎯 Mounting REAL AWS FaceLivenessDetector component...');
         
-        // ✅ REAL AWS FACE LIVENESS COMPONENT
-        const FaceLivenessDetector = window.AmplifyUIReactLiveness.FaceLivenessDetector;
+        // ✅ CORRECT: Get FaceLivenessDetector from Amplify UI React
+        const { FaceLivenessDetector } = window.AmplifyUIReact;
         
         if (!FaceLivenessDetector) {
-            throw new Error('FaceLivenessDetector component not loaded - check if Amplify UI React Liveness is available');
+            throw new Error('FaceLivenessDetector component not found in AmplifyUIReact');
         }
         
-        // React component props for REAL Face Liveness
+        console.log('✅ FaceLivenessDetector component found');
+        
+        // ✅ CORRECT: React component props for REAL Face Liveness
         const livenessProps = {
             sessionId: livenessSessionId,
             region: 'us-east-1',
             onAnalysisComplete: handleLivenessComplete,
             onError: handleLivenessError,
+            // Additional configuration
             config: {
-                faceMovementChallenge: 'FaceMovementAndLightChallenge' // Real AWS challenge
+                faceMovementChallenge: 'FaceMovementAndLightChallenge'
             }
         };
         
-        // Create and render REAL React component
+        // ✅ CORRECT: Create and render REAL React component
         const livenessElement = React.createElement(FaceLivenessDetector, livenessProps);
         
-        // Render using ReactDOM - THIS IS THE REAL AWS COMPONENT
-        ReactDOM.render(livenessElement, mountPoint);
+        // ✅ CORRECT: Render using ReactDOM
+        const { createRoot } = ReactDOM;
+        const root = createRoot(mountPoint);
+        root.render(livenessElement);
         
         console.log('✅ REAL AWS FaceLivenessDetector mounted successfully');
         showStatus('livenessStatus', '🎯 AWS Face Liveness iniciado - Siga las instrucciones', 'success');
         
     } catch (error) {
         console.error('❌ Error mounting Face Liveness component:', error);
+        
+        // Enhanced error information
+        console.log('Debug info:');
+        console.log('  AmplifyUIReact available:', typeof window.AmplifyUIReact !== 'undefined');
+        console.log('  FaceLivenessDetector available:', 
+                   typeof window.AmplifyUIReact !== 'undefined' && 
+                   typeof window.AmplifyUIReact.FaceLivenessDetector !== 'undefined');
+        
         throw error;
     }
 }
 
-async function handleLivenessComplete() {
+function handleLivenessComplete(analysisResult) {
     try {
         console.log('✅ REAL AWS Face Liveness completed');
-        showStatus('livenessStatus', '✅ Liveness verificado. Obteniendo resultados...', 'success');
+        console.log('Analysis result:', analysisResult);
+        
+        showStatus('livenessStatus', '✅ Liveness verificado. Procesando resultados...', 'success');
         
         processingInProgress = true;
         
-        // Get REAL liveness results from AWS
-        const results = await getLivenessResults(livenessSessionId);
-        
-        console.log('REAL Liveness results:', results);
-        
-        if (results.status !== 'SUCCEEDED') {
-            throw new Error(`Liveness check failed: ${results.status}`);
-        }
-        
-        // Store REAL liveness confidence for display
-        const livenessConfidence = results.confidence;
-        
-        // Create validation trigger
-        await createValidationTrigger(livenessSessionId);
-        
-        // Start polling for validation results
-        await startValidationPolling(livenessSessionId, livenessConfidence);
+        // Get liveness results from AWS
+        setTimeout(async () => {
+            try {
+                const results = await getLivenessResults(livenessSessionId);
+                
+                console.log('REAL Liveness results:', results);
+                
+                if (results.status !== 'SUCCEEDED') {
+                    throw new Error(`Liveness check failed: ${results.status}`);
+                }
+                
+                // Store liveness confidence for display
+                const livenessConfidence = results.confidence || 0;
+                
+                // Create validation trigger
+                await createValidationTrigger(livenessSessionId);
+                
+                // Start polling for validation results
+                await startValidationPolling(livenessSessionId, livenessConfidence);
+                
+            } catch (error) {
+                console.error('❌ Error processing liveness results:', error);
+                showStatus('livenessStatus', `❌ ${error.message}`, 'error');
+                showRetryButton();
+            } finally {
+                processingInProgress = false;
+            }
+        }, 1000);
         
     } catch (error) {
         console.error('❌ Error in liveness completion:', error);
         showStatus('livenessStatus', `❌ ${error.message}`, 'error');
         showRetryButton();
-    } finally {
         processingInProgress = false;
     }
 }
@@ -186,14 +213,17 @@ function handleLivenessError(error) {
     
     let errorMessage = 'Error en Face Liveness';
     
-    if (error.message) {
+    if (error && error.message) {
         errorMessage = error.message;
     } else if (typeof error === 'string') {
         errorMessage = error;
+    } else if (error && error.error) {
+        errorMessage = error.error;
     }
     
     showStatus('livenessStatus', `❌ ${errorMessage}`, 'error');
     showRetryButton();
+    processingInProgress = false;
 }
 
 async function getLivenessResults(sessionId) {
@@ -386,12 +416,6 @@ function showSuccessScreen(validationResult) {
         sessionIdElement.textContent = validationResult.sessionId?.substring(0, 12) + '...' || 'N/A';
     }
     
-    // Show liveness verification info
-    const livenessInfo = document.querySelector('.liveness-verification-info');
-    if (livenessInfo) {
-        livenessInfo.style.display = 'block';
-    }
-    
     console.log('✅ Identity verified using REAL AWS Face Liveness');
     console.log(`   Session ID: ${validationResult.sessionId}`);
     console.log(`   Liveness Confidence: ${validationResult.livenessConfidence}%`);
@@ -401,7 +425,7 @@ function showSuccessScreen(validationResult) {
 }
 
 // ============================================
-// UTILITY FUNCTIONS
+// UTILITY FUNCTIONS (SAME AS BEFORE)
 // ============================================
 
 function showInterface(interfaceId) {
@@ -478,7 +502,6 @@ function showRetryButton() {
 
 function retryLivenessProcess() {
     livenessSessionId = null;
-    faceLivenessComponent = null;
     processingInProgress = false;
     
     const retryButton = document.getElementById('retryLiveness');
@@ -495,7 +518,7 @@ function retryLivenessProcess() {
 }
 
 // ============================================
-// CAMERA FUNCTIONS (for document capture)
+// CAMERA FUNCTIONS (SAME AS BEFORE)
 // ============================================
 
 function checkCameraSupport() {
@@ -600,7 +623,7 @@ function capturePhoto(videoId, canvasId) {
 }
 
 // ============================================
-// API FUNCTIONS
+// API FUNCTIONS (SAME AS BEFORE)
 // ============================================
 
 async function checkDocumentExists(tipoDocumento, numeroDocumento) {
@@ -893,7 +916,6 @@ function setupEventListeners() {
             if (livenessSessionId) {
                 console.log('🔄 Cleaning up liveness session on back navigation');
                 livenessSessionId = null;
-                faceLivenessComponent = null;
             }
             
             processingInProgress = false;
@@ -925,7 +947,7 @@ function setupEventListeners() {
     const pagarBtn = document.getElementById('pagarBtn');
     if (pagarBtn) {
         pagarBtn.addEventListener('click', function() {
-            console.log('Pagar button clicked - no functionality implemented');
+            console.log('Continue process button clicked');
         });
     }
     
@@ -984,7 +1006,6 @@ function resetToInitialState() {
     
     // Reset liveness state
     livenessSessionId = null;
-    faceLivenessComponent = null;
     
     // Reset form
     const documentForm = document.getElementById('documentForm');
@@ -1052,16 +1073,22 @@ function initializeApp() {
         console.warn('⚠️  API_GATEWAY_URL not configured.');
     }
     
-    // Check for required libraries for REAL Face Liveness
+    // ✅ CORRECTED: Check for required libraries for REAL Face Liveness
     if (typeof window.Amplify === 'undefined') {
         console.error('❌ AWS Amplify not loaded');
         showError('Error: AWS Amplify no está disponible. Verifique la conexión a internet.');
         return;
     }
     
-    if (typeof window.AmplifyUIReactLiveness === 'undefined') {
-        console.error('❌ AWS Amplify UI React Liveness not loaded');
+    if (typeof window.AmplifyUIReact === 'undefined') {
+        console.error('❌ AWS Amplify UI React not loaded');
         showError('Error: Componente AWS Face Liveness no está disponible.');
+        return;
+    }
+    
+    if (typeof window.AmplifyUIReact.FaceLivenessDetector === 'undefined') {
+        console.error('❌ FaceLivenessDetector component not found');
+        showError('Error: FaceLivenessDetector no está disponible.');
         return;
     }
     
@@ -1087,7 +1114,8 @@ function initializeApp() {
     console.log('   - Secure Context:', window.isSecureContext);
     console.log('   - Camera Support:', checkCameraSupport().isSupported);
     console.log('   - AWS Amplify:', typeof window.Amplify !== 'undefined' ? 'Available' : 'Missing');
-    console.log('   - Face Liveness:', typeof window.AmplifyUIReactLiveness !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? 'Available' : 'Missing');
+    console.log('   - FaceLivenessDetector:', typeof window.AmplifyUIReact?.FaceLivenessDetector !== 'undefined' ? 'Available' : 'Missing');
     console.log('   - React:', typeof React !== 'undefined' ? 'Available' : 'Missing');
     
     console.log('✅ Rekognition POC Frontend initialized with REAL AWS Face Liveness');

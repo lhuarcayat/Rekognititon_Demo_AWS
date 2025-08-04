@@ -10,7 +10,7 @@ region = os.environ.get('CDK_DEFAULT_REGION', app.region)
 
 RekognitionStack(
     app,
-    'RekognitionPocStack',
+    'LivenessRekognitionPocStack',
     env=cdk.Environment(       
         account=account,
         region=region)

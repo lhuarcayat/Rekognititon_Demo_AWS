@@ -1,291 +1,718 @@
 /* ============================================ */
-/* REAL AWS FACE LIVENESS STYLES */
+/* ENHANCED STYLES FOR REAL AWS FACE LIVENESS */
 /* ============================================ */
 
-.aws-liveness-info {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    color: white;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
     padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.aws-liveness-info h3 {
-    margin: 0 0 8px 0;
-    color: white;
+/* ============================================ */
+/* INTERFACE MANAGEMENT */
+/* ============================================ */
+
+.interface {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-.session-info {
-    margin-top: 10px;
-    opacity: 0.8;
+.interface.active {
+    display: block;
 }
 
-.real-liveness-container {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    border: 2px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.liveness-instructions-real {
+/* ============================================ */
+/* FORM STYLES */
+/* ============================================ */
+
+.header {
     text-align: center;
-    margin-bottom: 20px;
-    color: #64748b;
+    margin-bottom: 30px;
 }
 
-.amplify-liveness-mount {
-    min-height: 400px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+.form-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.header h1 {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.form {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #e5e7eb;
     border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ============================================ */
+/* BUTTON STYLES */
+/* ============================================ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
     border: 2px solid #e5e7eb;
 }
 
-.amplify-liveness-detector {
+.btn-secondary:hover:not(:disabled) {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.btn-large {
+    padding: 18px 36px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.btn-retry {
+    background: #f59e0b;
+    color: white;
+}
+
+/* ============================================ */
+/* SPINNER */
+/* ============================================ */
+
+.spinner, .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner.hidden {
+    display: none;
+}
+
+/* ============================================ */
+/* STATUS MESSAGES */
+/* ============================================ */
+
+.status-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.status-message.info {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.status-message.success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.status-message.error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.status-message.hidden {
+    display: none;
+}
+
+/* ============================================ */
+/* CAMERA STYLES */
+/* ============================================ */
+
+.camera-section {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.camera-container {
+    position: relative;
+    margin: 20px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+}
+
+#videoDocument {
     width: 100%;
-    height: 100%;
+    max-width: 400px;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+}
+
+.camera-controls {
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+@media (min-width: 480px) {
+    .camera-controls {
+        flex-direction: row;
+        justify-content: center;
+    }
+    
+    .camera-controls .btn {
+        flex: 1;
+        max-width: 200px;
+    }
+}
+
+/* ============================================ */
+/* REAL AWS FACE LIVENESS STYLES */
+/* ============================================ */
+
+.liveness-section {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.aws-liveness-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 2px solid #e2e8f0;
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.face-liveness-mount {
+    width: 100%;
+    max-width: 400px;
+    min-height: 400px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    height: 100%;
+    color: #6b7280;
 }
 
-.liveness-camera-container {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
+.loading-placeholder p {
+    margin-top: 15px;
+    font-weight: 500;
 }
 
-.liveness-oval-frame {
-    position: relative;
-    width: 300px;
-    height: 400px;
-    margin: 20px auto;
-    border: 3px solid #3b82f6;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 70%, transparent 70%);
+/* AWS Face Liveness component overrides */
+.face-liveness-mount amplify-face-liveness-detector,
+.face-liveness-mount [data-amplify-face-liveness] {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 8px !important;
+}
+
+/* Enhanced styling for AWS Face Liveness phases */
+.face-liveness-mount .amplify-face-liveness-detector {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    border-radius: 8px;
+}
+
+.face-liveness-mount .amplify-face-liveness-detector__container {
+    padding: 20px;
+}
+
+.face-liveness-mount .amplify-face-liveness-detector__instructions {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Face oval styling */
+.face-liveness-mount .amplify-face-liveness-detector__face-oval {
+    border: 3px solid #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    animation: livenessGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes livenessGlow {
+    from {
+        border-color: #10b981;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+    to {
+        border-color: #059669;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    }
+}
+
+/* Progress indicators */
+.face-liveness-mount .amplify-face-liveness-detector__progress {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+/* Color overlay effects (AWS Face Liveness phases) */
+.face-liveness-mount .amplify-face-liveness-detector--face-movement-challenge {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+}
+
+.face-liveness-mount .amplify-face-liveness-detector--light-challenge {
+    background: linear-gradient(135deg, #ca8a04 0%, #eab308 100%);
+}
+
+.face-liveness-mount .amplify-face-liveness-detector--complete {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+/* ============================================ */
+/* PERMISSION INTERFACE */
+/* ============================================ */
+
+.permission-content {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.camera-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.permission-content h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.permission-content p {
+    color: #6b7280;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+/* ============================================ */
+/* SUCCESS INTERFACE */
+/* ============================================ */
+
+.success-content {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.success-header h1 {
+    color: #1f2937;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.success-badge {
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: liveness-pulse 2s ease-in-out infinite;
+    gap: 15px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #bbf7d0;
+    margin-bottom: 30px;
 }
 
-@keyframes liveness-pulse {
-    0%, 100% {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-    }
-    50% {
-        border-color: #10b981;
-        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-    }
+.check-icon {
+    font-size: 2rem;
 }
 
-.face-detection-area {
-    text-align: center;
-    position: relative;
+.success-text h3 {
+    color: #166534;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 5px;
 }
 
-.face-outline {
-    width: 180px;
-    height: 240px;
-    border: 2px dashed #94a3b8;
-    border-radius: 50%;
-    margin: 0 auto 20px;
-    position: relative;
-    background: rgba(255, 255, 255, 0.8);
+.success-text p {
+    color: #15803d;
+    font-size: 0.875rem;
 }
 
-.face-outline:before {
-    content: '👤';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 4rem;
-    color: #94a3b8;
+.user-info h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
 }
 
-.instruction-text {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 12px 16px;
-    border-radius: 20px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: 10px;
+.user-info p {
+    color: #6b7280;
+    margin-bottom: 25px;
 }
 
-.instruction-text p {
-    margin: 0;
+.liveness-verification-info {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.verification-details {
+    display: grid;
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item .label {
     font-weight: 600;
     color: #374151;
     font-size: 0.875rem;
 }
 
-.liveness-progress-real {
-    margin-top: 30px;
-    padding: 20px;
-    background: rgba(248, 250, 252, 0.8);
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+.detail-item .value {
+    font-weight: 500;
+    color: #1f2937;
+    font-size: 0.875rem;
+    font-family: 'Monaco', 'Menlo', monospace;
 }
 
-.progress-steps-real {
+.action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: 15px;
 }
 
-.step-real {
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    background: #f8fafc;
-    color: #64748b;
-    border-left: 3px solid #e2e8f0;
-    transition: all 0.3s ease;
-}
-
-.step-real.active {
-    background: #fef3c7;
-    color: #92400e;
-    border-left-color: #f59e0b;
-    animation: step-pulse 1s ease-in-out infinite;
-}
-
-.step-real.completed {
-    background: #f0fdf4;
-    color: #166534;
-    border-left-color: #10b981;
-}
-
-@keyframes step-pulse {
-    0%, 100% {
-        transform: scale(1);
+@media (min-width: 480px) {
+    .action-buttons {
+        flex-direction: row;
     }
-    50% {
-        transform: scale(1.02);
+    
+    .action-buttons .btn {
+        flex: 1;
     }
 }
 
-.progress-bar-real {
-    width: 100%;
-    height: 6px;
-    background: #e2e8f0;
-    border-radius: 3px;
-    overflow: hidden;
-    position: relative;
-}
+/* ============================================ */
+/* ERROR MODAL */
+/* ============================================ */
 
-.progress-fill-real {
-    height: 100%;
-    background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
-    width: 0%;
-    transition: width 0.2s ease;
-    border-radius: 3px;
-    position: relative;
-}
-
-.progress-fill-real:after {
-    content: '';
-    position: absolute;
+.modal {
+    position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.4),
-        transparent
-    );
-    animation: shimmer 1.5s infinite;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
 }
 
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
+.modal.hidden {
+    display: none;
 }
 
-.liveness-controls-real {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.liveness-ready-state {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.liveness-ready-message {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+.modal-content {
+    background: white;
+    border-radius: 16px;
     padding: 30px;
-    border-radius: 12px;
-    border: 2px solid #bbf7d0;
-    margin-bottom: 20px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    text-align: center;
 }
 
-.liveness-ready-message p {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #15803d;
-    margin-bottom: 20px;
-}
-
-/* Enhanced button for real liveness */
-.btn-large {
-    padding: 16px 32px;
-    font-size: 1.1rem;
-    min-height: 56px;
-    border-radius: 10px;
+.modal-header h3 {
+    color: #dc2626;
+    font-size: 1.25rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.25);
+    margin-bottom: 15px;
+}
+
+.modal-body p {
+    color: #6b7280;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* ============================================ */
+/* RESPONSIVE DESIGN */
+/* ============================================ */
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .form {
+        padding: 25px;
+    }
+    
+    .camera-section,
+    .liveness-section,
+    .permission-content,
+    .success-content {
+        padding: 25px;
+    }
+    
+    .header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .aws-liveness-container {
+        min-height: 350px;
+        padding: 15px;
+    }
+    
+    .face-liveness-mount {
+        min-height: 320px;
+    }
+    
+    .success-badge {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        text-align: left;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 600px;
+        padding: 30px;
+    }
+    
+    .aws-liveness-container {
+        min-height: 500px;
+    }
+    
+    .face-liveness-mount {
+        max-width: 450px;
+        min-height: 450px;
+    }
+}
+
+/* ============================================ */
+/* ANIMATIONS AND TRANSITIONS */
+/* ============================================ */
+
+.aws-liveness-container {
     transition: all 0.3s ease;
 }
 
-.btn-large:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.35);
+.face-liveness-mount {
+    transition: all 0.3s ease;
 }
 
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-    .liveness-oval-frame {
-        width: 250px;
-        height: 320px;
+.btn {
+    transition: all 0.2s ease;
+}
+
+.form-group input,
+.form-group select {
+    transition: all 0.2s ease;
+}
+
+/* ============================================ */
+/* ACCESSIBILITY */
+/* ============================================ */
+
+.btn:focus,
+.form-group input:focus,
+.form-group select:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================ */
+/* HIGH CONTRAST SUPPORT */
+/* ============================================ */
+
+@media (prefers-contrast: high) {
+    .btn-primary {
+        background: #000;
+        border: 2px solid #000;
     }
     
-    .face-outline {
-        width: 140px;
-        height: 200px;
+    .btn-secondary {
+        background: #fff;
+        border: 2px solid #000;
+        color: #000;
     }
     
-    .face-outline:before {
-        font-size: 3rem;
-    }
-    
-    .liveness-camera-container {
-        max-width: 320px;
-    }
-    
-    .real-liveness-container {
-        padding: 16px;
-    }
-    
-    .instruction-text {
-        font-size: 0.8rem;
-    }
-    
-    .progress-steps-real {
-        font-size: 0.8rem;
+    .form-group input,
+    .form-group select {
+        border-color: #000;
     }
 }

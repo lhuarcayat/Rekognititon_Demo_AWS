@@ -25,8 +25,8 @@ class RekognitionStack(Stack):
 # 1. S3 BUCKETS
 # ======================================================================
         self.documents_bucket = s3.Bucket(
-            self, 'DocumentsBucket',
-            bucket_name=f'rekognition-poc-documents-{self.account}-{self.region}',
+            self, 'LivenessDocumentsBucket',
+            bucket_name=f'liveness-poc-documents-{self.account}-{self.region}',
             versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
             cors=[
@@ -42,8 +42,8 @@ class RekognitionStack(Stack):
         )
         
         self.user_photos_bucket=s3.Bucket(
-            self,'UserPhotosBucket',
-            bucket_name=f'rekognition-poc-user-photos-{self.account}-{self.region}',
+            self,'LivenessUserPhotosBucket',
+            bucket_name=f'liveness-poc-user-photos-{self.account}-{self.region}',
             encryption=s3.BucketEncryption.S3_MANAGED,
             lifecycle_rules=[
                 s3.LifecycleRule(
@@ -72,8 +72,8 @@ class RekognitionStack(Stack):
         
         # FRONTEND BUCKET - Configured for CloudFront
         self.frontend_bucket = s3.Bucket(
-            self, 'FrontendBucket',
-            bucket_name = f'rekognition-poc-frontend-{self.account}-{self.region}',
+            self, 'LivenessFrontendBucket',
+            bucket_name = f'Liveness-poc-frontend-{self.account}-{self.region}',
             encryption=s3.BucketEncryption.S3_MANAGED,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY
@@ -84,8 +84,8 @@ class RekognitionStack(Stack):
 # ======================================================================
         # Table for indexed documents metadata
         self.indexed_documents_table=dynamodb.Table(
-            self,'IndexedDocumentsTable',
-            table_name='rekognition-indexed-documents',
+            self,'LivenessIndexedDocumentsTable',
+            table_name='liveness-indexed-documents',
             partition_key=dynamodb.Attribute(
                 name='document_id',
                 type=dynamodb.AttributeType.STRING
@@ -112,8 +112,8 @@ class RekognitionStack(Stack):
         
         # Table for comparison results
         self.comparison_results_table=dynamodb.Table(
-            self,'ComparisonResultsTable',
-            table_name='rekognition-comparison-results',
+            self,'LivenessComparisonResultsTable',
+            table_name='liveness-comparison-results',
             partition_key=dynamodb.Attribute(
                 name='comparison_id',
                 type=dynamodb.AttributeType.STRING
@@ -155,8 +155,8 @@ class RekognitionStack(Stack):
 # 3. LAMBDA LAYERS
 # ======================================================================
         self.shared_layer = lambda_.LayerVersion(
-            self, 'SharedLayer',
-            layer_version_name='rekognition-poc-shared-layer',
+            self, 'LivenessSharedLayer',
+            layer_version_name='liveness-poc-shared-layer',
             code=lambda_.Code.from_asset(
                 'layers/shared',
                 bundling=cdk.BundlingOptions(
@@ -176,7 +176,7 @@ class RekognitionStack(Stack):
 # 4. IAM ROLES
 # ======================================================================
         self.indexer_role=iam.Role(
-            self,'IndexerLambdaRole',
+            self,'LivenessIndexerLambdaRole',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
@@ -227,7 +227,7 @@ class RekognitionStack(Stack):
 
         # UPDATED VALIDATOR ROLE - With permissions to invoke document indexer
         self.validator_role = iam.Role(
-            self,'ValidatorLambdaRole',
+            self,'LivenessValidatorLambdaRole',
             assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
@@ -296,7 +296,7 @@ class RekognitionStack(Stack):
 
         # UPDATED API ROLE - With enhanced permissions
         self.api_role = iam.Role(
-            self, 'ApiLambdaRole',
+            self, 'LivenessApiLambdaRole',
             assumed_by = iam.ServicePrincipal('lambda.amazonaws.com'),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')                
@@ -373,7 +373,7 @@ class RekognitionStack(Stack):
 # ======================================================================
         self.identity_pool = cognito.CfnIdentityPool(
             self, 'LivenessIdentityPool',
-            identity_pool_name = 'rekognition-poc-liveness-pool',
+            identity_pool_name = 'liveness-poc-pool',
             allow_unauthenticated_identities = True,
             cognito_identity_providers = []
         )
@@ -419,8 +419,8 @@ class RekognitionStack(Stack):
 # 6. LAMBDA FUNCTIONS
 # ======================================================================
         self.document_indexer = lambda_.Function(
-            self, 'DocumentIndexer',
-            function_name='rekognition-poc-document-indexer',
+            self, 'LivenessDocumentIndexer',
+            function_name='liveness-poc-document-indexer',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/document_indexer'),
@@ -431,7 +431,7 @@ class RekognitionStack(Stack):
                 self.shared_layer       
             ],
             environment={
-                'COLLECTION_ID':'document-faces-collection',
+                'COLLECTION_ID':'liveness-document-faces-collection',
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
                 'DOCUMENTS_BUCKET':self.documents_bucket.bucket_name
             }
@@ -439,8 +439,8 @@ class RekognitionStack(Stack):
         
         # UPDATED USER VALIDATOR - With increased timeout and memory
         self.user_validator=lambda_.Function(
-            self,'UserValidator',
-            function_name='rekognition-poc-user-validator',
+            self,'LivenessUserValidator',
+            function_name='liveness-poc-user-validator',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/user_validator'),
@@ -451,12 +451,12 @@ class RekognitionStack(Stack):
                 self.shared_layer
             ],
             environment={
-                'COLLECTION_ID':'document-faces-collection',
+                'COLLECTION_ID':'liveness-document-faces-collection',
                 'COMPARISON_RESULTS_TABLE':self.comparison_results_table.table_name,
                 'INDEXED_DOCUMENTS_TABLE':self.indexed_documents_table.table_name,
                 'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
                 'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name,
-                'DOCUMENT_INDEXER_FUNCTION': 'rekognition-poc-document-indexer'
+                'DOCUMENT_INDEXER_FUNCTION': 'liveness-poc-document-indexer'
             }
         )
 
@@ -464,8 +464,8 @@ class RekognitionStack(Stack):
 # 7. API LAMBDA FUNCTIONS
 # ======================================================================
         self.presigned_urls_lambda = lambda_.Function(
-            self, 'PresignedUrlsLambda',
-            function_name= 'rekognition-poc-presigned-urls',
+            self, 'LivenessPresignedUrlsLambda',
+            function_name= 'liveness-poc-presigned-urls',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler ='handler.lambda_handler',
             code = lambda_.Code.from_asset('functions/presigned_urls'),
@@ -480,8 +480,8 @@ class RekognitionStack(Stack):
 
         # UPDATED Document indexer API - With enhanced variables
         self.document_indexer_api = lambda_.Function(
-            self, 'DocumentIndexerApi',
-            function_name='rekognition-poc-document-indexer-api',
+            self, 'LivenessDocumentIndexerApi',
+            function_name='liveness-poc-document-indexer-api',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/document_indexer_api'),
@@ -494,14 +494,14 @@ class RekognitionStack(Stack):
             environment={
                 'DOCUMENT_INDEXER_FUNCTION': self.document_indexer.function_name,
                 'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
-                'COLLECTION_ID': 'document-faces-collection'
+                'COLLECTION_ID': 'liveness-document-faces-collection'
             }
         )
 
         # Check validation lambda
         self.check_validation_lambda = lambda_.Function(
-            self, 'CheckValidationLambda',
-            function_name='rekognition-poc-check-validation',
+            self, 'LivenessCheckValidationLambda',
+            function_name='liveness-poc-check-validation',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/check_validation'),
@@ -515,8 +515,8 @@ class RekognitionStack(Stack):
 
         # NEW LAMBDA: Check Document Exists
         self.check_document_exists_lambda = lambda_.Function(
-            self, 'CheckDocumentExistsLambda',
-            function_name='rekognition-poc-check-document-exists',
+            self, 'LivenessCheckDocumentExistsLambda',
+            function_name='liveness-poc-check-document-exists',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/check_document_exists'),
@@ -530,8 +530,8 @@ class RekognitionStack(Stack):
 
         # NEW LAMBDA: Cleanup Document
         self.cleanup_document_lambda = lambda_.Function(
-            self, 'CleanupDocumentLambda',
-            function_name='rekognition-poc-cleanup-document',
+            self, 'LivenessCleanupDocumentLambda',
+            function_name='liveness-poc-cleanup-document',
             runtime=lambda_.Runtime.PYTHON_3_11,
             handler='handler.lambda_handler',
             code=lambda_.Code.from_asset('functions/cleanup_document'),
@@ -572,7 +572,7 @@ class RekognitionStack(Stack):
 
         # Create CloudFront distribution
         self.distribution = cloudfront.Distribution(
-            self, 'FrontendDistribution',
+            self, 'LivenessFrontendDistribution',
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(
                     self.frontend_bucket,
@@ -607,8 +607,8 @@ class RekognitionStack(Stack):
 # 9. API GATEWAY - With all endpoints
 # ======================================================================
         self.api = apigateway.RestApi(
-            self, 'RekognitionApi',
-            rest_api_name='rekognition-poc-api',
+            self, 'LivenessRekognitionApi',
+            rest_api_name='liveness-poc-api',
             description='API for Rekognition POC Frontend',
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
@@ -689,48 +689,48 @@ class RekognitionStack(Stack):
 # 11. OUTPUTS
 # ======================================================================
         cdk.CfnOutput(
-            self,'DocumentsBucketName',
+            self,'LivenessDocumentsBucketName',
             value=self.documents_bucket.bucket_name,
             description='Bucket for identity documents'
         )
         cdk.CfnOutput(
-            self, 'UserPhotosBucketName',
+            self, 'LivenessUserPhotosBucketName',
             value=self.user_photos_bucket.bucket_name,
             description='Bucket for user photos'
         )
 
         cdk.CfnOutput(
-            self, 'FrontendBucketName',
+            self, 'LivenessFrontendBucketName',
             value=self.frontend_bucket.bucket_name,
             description='Bucket for frontend hosting'
         )
         
         # HTTPS URL via CloudFront
         cdk.CfnOutput(
-            self, 'FrontendUrl',
+            self, 'LivenessFrontendUrl',
             value=f'https://{self.distribution.distribution_domain_name}',
             description='Frontend website URL (HTTPS via CloudFront)'
         )
         
         # CloudFront distribution ID
         cdk.CfnOutput(
-            self, 'CloudFrontDistributionId',
+            self, 'LivenessCloudFrontDistributionId',
             value=self.distribution.distribution_id,
             description='CloudFront distribution ID'
         )
         
         cdk.CfnOutput(
-            self, 'ApiGatewayUrl',
+            self, 'LivenessApiGatewayUrl',
             value=self.api.url,
             description='API Gateway endpoint URL'
         )
         cdk.CfnOutput(
-            self,'IndexedDocumentsTableName',
+            self,'LivenessIndexedDocumentsTableName',
             value=self.indexed_documents_table.table_name,
             description='DynamoDB table for indexed documents metadata'
         )
         cdk.CfnOutput(
-            self,'ComparisonResultsTableName',
+            self,'LivenessComparisonResultsTableName',
             value=self.comparison_results_table.table_name,
             description='DynamoDB table for comparison results'
         )

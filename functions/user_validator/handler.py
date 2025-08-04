@@ -24,7 +24,7 @@ COMPARISON_RESULTS_TABLE = os.environ['COMPARISON_RESULTS_TABLE']
 INDEXED_DOCUMENTS_TABLE = os.environ['INDEXED_DOCUMENTS_TABLE']
 DOCUMENTS_BUCKET = os.environ['DOCUMENTS_BUCKET']
 USER_PHOTOS_BUCKET = os.environ['USER_PHOTOS_BUCKET']
-DOCUMENT_INDEXER_FUNCTION = os.environ.get('DOCUMENT_INDEXER_FUNCTION', 'rekognition-poc-document-indexer')
+DOCUMENT_INDEXER_FUNCTION = os.environ.get('DOCUMENT_INDEXER_FUNCTION', 'liveness-poc-document-indexer')
 
 # Clients
 s3_client = boto3.client('s3')

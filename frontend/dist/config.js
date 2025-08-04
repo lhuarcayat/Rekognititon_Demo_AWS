@@ -1,5 +1,5 @@
 // ============================================
-// CONFIGURATION FILE FOR REAL AWS FACE LIVENESS
+// CORRECTED CONFIGURATION FOR AWS AMPLIFY V6
 // ============================================
 
 // This file is automatically updated with the actual API Gateway URL
@@ -17,7 +17,7 @@ window.AWS_REGION = 'us-east-1';
 console.log('🔧 Config loaded - API Gateway URL:', window.API_GATEWAY_URL);
 console.log('🔧 Config loaded - Identity Pool ID:', window.LIVENESS_IDENTITY_POOL_ID);
 
-// Amplify configuration object (for manual setup if needed)
+// ✅ CORRECTED: Amplify v6 configuration object
 window.AMPLIFY_CONFIG = {
     Auth: {
         Cognito: {

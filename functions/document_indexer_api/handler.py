@@ -17,7 +17,7 @@ logger.setLevel(logging.INFO)
 # Environment variables
 DOCUMENT_INDEXER_FUNCTION = os.environ['DOCUMENT_INDEXER_FUNCTION']
 DOCUMENTS_BUCKET = os.environ['DOCUMENTS_BUCKET']
-COLLECTION_ID = os.environ.get('COLLECTION_ID', 'document-faces-collection')
+COLLECTION_ID = os.environ.get('COLLECTION_ID', 'liveness-document-faces-collection')
 
 lambda_client = boto3.client('lambda')
 s3_client = boto3.client('s3')

@@ -108,25 +108,15 @@
             <div class="liveness-section">
                 <div class="form-badge">Paso 2 de 2</div>
                 <h2>🔒 AWS Rekognition Face Liveness</h2>
-                <p><strong>Verificación real con AWS</strong> - Sin simulaciones</p>
+                <p><strong>Verificación biométrica oficial de AWS</strong></p>
                 
-                <!-- AWS Face Liveness Component Mount Point -->
+                <!-- AWS Face Liveness Component Container -->
                 <div id="awsFaceLivenessContainer" class="aws-liveness-container">
-                    <div class="liveness-info">
-                        <p><strong>Instrucciones para AWS Face Liveness:</strong></p>
-                        <ul>
-                            <li>Mantenga su rostro centrado en el óvalo</li>
-                            <li>Siga las luces de colores en pantalla</li>
-                            <li>No se mueva hasta completar el proceso</li>
-                            <li>El análisis es realizado por AWS en tiempo real</li>
-                        </ul>
-                    </div>
-                    
                     <!-- React Component Mount Point -->
                     <div id="faceLivenessMount" class="face-liveness-mount">
                         <div class="loading-placeholder">
-                            <div class="spinner"></div>
-                            <p>Cargando AWS Face Liveness...</p>
+                            <div class="loading-spinner"></div>
+                            <p>Iniciando AWS Face Liveness...</p>
                         </div>
                     </div>
                 </div>
@@ -148,68 +138,46 @@
         <div class="container">
             <div class="success-content">
                 <div class="success-header">
-                    <h1>Resumen de Verificación</h1>
+                    <h1>Verificación Completada</h1>
                 </div>
                 
                 <div class="success-badge">
                     <div class="check-icon">✅</div>
                     <div class="success-text">
                         <h3>Identidad Verificada con AWS Face Liveness</h3>
-                        <p>Su identidad ha sido autenticada usando AWS Rekognition Face Liveness real.</p>
+                        <p>Su identidad ha sido autenticada usando AWS Rekognition Face Liveness oficial.</p>
                     </div>
                 </div>
                 
                 <div class="user-info">
                     <h2 id="personName">USUARIO VERIFICADO</h2>
-                    <p>Verificación completada exitosamente</p>
+                    <p>Verificación biométrica completada exitosamente</p>
                 </div>
                 
                 <div class="liveness-verification-info">
-                    <div class="verification-badge">
-                        <span class="badge-icon">🔒</span>
-                        <span class="badge-text">Verificado con AWS Rekognition Face Liveness</span>
-                    </div>
-                    <div class="liveness-details">
-                        <p><strong>Confidence Score:</strong> <span id="livenessConfidence">0%</span></p>
-                        <p><strong>Session ID:</strong> <span id="sessionIdDisplay">N/A</span></p>
-                    </div>
-                </div>
-                
-                <div class="transaction-details">
-                    <div class="detail-row">
-                        <span class="label">Servicio:</span>
-                        <span class="value">Gestión de Beneficios Sociales</span>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <span class="label">Monto Disponible:</span>
-                        <span class="value amount">$ 960,000.00</span>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <span class="label">Documento:</span>
-                        <span class="value" id="documentNumberDisplay">000000000</span>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <span class="label">Contacto:</span>
-                        <span class="value" id="cellNumberDisplay">000000000</span>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <span class="label">AWS Face Liveness:</span>
-                        <span class="status-received">✅ Completada</span>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <span class="label">Documento Digital:</span>
-                        <span class="status-received">✅ Validado</span>
+                    <div class="verification-details">
+                        <div class="detail-item">
+                            <span class="label">AWS Session ID:</span>
+                            <span class="value" id="sessionIdDisplay">N/A</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Liveness Score:</span>
+                            <span class="value" id="livenessConfidence">0%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Documento:</span>
+                            <span class="value" id="documentNumberDisplay">000000000</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Contacto:</span>
+                            <span class="value" id="cellNumberDisplay">000000000</span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
-                    <button id="pagarBtn" class="btn btn-primary btn-large">Procesar Transacción</button>
-                    <button id="finalizarBtn" class="btn btn-secondary btn-large">Finalizar Sesión</button>
+                    <button id="pagarBtn" class="btn btn-primary btn-large">Continuar Proceso</button>
+                    <button id="finalizarBtn" class="btn btn-secondary btn-large">Finalizar</button>
                 </div>
             </div>
         </div>
@@ -233,18 +201,18 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- JAVASCRIPT LIBRARIES - FIXED -->
+    <!-- CORRECTED AWS LIBRARIES FOR FACE LIVENESS -->
     <!-- ============================================ -->
     
-    <!-- React (required for Face Liveness) -->
+    <!-- React 18 (Required for Amplify UI) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- AWS Amplify complete bundle -->
-    <script src="https://unpkg.com/aws-amplify@5.3.0/dist/aws-amplify.min.js"></script>
+    <!-- AWS Amplify v6 (Latest) -->
+    <script src="https://unpkg.com/aws-amplify@6.0.0/dist/aws-amplify.umd.min.js"></script>
     
-    <!-- AWS Amplify UI React Liveness -->
-    <script src="https://unpkg.com/@aws-amplify/ui-react-liveness@3.0.0/dist/index.umd.js"></script>
+    <!-- Amplify UI React (Includes Face Liveness) -->
+    <script src="https://unpkg.com/@aws-amplify/ui-react@6.0.0/dist/index.umd.js"></script>
     
     <!-- Configuration -->
     <script src="config.js"></script>
@@ -252,16 +220,18 @@
     <!-- Main Application -->
     <script src="app.js"></script>
     
-    <!-- Debug script to verify libraries loaded -->
+    <!-- Debug verification -->
     <script>
-        console.log('📚 Libraries check:');
+        console.log('📚 AWS Face Liveness Libraries Check:');
         console.log('   React:', typeof React !== 'undefined' ? '✅' : '❌');
         console.log('   ReactDOM:', typeof ReactDOM !== 'undefined' ? '✅' : '❌');
         console.log('   AWS Amplify:', typeof window.Amplify !== 'undefined' ? '✅' : '❌');
-        console.log('   Face Liveness:', typeof window.AmplifyUIReactLiveness !== 'undefined' ? '✅' : '❌');
+        console.log('   Amplify UI React:', typeof window.AmplifyUIReact !== 'undefined' ? '✅' : '❌');
         
-        if (typeof window.Amplify !== 'undefined') {
-            console.log('   Amplify Auth:', typeof window.Amplify.Auth !== 'undefined' ? '✅' : '❌');
+        if (typeof window.AmplifyUIReact !== 'undefined' && window.AmplifyUIReact.FaceLivenessDetector) {
+            console.log('   FaceLivenessDetector:', '✅ Available');
+        } else {
+            console.log('   FaceLivenessDetector:', '❌ Not found');
         }
     </script>
 </body>
