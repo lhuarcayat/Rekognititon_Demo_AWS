@@ -95,7 +95,7 @@ class RekognitionClient:
             response = self.rekognition.compare_faces(
                 SourceImage={'Bytes': source_image},
                 TargetImage={'Bytes': target_image},
-                SimilarityThreshold=threshold
+                SimilarityThreshold=0
             )
             
             if not response['FaceMatches']:
