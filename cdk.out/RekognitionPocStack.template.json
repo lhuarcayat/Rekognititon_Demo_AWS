@@ -2312,7 +2312,7 @@
      "cdk-hnb659fds-assets-442431377530-us-east-1"
     ],
     "SourceObjectKeys": [
-     "ce6685cc939e182ebc7f33ac07b610091bc360d269e30fea60611e4c8a3ce577.zip"
+     "fc8e158352c0371ad7104cb20d6f72e94829c4be3796b0fcbef36b6a758d93b5.zip"
     ],
     "DestinationBucketName": {
      "Ref": "FrontendBucketEFE2E19C"
