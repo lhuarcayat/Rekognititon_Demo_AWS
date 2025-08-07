@@ -1037,6 +1037,104 @@
               "version": "2.140.0"
             }
           },
+          "CleanupLambdaRoleBasic": {
+            "id": "CleanupLambdaRoleBasic",
+            "path": "RekognitionPocStack/CleanupLambdaRoleBasic",
+            "children": {
+              "ImportCleanupLambdaRoleBasic": {
+                "id": "ImportCleanupLambdaRoleBasic",
+                "path": "RekognitionPocStack/CleanupLambdaRoleBasic/ImportCleanupLambdaRoleBasic",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/CleanupLambdaRoleBasic/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                  "aws:cdk:cloudformation:props": {
+                    "assumeRolePolicyDocument": {
+                      "Statement": [
+                        {
+                          "Action": "sts:AssumeRole",
+                          "Effect": "Allow",
+                          "Principal": {
+                            "Service": "lambda.amazonaws.com"
+                          }
+                        }
+                      ],
+                      "Version": "2012-10-17"
+                    },
+                    "managedPolicyArns": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                          ]
+                        ]
+                      }
+                    ],
+                    "policies": [
+                      {
+                        "policyName": "RekognitionCleanupBasicPolicy",
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "rekognition:DeleteFaces",
+                                "rekognition:DescribeCollection",
+                                "rekognition:ListFaces"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": "*"
+                            },
+                            {
+                              "Action": [
+                                "dynamodb:BatchWriteItem",
+                                "dynamodb:DeleteItem",
+                                "dynamodb:Scan"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": [
+                                {
+                                  "Fn::GetAtt": [
+                                    "ComparisonResultsTable188C61C4",
+                                    "Arn"
+                                  ]
+                                },
+                                {
+                                  "Fn::GetAtt": [
+                                    "IndexedDocumentsTable2C59B6EB",
+                                    "Arn"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_iam.Role",
+              "version": "2.140.0"
+            }
+          },
           "DocumentIndexer": {
             "id": "DocumentIndexer",
             "path": "RekognitionPocStack/DocumentIndexer",
@@ -1191,6 +1289,81 @@
                     },
                     "runtime": "python3.11",
                     "timeout": 30
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.140.0"
+            }
+          },
+          "CleanupFunction": {
+            "id": "CleanupFunction",
+            "path": "RekognitionPocStack/CleanupFunction",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "RekognitionPocStack/CleanupFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "RekognitionPocStack/CleanupFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "RekognitionPocStack/CleanupFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.140.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocStack/CleanupFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+                      "s3Key": "e8ca73b6e63479ccc6d912fe5eb4c0d33f25aec00ee982a4f83f2e609b30bd24.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "COLLECTION_ID": "document-faces-collection",
+                        "INDEXED_DOCUMENTS_TABLE": {
+                          "Ref": "IndexedDocumentsTable2C59B6EB"
+                        },
+                        "COMPARISON_RESULTS_TABLE": {
+                          "Ref": "ComparisonResultsTable188C61C4"
+                        }
+                      }
+                    },
+                    "functionName": "rekognition-cleanup",
+                    "handler": "handler.lambda_handler",
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "CleanupLambdaRoleBasicE17A54CA",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.11",
+                    "timeout": 900
                   }
                 },
                 "constructInfo": {

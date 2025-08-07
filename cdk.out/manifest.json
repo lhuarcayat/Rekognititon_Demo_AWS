@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-deploy-role-442431377530-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::442431377530:role/cdk-hnb659fds-cfn-exec-role-442431377530-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-442431377530-us-east-1/94f5c5ecdfc1e39eb2d8c615fdd63c8407b31a1e9ba4f832fc81b12206d2a675.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-442431377530-us-east-1/d5445df15e35db21b3ba94d731d58bce14ab0846735493b0afd49417d8881d3f.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -122,6 +122,12 @@
             "data": "ApiLambdaRole66D0B4CD"
           }
         ],
+        "/RekognitionPocStack/CleanupLambdaRoleBasic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CleanupLambdaRoleBasicE17A54CA"
+          }
+        ],
         "/RekognitionPocStack/DocumentIndexer/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -132,6 +138,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "UserValidatorF49AEC8F"
+          }
+        ],
+        "/RekognitionPocStack/CleanupFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CleanupFunction1604930F"
           }
         ],
         "/RekognitionPocStack/PresignedUrlsLambda/Resource": [

@@ -353,6 +353,42 @@ class RekognitionStack(Stack):
                 )
             }
         )
+
+        self.cleanup_role = iam.Role(
+            self, 'CleanupLambdaRoleBasic',
+            assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
+            ],
+            inline_policies={
+                'RekognitionCleanupBasicPolicy': iam.PolicyDocument(
+                    statements=[
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'rekognition:DescribeCollection',
+                                'rekognition:ListFaces',
+                                'rekognition:DeleteFaces'
+                            ],
+                            resources=['*']
+                        ),
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'dynamodb:Scan',
+                                'dynamodb:DeleteItem',
+                                'dynamodb:BatchWriteItem'
+                            ],
+                            resources=[
+                                self.indexed_documents_table.table_arn,
+                                self.comparison_results_table.table_arn
+                            ]
+                        )
+                    ]
+                )
+            }
+        )
+
     #====================================================
         self.document_indexer = lambda_.Function(
             self, 'DocumentIndexer',
@@ -393,6 +429,22 @@ class RekognitionStack(Stack):
                 'DOCUMENTS_BUCKET': self.documents_bucket.bucket_name,
                 'USER_PHOTOS_BUCKET': self.user_photos_bucket.bucket_name,
                 'DOCUMENT_INDEXER_FUNCTION': 'rekognition-poc-document-indexer'  # 🆕
+            }
+        )
+
+        self.cleanup_function = lambda_.Function(
+            self, 'CleanupFunction',
+            function_name='rekognition-cleanup',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/cleanup'),
+            role=self.cleanup_role,
+            timeout=Duration.minutes(15),  # Tiempo suficiente para limpiezas grandes
+            memory_size=512,
+            environment={
+                'COLLECTION_ID': 'document-faces-collection',
+                'INDEXED_DOCUMENTS_TABLE': self.indexed_documents_table.table_name,
+                'COMPARISON_RESULTS_TABLE': self.comparison_results_table.table_name
             }
         )
 #=======================================================================

@@ -891,6 +891,81 @@
     "aws:cdk:path": "RekognitionPocStack/ApiLambdaRole/Resource"
    }
   },
+  "CleanupLambdaRoleBasicE17A54CA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "rekognition:DeleteFaces",
+          "rekognition:DescribeCollection",
+          "rekognition:ListFaces"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        },
+        {
+         "Action": [
+          "dynamodb:BatchWriteItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Scan"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::GetAtt": [
+            "ComparisonResultsTable188C61C4",
+            "Arn"
+           ]
+          },
+          {
+           "Fn::GetAtt": [
+            "IndexedDocumentsTable2C59B6EB",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "RekognitionCleanupBasicPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/CleanupLambdaRoleBasic/Resource"
+   }
+  },
   "DocumentIndexer7C68C1D7": {
    "Type": "AWS::Lambda::Function",
    "Properties": {
@@ -984,6 +1059,46 @@
    "Metadata": {
     "aws:cdk:path": "RekognitionPocStack/UserValidator/Resource",
     "aws:asset:path": "asset.d09dffc85f993cf3bb1d3d80f64e2d87eab3abdb5addfa6ff3e8bc803c4824b4",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CleanupFunction1604930F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-442431377530-us-east-1",
+     "S3Key": "e8ca73b6e63479ccc6d912fe5eb4c0d33f25aec00ee982a4f83f2e609b30bd24.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "COLLECTION_ID": "document-faces-collection",
+      "INDEXED_DOCUMENTS_TABLE": {
+       "Ref": "IndexedDocumentsTable2C59B6EB"
+      },
+      "COMPARISON_RESULTS_TABLE": {
+       "Ref": "ComparisonResultsTable188C61C4"
+      }
+     }
+    },
+    "FunctionName": "rekognition-cleanup",
+    "Handler": "handler.lambda_handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "CleanupLambdaRoleBasicE17A54CA",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CleanupLambdaRoleBasicE17A54CA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RekognitionPocStack/CleanupFunction/Resource",
+    "aws:asset:path": "asset.e8ca73b6e63479ccc6d912fe5eb4c0d33f25aec00ee982a4f83f2e609b30bd24",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
