@@ -733,6 +733,104 @@
               "version": "2.140.0"
             }
           },
+          "CleanupLambdaRoleBasic": {
+            "id": "CleanupLambdaRoleBasic",
+            "path": "RekognitionPocBasicStack/CleanupLambdaRoleBasic",
+            "children": {
+              "ImportCleanupLambdaRoleBasic": {
+                "id": "ImportCleanupLambdaRoleBasic",
+                "path": "RekognitionPocBasicStack/CleanupLambdaRoleBasic/ImportCleanupLambdaRoleBasic",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocBasicStack/CleanupLambdaRoleBasic/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                  "aws:cdk:cloudformation:props": {
+                    "assumeRolePolicyDocument": {
+                      "Statement": [
+                        {
+                          "Action": "sts:AssumeRole",
+                          "Effect": "Allow",
+                          "Principal": {
+                            "Service": "lambda.amazonaws.com"
+                          }
+                        }
+                      ],
+                      "Version": "2012-10-17"
+                    },
+                    "managedPolicyArns": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                          ]
+                        ]
+                      }
+                    ],
+                    "policies": [
+                      {
+                        "policyName": "RekognitionCleanupBasicPolicy",
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "rekognition:DeleteFaces",
+                                "rekognition:DescribeCollection",
+                                "rekognition:ListFaces"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": "*"
+                            },
+                            {
+                              "Action": [
+                                "dynamodb:BatchWriteItem",
+                                "dynamodb:DeleteItem",
+                                "dynamodb:Scan"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": [
+                                {
+                                  "Fn::GetAtt": [
+                                    "ComparisonResultsTableBasic37BC9648",
+                                    "Arn"
+                                  ]
+                                },
+                                {
+                                  "Fn::GetAtt": [
+                                    "IndexedDocumentsTableBasic38A69D7F",
+                                    "Arn"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_iam.Role",
+              "version": "2.140.0"
+            }
+          },
           "DocumentIndexerBasic": {
             "id": "DocumentIndexerBasic",
             "path": "RekognitionPocBasicStack/DocumentIndexerBasic",
@@ -892,6 +990,83 @@
                     },
                     "runtime": "python3.11",
                     "timeout": 30
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.140.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.140.0"
+            }
+          },
+          "CleanupFunctionBasic": {
+            "id": "CleanupFunctionBasic",
+            "path": "RekognitionPocBasicStack/CleanupFunctionBasic",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "RekognitionPocBasicStack/CleanupFunctionBasic/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "RekognitionPocBasicStack/CleanupFunctionBasic/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.140.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "RekognitionPocBasicStack/CleanupFunctionBasic/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.140.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.140.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "RekognitionPocBasicStack/CleanupFunctionBasic/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": {
+                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
+                      },
+                      "s3Key": "49f9ec30d71b27368ac5fd6f6c1f1091e10db86058be0378eac80bc4d268d60e.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "COLLECTION_ID": "document-faces-basic-collection",
+                        "INDEXED_DOCUMENTS_TABLE": {
+                          "Ref": "IndexedDocumentsTableBasic38A69D7F"
+                        },
+                        "COMPARISON_RESULTS_TABLE": {
+                          "Ref": "ComparisonResultsTableBasic37BC9648"
+                        }
+                      }
+                    },
+                    "functionName": "rekognition-basic-cleanup",
+                    "handler": "handler.lambda_handler",
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "CleanupLambdaRoleBasicE17A54CA",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "python3.11",
+                    "timeout": 900
                   }
                 },
                 "constructInfo": {

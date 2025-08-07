@@ -260,6 +260,41 @@ class RekognitionStack(Stack):
             }
         )
 
+        self.cleanup_role = iam.Role(
+            self, 'CleanupLambdaRoleBasic',
+            assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name('service-role/AWSLambdaBasicExecutionRole')
+            ],
+            inline_policies={
+                'RekognitionCleanupBasicPolicy': iam.PolicyDocument(
+                    statements=[
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'rekognition:DescribeCollection',
+                                'rekognition:ListFaces',
+                                'rekognition:DeleteFaces'
+                            ],
+                            resources=['*']
+                        ),
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                'dynamodb:Scan',
+                                'dynamodb:DeleteItem',
+                                'dynamodb:BatchWriteItem'
+                            ],
+                            resources=[
+                                self.indexed_documents_table.table_arn,
+                                self.comparison_results_table.table_arn
+                            ]
+                        )
+                    ]
+                )
+            }
+        )
+
     #==================================================== LAMBDA FUNCTIONS
         self.document_indexer = lambda_.Function(
             self, 'DocumentIndexerBasic',
@@ -305,6 +340,21 @@ class RekognitionStack(Stack):
             }
         )
 
+        self.cleanup_function = lambda_.Function(
+            self, 'CleanupFunctionBasic',
+            function_name='rekognition-basic-cleanup',
+            runtime=lambda_.Runtime.PYTHON_3_11,
+            handler='handler.lambda_handler',
+            code=lambda_.Code.from_asset('functions/cleanup'),
+            role=self.cleanup_role,
+            timeout=Duration.minutes(15),  # Tiempo suficiente para limpiezas grandes
+            memory_size=512,
+            environment={
+                'COLLECTION_ID': 'document-faces-basic-collection',
+                'INDEXED_DOCUMENTS_TABLE': self.indexed_documents_table.table_name,
+                'COMPARISON_RESULTS_TABLE': self.comparison_results_table.table_name
+            }
+        )
         # S3 event notifications (unchanged)
         self.user_photos_bucket.add_event_notification(
             s3.EventType.OBJECT_CREATED,
